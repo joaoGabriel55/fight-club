@@ -58,7 +58,11 @@ export default class BeltProgressController {
     await AuditLogService.log(user.id, 'belt_awarded', 'belt_progress', {
       resourceId: belt.id,
       ipAddress: request.ip(),
-      metadata: { enrollment_id: enrollment.id, class_id: enrollment.classId, belt_name: data.belt_name },
+      metadata: {
+        enrollment_id: enrollment.id,
+        class_id: enrollment.classId,
+        belt_name: data.belt_name,
+      },
     })
 
     await emitter.emit(
