@@ -16,6 +16,7 @@ async function registerTeacher(
     password: 'password123',
     first_name: 'Alice',
     profile_type: 'teacher',
+    birth_date: '1990-01-01',
     ...overrides,
   })
   return response.body()
@@ -30,6 +31,7 @@ async function registerStudent(
     password: 'password123',
     first_name: 'Bob',
     profile_type: 'student',
+    birth_date: '2000-01-01',
     ...overrides,
   })
   return response.body()
