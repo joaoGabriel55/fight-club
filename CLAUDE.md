@@ -107,3 +107,35 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 | `DB_HOST`      | `postgres`              | `127.0.0.1`             |
 | `REDIS_HOST`   | `valkey`                | `127.0.0.1`             |
 | `VITE_APP_URL` | `http://localhost:3000` | `http://localhost:3000` |
+| `TOKEN_EXPIRY` | `7 days`                | `7 days` (optional)     |
+
+## Authentication (v0.2)
+
+**Backend endpoints** — all under `/api/v1/auth`:
+
+| Method   | Path        | Auth required | Description                         |
+| -------- | ----------- | ------------- | ----------------------------------- |
+| `POST`   | `/register` | No            | Create account + issue opaque token |
+| `POST`   | `/login`    | No            | Verify credentials + issue token    |
+| `DELETE` | `/logout`   | Yes           | Revoke current token                |
+| `GET`    | `/me`       | Yes           | Return own profile (email visible)  |
+| `PUT`    | `/me`       | Yes           | Update profile fields               |
+| `DELETE` | `/me`       | Yes           | Anonymise account (soft-delete)     |
+
+**Key design decisions:**
+
+- Tokens are opaque (stored hashed in `auth_access_tokens`, never JWTs).
+- `email` column is AES-encrypted (non-deterministic). A separate `email_hash` column (SHA-256 of normalised email) is used for duplicate detection and login lookups.
+- Auth rate limit: 5 req/min per IP on `/register` and `/login`.
+- `SanitizeInputMiddleware` strips HTML from all string inputs globally.
+- `AuditLogService.log()` records `login`, `logout`, `profile_update`, `account_delete` events.
+
+**Frontend** — domains in `src/domains/auth/`:
+
+- Schemas: `login.schema.ts`, `register.schema.ts` (Zod)
+- Services: `auth.service.ts` (`register`, `login`, `logout`, `getMe`, `updateMe`, `deleteMe`)
+- Hooks: `useLogin`, `useRegister`, `useMe` (TanStack Query mutations/queries)
+- Components: `LoginForm`, `RegisterForm`, `ConsentCheckbox` (React Hook Form + Zod)
+- Shared hook: `src/shared/hooks/useAuth.ts`
+- Token stored **in-memory only** via `setToken()`/`clearToken()` in `api-client.ts`.
+- `_authenticated.tsx` layout route guards all authenticated pages; redirects to `/login` if no token.

@@ -68,5 +68,10 @@
       "./app/middleware/*.ts"
     ]
   },
-  "prettier": "@adonisjs/prettier-config"
+  "prettier": "@adonisjs/prettier-config",
+  "overrides": {
+    "chevrotain": "^12.0.0",
+    "@chevrotain/cst-dts-gen": "^12.0.0",
+    "@chevrotain/gast": "^12.0.0"
+  }
 }

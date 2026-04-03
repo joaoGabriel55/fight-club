@@ -3,8 +3,11 @@ import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { compose } from '@adonisjs/core/helpers'
 import encryption from '@adonisjs/core/services/encryption'
 import hash from '@adonisjs/core/services/hash'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasOne } from '@adonisjs/lucid/orm'
+import type { HasOne } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
+import StudentProfile from '#models/student_profile'
+import TeacherProfile from '#models/teacher_profile'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -22,13 +25,20 @@ export default class User extends compose(BaseModel, AuthFinder) {
     prepare: (value: string | null) => (value ? encryption.encrypt(value) : null),
     consume: (value: string | null) => (value ? (encryption.decrypt(value) as string) : null),
   })
-  declare lastName: string
+  declare lastName: string | null
 
   @column({
     prepare: (value: string | null) => (value ? encryption.encrypt(value) : null),
     consume: (value: string | null) => (value ? (encryption.decrypt(value) as string) : null),
   })
   declare email: string
+
+  /**
+   * Deterministic SHA-256 of the normalised email. Used for duplicate
+   * detection and lookups without exposing plaintext.
+   */
+  @column({ serializeAs: null })
+  declare emailHash: string | null
 
   @column({ serializeAs: null })
   declare passwordHash: string
@@ -55,4 +65,10 @@ export default class User extends compose(BaseModel, AuthFinder) {
   declare deletedAt: DateTime | null
 
   static accessTokens = DbAccessTokensProvider.forModel(User)
+
+  @hasOne(() => StudentProfile)
+  declare studentProfile: HasOne<typeof StudentProfile>
+
+  @hasOne(() => TeacherProfile)
+  declare teacherProfile: HasOne<typeof TeacherProfile>
 }

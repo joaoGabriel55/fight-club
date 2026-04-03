@@ -47,4 +47,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   LIMITER_STORE: Env.schema.enum(['database', 'memory'] as const),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for configuring auth tokens
+  |----------------------------------------------------------
+  */
+  TOKEN_EXPIRY: Env.schema.string.optional(),
 })
