@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { clearToken, getToken } from "@/shared/lib/api-client";
+import { clearToken, isAuthenticated } from "@/shared/lib/api-client";
 import { authService } from "@/domains/auth/services/auth.service";
 import { useMe } from "@/domains/auth/hooks/useMe";
 import { useLogin } from "@/domains/auth/hooks/useLogin";
@@ -24,7 +24,7 @@ export function useAuth() {
   return {
     user,
     isLoading,
-    isAuthenticated: !!getToken(),
+    isAuthenticated: isAuthenticated(),
     login: loginMutation.mutateAsync,
     register: registerMutation.mutateAsync,
     logout,

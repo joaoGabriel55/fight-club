@@ -2,26 +2,45 @@
  * API client for Fight Club.
  *
  * Token storage:
- *   - Stored in-memory only (module-level variable).
- *   - NEVER written to localStorage, sessionStorage, or any persistent store.
+ *   - The auth token is set as an httpOnly cookie by the backend on login/register.
+ *   - The browser sends it automatically on every request via `credentials: 'include'`.
+ *   - Token never touches JS storage (localStorage/sessionStorage) — XSS-proof.
+ *   - _token is an in-memory copy used to attach the Authorization header within
+ *     the same page session (after login/register); on reload it is null and the
+ *     cookie carries the session on its own.
+ *   - _authenticated tracks whether the session has been confirmed (either by a
+ *     successful login/register or by a GET /me call in the route guard).
  *   - Cleared on 401 response, then the user is redirected to /login.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
-// ─── In-memory token store ────────────────────────────────────────────────────
+// ─── Auth state ───────────────────────────────────────────────────────────────
 let _token: string | null = null;
+let _authenticated = false;
 
 export function setToken(token: string): void {
   _token = token;
+  _authenticated = true;
 }
 
 export function clearToken(): void {
   _token = null;
+  _authenticated = false;
 }
 
 export function getToken(): string | null {
   return _token;
+}
+
+/** True when the session has been confirmed (login, register, or /me check). */
+export function isAuthenticated(): boolean {
+  return _authenticated;
+}
+
+/** Mark the session as confirmed without storing a token (used after /me validates the cookie). */
+export function markAuthenticated(): void {
+  _authenticated = true;
 }
 
 // ─── Navigation callback ──────────────────────────────────────────────────────
@@ -62,6 +81,7 @@ export async function apiClient<T = unknown>(
   const response = await fetch(`${API_BASE}${path}`, {
     ...fetchOptions,
     headers,
+    credentials: "include", // send httpOnly auth cookie on every request
   });
 
   if (response.status === 401) {

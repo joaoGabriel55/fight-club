@@ -19,7 +19,7 @@ export function LoginForm() {
   const onSubmit = (data: LoginInput) => {
     login(data, {
       onSuccess: () => {
-        navigate({ to: "/dashboard" });
+        navigate({ to: "/dashboard", reloadDocument: true });
       },
     });
   };

@@ -65,9 +65,18 @@ export default class AuthController {
 
     const expiresIn = env.get('TOKEN_EXPIRY', '7 days')
     const token = await User.accessTokens.create(user, ['*'], { expiresIn })
+    const tokenValue = token.value!.release()
+
+    response.cookie('auth_token', tokenValue, {
+      httpOnly: true,
+      secure: env.get('NODE_ENV') === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    })
 
     return response.status(201).send({
-      token: token.value!.release(),
+      token: tokenValue,
       user: {
         id: user.id,
         first_name: user.firstName,
@@ -99,13 +108,22 @@ export default class AuthController {
 
     const expiresIn = env.get('TOKEN_EXPIRY', '7 days')
     const token = await User.accessTokens.create(user, ['*'], { expiresIn })
+    const tokenValue = token.value!.release()
 
     await AuditLogService.log(user.id, 'login', 'user', {
       ipAddress: request.ip(),
     })
 
+    response.cookie('auth_token', tokenValue, {
+      httpOnly: true,
+      secure: env.get('NODE_ENV') === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
+    })
+
     return response.status(200).send({
-      token: token.value!.release(),
+      token: tokenValue,
       user: {
         id: user.id,
         first_name: user.firstName,
@@ -127,6 +145,7 @@ export default class AuthController {
       ipAddress: request.ip(),
     })
 
+    response.clearCookie('auth_token', { path: '/' })
     return response.status(204).send(null)
   }
 

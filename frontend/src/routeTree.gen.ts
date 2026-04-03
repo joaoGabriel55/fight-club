@@ -14,6 +14,11 @@ import { Route as LoginRouteImport } from "./routes/login";
 import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
 import { Route as IndexRouteImport } from "./routes/index";
 import { Route as AuthenticatedDashboardRouteImport } from "./routes/_authenticated/dashboard";
+import { Route as AuthenticatedClassesIndexRouteImport } from "./routes/_authenticated/classes/index";
+import { Route as AuthenticatedClassesNewRouteImport } from "./routes/_authenticated/classes/new";
+import { Route as AuthenticatedClassesClassIdRouteImport } from "./routes/_authenticated/classes/$classId";
+import { Route as AuthenticatedClassesClassIdStudentsRouteImport } from "./routes/_authenticated/classes/$classId/students";
+import { Route as AuthenticatedClassesClassIdSchedulesRouteImport } from "./routes/_authenticated/classes/$classId/schedules";
 
 const RegisterRoute = RegisterRouteImport.update({
   id: "/register",
@@ -39,18 +44,57 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: "/dashboard",
   getParentRoute: () => AuthenticatedRoute,
 } as any);
+const AuthenticatedClassesIndexRoute =
+  AuthenticatedClassesIndexRouteImport.update({
+    id: "/classes/",
+    path: "/classes/",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any);
+const AuthenticatedClassesNewRoute = AuthenticatedClassesNewRouteImport.update({
+  id: "/classes/new",
+  path: "/classes/new",
+  getParentRoute: () => AuthenticatedRoute,
+} as any);
+const AuthenticatedClassesClassIdRoute =
+  AuthenticatedClassesClassIdRouteImport.update({
+    id: "/classes/$classId",
+    path: "/classes/$classId",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any);
+const AuthenticatedClassesClassIdStudentsRoute =
+  AuthenticatedClassesClassIdStudentsRouteImport.update({
+    id: "/students",
+    path: "/students",
+    getParentRoute: () => AuthenticatedClassesClassIdRoute,
+  } as any);
+const AuthenticatedClassesClassIdSchedulesRoute =
+  AuthenticatedClassesClassIdSchedulesRouteImport.update({
+    id: "/schedules",
+    path: "/schedules",
+    getParentRoute: () => AuthenticatedClassesClassIdRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/dashboard": typeof AuthenticatedDashboardRoute;
+  "/classes/$classId": typeof AuthenticatedClassesClassIdRouteWithChildren;
+  "/classes/new": typeof AuthenticatedClassesNewRoute;
+  "/classes/": typeof AuthenticatedClassesIndexRoute;
+  "/classes/$classId/schedules": typeof AuthenticatedClassesClassIdSchedulesRoute;
+  "/classes/$classId/students": typeof AuthenticatedClassesClassIdStudentsRoute;
 }
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/dashboard": typeof AuthenticatedDashboardRoute;
+  "/classes/$classId": typeof AuthenticatedClassesClassIdRouteWithChildren;
+  "/classes/new": typeof AuthenticatedClassesNewRoute;
+  "/classes": typeof AuthenticatedClassesIndexRoute;
+  "/classes/$classId/schedules": typeof AuthenticatedClassesClassIdSchedulesRoute;
+  "/classes/$classId/students": typeof AuthenticatedClassesClassIdStudentsRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -59,19 +103,47 @@ export interface FileRoutesById {
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/_authenticated/dashboard": typeof AuthenticatedDashboardRoute;
+  "/_authenticated/classes/$classId": typeof AuthenticatedClassesClassIdRouteWithChildren;
+  "/_authenticated/classes/new": typeof AuthenticatedClassesNewRoute;
+  "/_authenticated/classes/": typeof AuthenticatedClassesIndexRoute;
+  "/_authenticated/classes/$classId/schedules": typeof AuthenticatedClassesClassIdSchedulesRoute;
+  "/_authenticated/classes/$classId/students": typeof AuthenticatedClassesClassIdStudentsRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/login" | "/register" | "/dashboard";
+  fullPaths:
+    | "/"
+    | "/login"
+    | "/register"
+    | "/dashboard"
+    | "/classes/$classId"
+    | "/classes/new"
+    | "/classes/"
+    | "/classes/$classId/schedules"
+    | "/classes/$classId/students";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/login" | "/register" | "/dashboard";
+  to:
+    | "/"
+    | "/login"
+    | "/register"
+    | "/dashboard"
+    | "/classes/$classId"
+    | "/classes/new"
+    | "/classes"
+    | "/classes/$classId/schedules"
+    | "/classes/$classId/students";
   id:
     | "__root__"
     | "/"
     | "/_authenticated"
     | "/login"
     | "/register"
-    | "/_authenticated/dashboard";
+    | "/_authenticated/dashboard"
+    | "/_authenticated/classes/$classId"
+    | "/_authenticated/classes/new"
+    | "/_authenticated/classes/"
+    | "/_authenticated/classes/$classId/schedules"
+    | "/_authenticated/classes/$classId/students";
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
@@ -118,15 +190,75 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport;
       parentRoute: typeof AuthenticatedRoute;
     };
+    "/_authenticated/classes/": {
+      id: "/_authenticated/classes/";
+      path: "/classes";
+      fullPath: "/classes/";
+      preLoaderRoute: typeof AuthenticatedClassesIndexRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
+    };
+    "/_authenticated/classes/new": {
+      id: "/_authenticated/classes/new";
+      path: "/classes/new";
+      fullPath: "/classes/new";
+      preLoaderRoute: typeof AuthenticatedClassesNewRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
+    };
+    "/_authenticated/classes/$classId": {
+      id: "/_authenticated/classes/$classId";
+      path: "/classes/$classId";
+      fullPath: "/classes/$classId";
+      preLoaderRoute: typeof AuthenticatedClassesClassIdRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
+    };
+    "/_authenticated/classes/$classId/students": {
+      id: "/_authenticated/classes/$classId/students";
+      path: "/students";
+      fullPath: "/classes/$classId/students";
+      preLoaderRoute: typeof AuthenticatedClassesClassIdStudentsRouteImport;
+      parentRoute: typeof AuthenticatedClassesClassIdRoute;
+    };
+    "/_authenticated/classes/$classId/schedules": {
+      id: "/_authenticated/classes/$classId/schedules";
+      path: "/schedules";
+      fullPath: "/classes/$classId/schedules";
+      preLoaderRoute: typeof AuthenticatedClassesClassIdSchedulesRouteImport;
+      parentRoute: typeof AuthenticatedClassesClassIdRoute;
+    };
   }
 }
 
+interface AuthenticatedClassesClassIdRouteChildren {
+  AuthenticatedClassesClassIdSchedulesRoute: typeof AuthenticatedClassesClassIdSchedulesRoute;
+  AuthenticatedClassesClassIdStudentsRoute: typeof AuthenticatedClassesClassIdStudentsRoute;
+}
+
+const AuthenticatedClassesClassIdRouteChildren: AuthenticatedClassesClassIdRouteChildren =
+  {
+    AuthenticatedClassesClassIdSchedulesRoute:
+      AuthenticatedClassesClassIdSchedulesRoute,
+    AuthenticatedClassesClassIdStudentsRoute:
+      AuthenticatedClassesClassIdStudentsRoute,
+  };
+
+const AuthenticatedClassesClassIdRouteWithChildren =
+  AuthenticatedClassesClassIdRoute._addFileChildren(
+    AuthenticatedClassesClassIdRouteChildren,
+  );
+
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute;
+  AuthenticatedClassesClassIdRoute: typeof AuthenticatedClassesClassIdRouteWithChildren;
+  AuthenticatedClassesNewRoute: typeof AuthenticatedClassesNewRoute;
+  AuthenticatedClassesIndexRoute: typeof AuthenticatedClassesIndexRoute;
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedClassesClassIdRoute:
+    AuthenticatedClassesClassIdRouteWithChildren,
+  AuthenticatedClassesNewRoute: AuthenticatedClassesNewRoute,
+  AuthenticatedClassesIndexRoute: AuthenticatedClassesIndexRoute,
 };
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

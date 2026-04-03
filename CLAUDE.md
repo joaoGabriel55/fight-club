@@ -68,7 +68,7 @@ npm run lint         # tsc --noEmit
 - `app/exceptions/handler.ts` — centralised JSON error responses
 - `database/migrations/` — schema history
 
-**Auth:** Opaque access tokens via `@adonisjs/auth` with `DbAccessTokensProvider`. Tokens are stored hashed in `auth_access_tokens`. Login UID is email; passwords hashed with Scrypt. Protected routes use the named `auth` middleware.
+**Auth:** Opaque access tokens via `@adonisjs/auth` with `DbAccessTokensProvider`. Tokens are stored hashed in `auth_access_tokens`. Login UID is email; passwords hashed with Scrypt. Protected routes use the named `auth` middleware. `CookieTokenMiddleware` (in `router.use`) reads the httpOnly `auth_token` cookie and injects it as an `Authorization` header when no header is already present, enabling cookie-based sessions without changing the auth guard.
 
 **Privacy / encryption:** `User.lastName`, `User.email`, `User.birthDate` are encrypted at rest using AdonisJS's encryption service via `prepare`/`consume` column hooks. The `audit_logs` table records sensitive actions.
 
@@ -137,5 +137,47 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Hooks: `useLogin`, `useRegister`, `useMe` (TanStack Query mutations/queries)
 - Components: `LoginForm`, `RegisterForm`, `ConsentCheckbox` (React Hook Form + Zod)
 - Shared hook: `src/shared/hooks/useAuth.ts`
-- Token stored **in-memory only** via `setToken()`/`clearToken()` in `api-client.ts`.
+- Token set as an **httpOnly cookie** by the backend on login/register; browser sends it automatically via `credentials: 'include'` — never touches JS storage (XSS-proof).
+- `_token` is kept in-memory within the same page session (set by `setToken()` after login/register) and used for the `Authorization` header. On reload `_token` is null but the cookie carries the session.
+- `_authenticated` boolean tracks whether the session is confirmed. Route guards call `GET /me` on reload to re-confirm (cookie-based), then call `markAuthenticated()`. Subsequent in-session navigations skip the `/me` call.
+- `clearToken()` resets both `_token` and `_authenticated`; called on logout and on 401.
 - `_authenticated.tsx` layout route guards all authenticated pages; redirects to `/login` if no token.
+
+## Class & Schedule Management (v0.3)
+
+**Database tables:** `classes`, `class_schedules`
+
+**Backend endpoints** — all under `/api/v1/classes`, all require auth:
+
+| Method   | Path                      | Description                                     |
+| -------- | ------------------------- | ----------------------------------------------- |
+| `POST`   | `/`                       | Create class + schedules (teacher only)         |
+| `GET`    | `/`                       | List own classes (teacher only)                 |
+| `GET`    | `/:id`                    | Class detail with schedules (owner only)        |
+| `PUT`    | `/:id`                    | Update class metadata (owner only)              |
+| `DELETE` | `/:id`                    | Soft-delete class (owner only)                  |
+| `GET`    | `/:id/students`           | Enrolled students with minimal PII (owner only) |
+| `POST`   | `/:classId/schedules`     | Add schedule to class                           |
+| `PUT`    | `/:classId/schedules/:id` | Update schedule                                 |
+| `DELETE` | `/:classId/schedules/:id` | Remove schedule                                 |
+
+**Key design decisions:**
+
+- No `@adonisjs/bouncer` dependency — ownership checks done inline in controllers.
+- Teacher-only guard: `user.profileType !== 'teacher'` → `403` on all class endpoints.
+- Ownership check: `cls.teacherId !== user.id` → `403`.
+- Soft-delete: `deleted_at` timestamp set; class disappears from all list/detail queries.
+- `end_time` ≤ `start_time` → `422` (validated in controller after VineJS).
+- POST /classes reloads from DB after transaction so time values are normalised to `HH:MM:SS`.
+- `AuditLogService.log()` records `class_created`, `class_updated`, `class_deleted` events.
+- Student list (`GET /:id/students`) returns `[]` until the enrollment table is added (future ticket).
+
+**Frontend** — domains in `src/domains/classes/`:
+
+- Types: `class.types.ts` (Class, ClassListItem, ClassStudent, CreateClassInput, etc.)
+- Schemas: `class.schema.ts` (Zod), `schedule.schema.ts` (Zod with cross-field time validation)
+- Service: `classes.service.ts` (full CRUD + schedule operations)
+- Hooks: `useClasses`, `useClass`, `useCreateClass`, `useUpdateClass`, `useDeleteClass`, `useClassStudents`
+- Components: `ClassCard`, `ClassForm` (RHF + Zod + FormProvider), `ScheduleManager` (useFieldArray), `StudentList`
+- Routes: `/classes` (list), `/classes/new` (create), `/classes/$classId` (layout with tabs + Outlet), `/classes/$classId/schedules`, `/classes/$classId/students`
+- Teacher-only guard: student `profile_type` redirects away in the list page.
