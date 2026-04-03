@@ -50,7 +50,7 @@ export default class AuthController {
 
     const user = await User.create({
       firstName: data.first_name,
-      lastName: data.last_name ?? null,
+      lastName: data.last_name,
       email: data.email,
       emailHash,
       passwordHash,
