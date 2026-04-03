@@ -3,6 +3,7 @@ import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import Class from '#models/class'
 import ClassSchedule from '#models/class_schedule'
+import Enrollment from '#models/enrollment'
 import { AuditLogService } from '#services/audit_log_service'
 import { createClassValidator, updateClassValidator } from '#validators/class_validator'
 
@@ -106,6 +107,7 @@ export default class ClassesController {
       .where('teacher_id', user.id)
       .whereNull('deleted_at')
       .withCount('schedules')
+      .withCount('enrollments', (q) => q.where('status', 'active'))
       .orderBy('created_at', 'desc')
 
     return response.status(200).send(
@@ -116,7 +118,7 @@ export default class ClassesController {
         has_belt_system: cls.hasBeltSystem,
         description: cls.description,
         schedule_count: Number(cls.$extras.schedules_count),
-        enrollment_count: 0,
+        enrollment_count: Number(cls.$extras.enrollments_count),
         created_at: cls.createdAt,
       }))
     )
@@ -260,7 +262,18 @@ export default class ClassesController {
       return response.status(403).send({ error: { message: 'Forbidden' } })
     }
 
-    // Enrollment table introduced in a later ticket. Return empty array for now.
-    return response.status(200).send([])
+    const enrollments = await Enrollment.query()
+      .where('class_id', cls.id)
+      .where('status', 'active')
+      .preload('student')
+      .orderBy('joined_at', 'asc')
+
+    return response.status(200).send(
+      enrollments.map((enr) => ({
+        id: enr.studentId,
+        first_name: enr.student.firstName,
+        enrolled_at: enr.joinedAt,
+      }))
+    )
   }
 }

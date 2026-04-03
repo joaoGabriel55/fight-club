@@ -3,6 +3,8 @@ import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import User from '#models/user'
 import ClassSchedule from '#models/class_schedule'
+import Invitation from '#models/invitation'
+import Enrollment from '#models/enrollment'
 
 export default class Class extends BaseModel {
   static table = 'classes'
@@ -39,4 +41,10 @@ export default class Class extends BaseModel {
 
   @hasMany(() => ClassSchedule)
   declare schedules: HasMany<typeof ClassSchedule>
+
+  @hasMany(() => Invitation)
+  declare invitations: HasMany<typeof Invitation>
+
+  @hasMany(() => Enrollment)
+  declare enrollments: HasMany<typeof Enrollment>
 }

@@ -4,7 +4,11 @@ import { useNavigate } from "@tanstack/react-router";
 import { loginSchema, type LoginInput } from "../schemas/login.schema";
 import { useLogin } from "../hooks/useLogin";
 
-export function LoginForm() {
+interface LoginFormProps {
+  redirectTo?: string;
+}
+
+export function LoginForm({ redirectTo }: LoginFormProps) {
   const navigate = useNavigate();
   const { mutate: login, isPending, error } = useLogin();
 
@@ -19,7 +23,7 @@ export function LoginForm() {
   const onSubmit = (data: LoginInput) => {
     login(data, {
       onSuccess: () => {
-        navigate({ to: "/dashboard", reloadDocument: true });
+        navigate({ to: redirectTo || "/dashboard", reloadDocument: true });
       },
     });
   };
