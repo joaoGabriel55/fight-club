@@ -123,7 +123,7 @@ test.group('Auth — Login', (group) => {
     assert.isString(response.body().token)
   })
 
-  test('wrong password returns 400 or 401', async ({ client }) => {
+  test('wrong password returns 400 or 401', async ({ client, assert }) => {
     await registerUser(client)
     const response = await client.post('/api/v1/auth/login').json({
       email: 'test@example.com',
