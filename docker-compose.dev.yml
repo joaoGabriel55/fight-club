@@ -2,15 +2,15 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: fightclub
-      POSTGRES_PASSWORD: fightclub_dev
-      POSTGRES_DB: fightclub_dev
+      POSTGRES_USER: fight_club
+      POSTGRES_PASSWORD: fight_club
+      POSTGRES_DB: fight_club
     ports:
       - "5432:5432"
     volumes:
       - pg_data_dev:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fightclub -d fightclub_dev"]
+      test: ["CMD-SHELL", "pg_isready -U fight_club -d fight_club"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -44,9 +44,9 @@ services:
       LOG_LEVEL: info
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USER: fightclub
-      DB_PASSWORD: fightclub_dev
-      DB_DATABASE: fightclub_dev
+      DB_USER: fight_club
+      DB_PASSWORD: fight_club
+      DB_DATABASE: fight_club
       REDIS_HOST: valkey
       REDIS_PORT: 6379
       VITE_APP_URL: "http://localhost:3000"

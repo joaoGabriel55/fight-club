@@ -85,10 +85,6 @@ jobs:
         run: npm run typecheck
         working-directory: backend
 
-      - name: Run migrations
-        run: node ace.js migration:run --force
-        working-directory: backend
-
       - name: Test
         run: npm run test
         working-directory: backend

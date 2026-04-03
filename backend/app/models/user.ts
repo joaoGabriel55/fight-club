@@ -25,7 +25,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
     prepare: (value: string | null) => (value ? encryption.encrypt(value) : null),
     consume: (value: string | null) => (value ? (encryption.decrypt(value) as string) : null),
   })
-  declare lastName: string
+  declare lastName: string | null
 
   @column({
     prepare: (value: string | null) => (value ? encryption.encrypt(value) : null),
