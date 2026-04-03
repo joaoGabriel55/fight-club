@@ -6,7 +6,11 @@
       "Bash(npm -v)",
       "Bash(node ace:*)",
       "Bash(docker-compose -f docker-compose.dev.yml build --no-cache backend)",
-      "Bash(docker compose:*)"
+      "Bash(docker compose:*)",
+      "Bash(docker-compose -f \"C:/Users/jquar/projects/fight-club/docker-compose.dev.yml\" exec backend npm run test)",
+      "Bash(docker-compose -f \"C:/Users/jquar/projects/fight-club/docker-compose.dev.yml\" run --rm backend npm run test)",
+      "Bash(docker-compose -f \"C:/Users/jquar/projects/fight-club/docker-compose.dev.yml\" run --rm frontend npm test)",
+      "Bash(docker-compose:*)"
     ]
   }
 }

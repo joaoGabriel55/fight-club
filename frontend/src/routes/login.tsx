@@ -1,11 +1,25 @@
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
-import { getToken } from "@/shared/lib/api-client";
+import {
+  createFileRoute,
+  redirect,
+  isRedirect,
+  Link,
+} from "@tanstack/react-router";
+import { isAuthenticated, markAuthenticated } from "@/shared/lib/api-client";
+import { authService } from "@/domains/auth/services/auth.service";
 import { LoginForm } from "@/domains/auth/components/LoginForm";
 
 export const Route = createFileRoute("/login")({
-  beforeLoad: () => {
-    if (getToken()) {
+  beforeLoad: async () => {
+    if (isAuthenticated()) {
       throw redirect({ to: "/dashboard" });
+    }
+    try {
+      await authService.getMe();
+      markAuthenticated();
+      throw redirect({ to: "/dashboard" });
+    } catch (e) {
+      if (isRedirect(e)) throw e;
+      // Not authenticated — show login page
     }
   },
   component: LoginPage,

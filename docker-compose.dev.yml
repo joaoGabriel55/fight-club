@@ -52,6 +52,7 @@ services:
       VITE_APP_URL: "http://localhost:3000"
       LIMITER_STORE: database
       TOKEN_EXPIRY: "7 days"
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       postgres:
         condition: service_healthy
@@ -71,6 +72,7 @@ services:
     environment:
       VITE_API_URL: "http://localhost:3333"
       VITE_APP_NAME: "Fight Club"
+      CHOKIDAR_USEPOLLING: "true"
     depends_on:
       - backend
     command: npm run dev

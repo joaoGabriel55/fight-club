@@ -75,6 +75,9 @@ describe("LoginForm", () => {
     await waitFor(() => {
       expect(setTokenSpy).toHaveBeenCalledWith("opaque-token-xyz");
     });
-    expect(mockNavigate).toHaveBeenCalledWith({ to: "/dashboard" });
+    expect(mockNavigate).toHaveBeenCalledWith({
+      to: "/dashboard",
+      reloadDocument: true,
+    });
   });
 });
