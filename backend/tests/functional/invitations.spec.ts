@@ -179,14 +179,13 @@ test.group('Invitations — List', (group) => {
     const classId = cls.body().id
 
     await createInvitation(client, token, classId)
-    await createInvitation(client, token, classId)
 
     const response = await client
       .get(`/api/v1/classes/${classId}/invitations`)
       .header('Authorization', `Bearer ${token}`)
 
     response.assertStatus(200)
-    assert.lengthOf(response.body(), 2)
+    assert.lengthOf(response.body(), 1)
     assert.exists(response.body()[0].invite_url)
     assert.exists(response.body()[0].use_count)
   })

@@ -61,6 +61,9 @@ export default class InvitationsController {
       useCount: 0,
     })
 
+    // Reload to pick up DB-generated token (gen_random_uuid() default)
+    await invitation.refresh()
+
     await AuditLogService.log(user.id, 'invitation_created', 'invitation', {
       resourceId: invitation.id,
       ipAddress: request.ip(),

@@ -66,6 +66,12 @@ async function createInvitation(
   return response.body()
 }
 
+async function revokeInvitation(client: any, token: string, invitationId: string) {
+  await client
+    .delete(`/api/v1/invitations/${invitationId}`)
+    .header('Authorization', `Bearer ${token}`)
+}
+
 async function joinClass(
   client: any,
   token: string,
@@ -204,7 +210,8 @@ test.group('Enrollment — Join', (group) => {
 
     await joinClass(client, student.token, inv.token)
 
-    // Create a second invitation to try again
+    // Revoke first invitation, then create a second to try again
+    await revokeInvitation(client, teacher.token, inv.id)
     const inv2 = await createInvitation(client, teacher.token, cls.id)
     const response = await joinClass(client, student.token, inv2.token)
     response.assertStatus(409)
@@ -280,6 +287,8 @@ test.group('Enrollment — List', (group) => {
 
     await joinClass(client, studentA.token, inv.token)
 
+    // Revoke first invitation before creating a new one (only one active per class)
+    await revokeInvitation(client, teacher.token, inv.id)
     const inv2 = await createInvitation(client, teacher.token, cls.id)
     await joinClass(client, studentB.token, inv2.token)
 
@@ -365,9 +374,11 @@ test.group('Enrollment — Leave', (group) => {
 
     const cls = await createClass(client, teacher.token)
     const invA = await createInvitation(client, teacher.token, cls.id)
-    const invB = await createInvitation(client, teacher.token, cls.id)
-
     const joinA = await joinClass(client, studentA.token, invA.token)
+
+    // Revoke first invitation before creating a new one (only one active per class)
+    await revokeInvitation(client, teacher.token, invA.id)
+    const invB = await createInvitation(client, teacher.token, cls.id)
     await joinClass(client, studentB.token, invB.token)
 
     const enrollmentAId = joinA.body().id
