@@ -28,6 +28,7 @@ export interface ClassListItem {
 
 export interface ClassStudent {
   id: string;
+  enrollment_id: string;
   first_name: string;
   belt_level: string | null;
   enrolled_at: string;

@@ -35,7 +35,7 @@ services:
     ports:
       - "3333:3333"
     environment:
-      NODE_ENV: development
+      NODE_ENV: ${NODE_ENV:-development}
       PORT: 3333
       HOST: "0.0.0.0"
       TZ: UTC
@@ -58,7 +58,7 @@ services:
         condition: service_healthy
       valkey:
         condition: service_healthy
-    command: node ace.js serve --hmr
+    command: sh -c "node ace.js migration:run --force && node ace.js serve --hmr"
 
   frontend:
     build:

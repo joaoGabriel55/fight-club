@@ -16,6 +16,8 @@ const ClassesController = () => import('#controllers/classes_controller')
 const SchedulesController = () => import('#controllers/schedules_controller')
 const InvitationsController = () => import('#controllers/invitations_controller')
 const EnrollmentController = () => import('#controllers/enrollment_controller')
+const AnnouncementsController = () => import('#controllers/announcements_controller')
+const FeedbackController = () => import('#controllers/feedback_controller')
 
 router.get('/health', async ({ response }) => {
   return response.ok({ status: 'ok' })
@@ -62,6 +64,14 @@ router
         router.get('/', [InvitationsController, 'index'])
       })
       .prefix('/:classId/invitations')
+
+    router
+      .group(() => {
+        router.post('/', [AnnouncementsController, 'store'])
+        router.get('/', [AnnouncementsController, 'index'])
+        router.delete('/:id', [AnnouncementsController, 'destroy'])
+      })
+      .prefix('/:classId/announcements')
   })
   .prefix('/api/v1/classes')
   .use(middleware.auth())
@@ -78,6 +88,14 @@ router
     router.post('/join/:token', [EnrollmentController, 'join'])
     router.get('/enrollments', [EnrollmentController, 'index'])
     router.delete('/enrollments/:id', [EnrollmentController, 'leave'])
+
+    // Feedback on enrollments
+    router.post('/enrollments/:enrollmentId/feedback', [FeedbackController, 'store'])
+    router.get('/enrollments/:enrollmentId/feedback', [FeedbackController, 'index'])
+
+    // Student aggregate views
+    router.get('/announcements', [AnnouncementsController, 'myAnnouncements'])
+    router.get('/feedback', [FeedbackController, 'myFeedback'])
   })
   .prefix('/api/v1')
   .use(middleware.auth())

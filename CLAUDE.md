@@ -215,3 +215,38 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Invitations: `invitation.types.ts`, `invitations.service.ts`, `useInvitations`, `useCreateInvitation`, `useRevokeInvitation`, `InvitationManager`, `InviteLinkCard`
 - Routes: `/join/$token` (public), `/enrollments` (student), `/classes/$classId/invitations` (teacher tab)
 - `/join/$token` handles: unauthenticated → show register/login links; teacher → error; invalid/expired token → error; student → `ConsentDialog`.
+
+## Announcements & Feedback (v0.5)
+
+**Database tables:** `announcements`, `feedback` (plus `notifications` altered with `title`, `body`, `expires_at` columns)
+
+**Backend endpoints:**
+
+| Method   | Path                                         | Auth required | Description                                                    |
+| -------- | -------------------------------------------- | ------------- | -------------------------------------------------------------- |
+| `POST`   | `/api/v1/classes/:classId/announcements`     | Yes (teacher) | Create announcement (owner only). Emits `AnnouncementCreated`. |
+| `GET`    | `/api/v1/classes/:classId/announcements`     | Yes           | List announcements (owner teacher or enrolled student).        |
+| `GET`    | `/api/v1/announcements`                      | Yes (student) | All announcements across student's enrolled classes.           |
+| `DELETE` | `/api/v1/classes/:classId/announcements/:id` | Yes (teacher) | Delete announcement (owner only).                              |
+| `POST`   | `/api/v1/enrollments/:enrollmentId/feedback` | Yes (teacher) | Send feedback to enrolled student. Emits `FeedbackSent`.       |
+| `GET`    | `/api/v1/enrollments/:enrollmentId/feedback` | Yes           | List feedback (class teacher or enrolled student).             |
+| `GET`    | `/api/v1/feedback`                           | Yes (student) | All feedback across student's enrollments.                     |
+
+**Key design decisions:**
+
+- Bouncer-style policies in `app/policies/` (`AnnouncementPolicy`, `FeedbackPolicy`) encapsulate authorization logic — called from controllers.
+- Feedback `content` is encrypted at rest via AdonisJS `encryption.encrypt()`/`decrypt()` in model `prepare`/`consume` hooks.
+- `AnnouncementCreated` event → `CreateNotification` listener creates a notification for every active student in the class.
+- `FeedbackSent` event → `CreateNotification` listener creates a notification for the recipient student (`type: 'feedback_received'`).
+- `GET /api/v1/announcements` and `GET /api/v1/feedback` return `403` for teachers (student-only aggregate views).
+- Announcement list returns `{ author: { first_name } }` — never exposes raw `author_id`.
+- Audit log actions: `announcement_created`, `announcement_deleted`, `feedback_sent`, `feedback_viewed`.
+- Events registered in `start/events.ts`; listener handles all three event types (`handle`, `handleAnnouncementCreated`, `handleFeedbackSent`).
+
+**Frontend** — domains in `src/domains/announcements/` and `src/domains/feedback/`:
+
+- Announcements: `announcement.types.ts`, `announcement.schema.ts`, `announcements.service.ts`, `useAnnouncements`, `useMyAnnouncements`, `useCreateAnnouncement`, `useDeleteAnnouncement`, `AnnouncementCard`, `AnnouncementForm`, `AnnouncementFeed`
+- Feedback: `feedback.types.ts`, `feedback.schema.ts`, `feedback.service.ts`, `useFeedback`, `useMyFeedback`, `useSendFeedback`, `FeedbackCard`, `FeedbackForm`, `FeedbackHistory`
+- Routes: `/classes/$classId/announcements` (teacher + enrolled student), `/feedback` (student aggregate view)
+- Class detail layout has "Announcements" tab. Students page shows expandable feedback panel per student (teacher view).
+- `StudentList` updated to include `enrollment_id` and inline feedback form/history per student row.

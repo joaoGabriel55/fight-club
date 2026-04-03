@@ -16,6 +16,12 @@ export default class Notification extends BaseModel {
   declare type: string
 
   @column()
+  declare title: string | null
+
+  @column()
+  declare body: string | null
+
+  @column()
   declare data: Record<string, unknown>
 
   @column.dateTime()
@@ -23,6 +29,9 @@ export default class Notification extends BaseModel {
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
+
+  @column.dateTime()
+  declare expiresAt: DateTime | null
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>

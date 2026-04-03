@@ -163,7 +163,7 @@ jobs:
       LOG_LEVEL: info
       APP_KEY: test-app-key-that-is-at-least-16-chars
       APP_NAME: FightClub
-      NODE_ENV: development
+      NODE_ENV: test
       VITE_APP_URL: http://localhost:3000
       VITE_API_URL: http://localhost:3333
       DB_HOST: 127.0.0.1
