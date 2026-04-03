@@ -130,10 +130,6 @@ export default class ClassesController {
   async show({ auth, params, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
-    if (user.profileType !== 'teacher') {
-      return response.status(403).send({ error: { message: 'Forbidden' } })
-    }
-
     const cls = await Class.query()
       .where('id', params.id)
       .whereNull('deleted_at')
@@ -144,8 +140,20 @@ export default class ClassesController {
       return response.status(404).send({ error: { message: 'Not found' } })
     }
 
-    if (cls.teacherId !== user.id) {
-      return response.status(403).send({ error: { message: 'Forbidden' } })
+    // Teacher must own the class; student must be enrolled
+    if (user.profileType === 'teacher') {
+      if (cls.teacherId !== user.id) {
+        return response.status(403).send({ error: { message: 'Forbidden' } })
+      }
+    } else {
+      const enrollment = await Enrollment.query()
+        .where('class_id', cls.id)
+        .where('student_id', user.id)
+        .where('status', 'active')
+        .first()
+      if (!enrollment) {
+        return response.status(403).send({ error: { message: 'Forbidden' } })
+      }
     }
 
     return response.status(200).send({

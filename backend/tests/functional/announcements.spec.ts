@@ -64,7 +64,15 @@ async function createInvitationAndJoin(
       max_uses: null,
     })
 
-  const invToken = inv.body().token
+  let invToken = inv.body().token
+
+  // If a 409 is returned, an active invitation already exists — reuse it
+  if (!invToken) {
+    const listResp = await client
+      .get(`/api/v1/classes/${classId}/invitations`)
+      .header('Authorization', `Bearer ${teacherToken}`)
+    invToken = listResp.body()[0].token
+  }
 
   const joinResp = await client
     .post(`/api/v1/join/${invToken}`)

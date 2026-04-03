@@ -5,6 +5,7 @@ import {
   useParams,
 } from "@tanstack/react-router";
 import { useClass } from "@/domains/classes/hooks/useClass";
+import { useAuth } from "@/shared/hooks/useAuth";
 
 export const Route = createFileRoute("/_authenticated/classes/$classId")({
   component: ClassDetailLayout,
@@ -13,6 +14,9 @@ export const Route = createFileRoute("/_authenticated/classes/$classId")({
 function ClassDetailLayout() {
   const { classId } = useParams({ from: "/_authenticated/classes/$classId" });
   const { data: cls, isLoading, error } = useClass(classId);
+  const { user } = useAuth();
+
+  const isTeacher = user?.profile_type === "teacher";
 
   if (isLoading) {
     return (
@@ -46,10 +50,10 @@ function ClassDetailLayout() {
     <div className="min-h-screen px-4 py-8 max-w-4xl mx-auto">
       <div className="mb-4">
         <Link
-          to="/classes"
+          to={isTeacher ? "/classes" : "/enrollments"}
           className="text-sm text-gray-400 hover:text-gray-200 transition"
         >
-          ← My classes
+          {isTeacher ? "← My classes" : "← My enrollments"}
         </Link>
       </div>
 
@@ -72,22 +76,26 @@ function ClassDetailLayout() {
 
       {/* Tab navigation */}
       <div className="flex gap-1 border-b border-gray-800 mb-6">
-        <Link
-          to="/classes/$classId/schedules"
-          params={{ classId }}
-          className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-b-2 border-transparent [&.active]:border-red-500 [&.active]:text-gray-100 transition"
-          activeOptions={{ exact: true }}
-        >
-          Schedules
-        </Link>
-        <Link
-          to="/classes/$classId/students"
-          params={{ classId }}
-          className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-b-2 border-transparent [&.active]:border-red-500 [&.active]:text-gray-100 transition"
-          activeOptions={{ exact: true }}
-        >
-          Students
-        </Link>
+        {isTeacher && (
+          <Link
+            to="/classes/$classId/schedules"
+            params={{ classId }}
+            className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-b-2 border-transparent [&.active]:border-red-500 [&.active]:text-gray-100 transition"
+            activeOptions={{ exact: true }}
+          >
+            Schedules
+          </Link>
+        )}
+        {isTeacher && (
+          <Link
+            to="/classes/$classId/students"
+            params={{ classId }}
+            className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-b-2 border-transparent [&.active]:border-red-500 [&.active]:text-gray-100 transition"
+            activeOptions={{ exact: true }}
+          >
+            Students
+          </Link>
+        )}
         <Link
           to="/classes/$classId/announcements"
           params={{ classId }}
@@ -96,14 +104,16 @@ function ClassDetailLayout() {
         >
           Announcements
         </Link>
-        <Link
-          to="/classes/$classId/invitations"
-          params={{ classId }}
-          className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-b-2 border-transparent [&.active]:border-red-500 [&.active]:text-gray-100 transition"
-          activeOptions={{ exact: true }}
-        >
-          Invite links
-        </Link>
+        {isTeacher && (
+          <Link
+            to="/classes/$classId/invitations"
+            params={{ classId }}
+            className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-b-2 border-transparent [&.active]:border-red-500 [&.active]:text-gray-100 transition"
+            activeOptions={{ exact: true }}
+          >
+            Invite links
+          </Link>
+        )}
       </div>
 
       <Outlet />
