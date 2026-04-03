@@ -1,6 +1,7 @@
-import { createFileRoute, redirect, Outlet } from "@tanstack/react-router";
+import { createFileRoute, redirect, Outlet, Link } from "@tanstack/react-router";
 import { isAuthenticated, markAuthenticated } from "@/shared/lib/api-client";
 import { authService } from "@/domains/auth/services/auth.service";
+import { NotificationBell } from "@/domains/notifications/components/NotificationBell";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
@@ -16,5 +17,17 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthenticatedLayout() {
-  return <Outlet />;
+  return (
+    <>
+      <header className="flex items-center justify-between border-b border-gray-800 px-4 py-2">
+        <Link to="/dashboard" className="text-sm font-medium text-gray-300 hover:text-gray-100 transition">
+          Fight Club
+        </Link>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+        </div>
+      </header>
+      <Outlet />
+    </>
+  );
 }

@@ -84,7 +84,7 @@ npm run lint         # tsc --noEmit
 
 **API calls:** All requests go through `src/shared/lib/api-client.ts` (`apiClient<T>(path, options)`). Tokens are stored **in memory only** — never in localStorage or sessionStorage. On 401, the token is cleared and the user is redirected to `/login` via the injected `_navigateTo` callback.
 
-**Domain structure:** `src/domains/{auth,classes,enrollments,feedback,notifications}/` — feature code lives here. Shared utilities and components go in `src/shared/`.
+**Domain structure:** `src/domains/{auth,classes,enrollments,feedback,notifications,announcements,invitations,belts}/` — feature code lives here. Shared utilities and components go in `src/shared/`.
 
 ### Database schema (PostgreSQL)
 
@@ -96,6 +96,14 @@ npm run lint         # tsc --noEmit
 | `teacher_profiles`   | Fight experience                                        |
 | `audit_logs`         | JSONB metadata per action per user                      |
 | `rate_limits`        | Database-backed rate limiter state                      |
+| `classes`            | Martial arts classes; `has_belt_system` flag; soft delete|
+| `class_schedules`    | Weekly schedule entries per class                       |
+| `invitations`        | Join tokens with expiry and use counting                |
+| `enrollments`        | Student-class enrollment with consent tracking          |
+| `announcements`      | Class announcements by teacher                          |
+| `feedback`           | Teacher feedback per enrollment (encrypted content)     |
+| `notifications`      | User notifications with type, title, body, expiry       |
+| `belt_progress`      | Belt awards per enrollment with awarded_at and awarder  |
 
 ## Environment variables
 
@@ -250,3 +258,36 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Routes: `/classes/$classId/announcements` (teacher + enrolled student), `/feedback` (student aggregate view)
 - Class detail layout has "Announcements" tab. Students page shows expandable feedback panel per student (teacher view).
 - `StudentList` updated to include `enrollment_id` and inline feedback form/history per student row.
+
+## Belt Progression & Notifications (v0.6)
+
+**Database tables:** `belt_progress`
+
+**Backend endpoints:**
+
+| Method | Path                                      | Auth required | Description                                                        |
+| ------ | ----------------------------------------- | ------------- | ------------------------------------------------------------------ |
+| `POST` | `/api/v1/enrollments/:enrollmentId/belts` | Yes (teacher) | Award belt. Requires `has_belt_system = true`. Emits `BeltAwarded` |
+| `GET`  | `/api/v1/enrollments/:enrollmentId/belts` | Yes           | Belt history (teacher or enrolled student), asc by `awarded_at`    |
+| `GET`  | `/api/v1/notifications`                   | Yes           | User's non-expired notifications with `{ data, meta: { unread_count } }` |
+| `PUT`  | `/api/v1/notifications/:id/read`          | Yes           | Mark single notification as read (owner only)                      |
+| `PUT`  | `/api/v1/notifications/read-all`          | Yes           | Mark all user's unread notifications as read                       |
+
+**Key design decisions:**
+
+- `BeltPolicy` in `app/policies/belt_policy.ts`: `award()` checks teacher owns class AND `has_belt_system = true`; `view()` checks teacher or enrolled student.
+- `NotificationPolicy` in `app/policies/notification_policy.ts`: ownership checks for view and markRead.
+- `NotificationService` in `app/services/notification_service.ts`: shared service sets `expires_at = now() + 90 days` by default.
+- `BeltAwarded` event → `CreateNotification` listener (`handleBeltAwarded`) creates notification for student with type `belt_awarded`.
+- All event listeners now use `NotificationService.createNotification()` for consistent notification creation with expiry.
+- Expired notifications (`expires_at < now()`) excluded from `GET /notifications`.
+- Belt names are predefined: White, Yellow, Orange, Green, Blue, Purple, Brown, Black.
+- Audit log action: `belt_awarded`.
+
+**Frontend** — domains in `src/domains/belts/` and `src/domains/notifications/`:
+
+- Belts: `belt.types.ts`, `belt.schema.ts`, `belts.service.ts`, `useBelts`, `useAwardBelt`, `BeltTimeline`, `AwardBeltForm`, `BeltBadge`
+- Notifications: `notification.types.ts`, `notifications.service.ts`, `useNotifications` (60s refetch), `useMarkRead`, `useMarkAllRead`, `NotificationBell`, `NotificationPanel`, `NotificationItem`
+- Routes: `/notifications` (full page view)
+- `NotificationBell` added to authenticated layout header (`_authenticated.tsx`).
+- `StudentList` updated with belt panel toggle (only when `has_belt_system = true`). Shows `AwardBeltForm` and `BeltTimeline` inline per student.

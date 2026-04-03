@@ -3,24 +3,24 @@ import { useClassStudents } from "../hooks/useClassStudents";
 import { FeedbackForm } from "@/domains/feedback/components/FeedbackForm";
 import { FeedbackHistory } from "@/domains/feedback/components/FeedbackHistory";
 import { useFeedback } from "@/domains/feedback/hooks/useFeedback";
-
-const BELT_COLORS: Record<string, string> = {
-  white: "bg-gray-200 text-gray-900",
-  blue: "bg-blue-500 text-white",
-  purple: "bg-purple-500 text-white",
-  brown: "bg-amber-800 text-white",
-  black: "bg-gray-900 text-white border border-gray-600",
-};
+import { BeltTimeline } from "@/domains/belts/components/BeltTimeline";
+import { AwardBeltForm } from "@/domains/belts/components/AwardBeltForm";
+import { useBelts } from "@/domains/belts/hooks/useBelts";
+import { BeltBadge } from "@/domains/belts/components/BeltBadge";
 
 interface StudentListProps {
   classId: string;
+  hasBeltSystem: boolean;
 }
 
-export function StudentList({ classId }: StudentListProps) {
+export function StudentList({ classId, hasBeltSystem }: StudentListProps) {
   const { data: students, isLoading, error } = useClassStudents(classId);
   const [expandedEnrollmentId, setExpandedEnrollmentId] = useState<
     string | null
   >(null);
+  const [expandedPanel, setExpandedPanel] = useState<"feedback" | "belts">(
+    "feedback",
+  );
 
   if (isLoading) {
     return (
@@ -62,12 +62,31 @@ export function StudentList({ classId }: StudentListProps) {
             <StudentRow
               key={student.id}
               student={student}
+              hasBeltSystem={hasBeltSystem}
               isExpanded={expandedEnrollmentId === student.enrollment_id}
-              onToggle={() =>
-                setExpandedEnrollmentId((prev) =>
-                  prev === student.enrollment_id ? null : student.enrollment_id,
-                )
-              }
+              expandedPanel={expandedPanel}
+              onToggleFeedback={() => {
+                if (
+                  expandedEnrollmentId === student.enrollment_id &&
+                  expandedPanel === "feedback"
+                ) {
+                  setExpandedEnrollmentId(null);
+                } else {
+                  setExpandedEnrollmentId(student.enrollment_id);
+                  setExpandedPanel("feedback");
+                }
+              }}
+              onToggleBelts={() => {
+                if (
+                  expandedEnrollmentId === student.enrollment_id &&
+                  expandedPanel === "belts"
+                ) {
+                  setExpandedEnrollmentId(null);
+                } else {
+                  setExpandedEnrollmentId(student.enrollment_id);
+                  setExpandedPanel("belts");
+                }
+              }}
             />
           ))}
         </tbody>
@@ -84,45 +103,66 @@ interface StudentRowProps {
     belt_level: string | null;
     enrolled_at: string;
   };
+  hasBeltSystem: boolean;
   isExpanded: boolean;
-  onToggle: () => void;
+  expandedPanel: "feedback" | "belts";
+  onToggleFeedback: () => void;
+  onToggleBelts: () => void;
 }
 
-function StudentRow({ student, isExpanded, onToggle }: StudentRowProps) {
+function StudentRow({
+  student,
+  hasBeltSystem,
+  isExpanded,
+  expandedPanel,
+  onToggleFeedback,
+  onToggleBelts,
+}: StudentRowProps) {
   return (
     <>
       <tr className="border-b border-gray-800/50">
         <td className="py-2.5 text-gray-100">{student.first_name}</td>
         <td className="py-2.5">
-          {student.belt_level ? (
-            <span
-              className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-                BELT_COLORS[student.belt_level.toLowerCase()] ??
-                "bg-gray-700 text-gray-200"
-              }`}
-            >
-              {student.belt_level}
-            </span>
-          ) : (
-            <span className="text-gray-500">—</span>
-          )}
+          <BeltBadge beltName={student.belt_level} />
         </td>
         <td className="py-2.5 text-gray-400">
           {new Date(student.enrolled_at).toLocaleDateString()}
         </td>
-        <td className="py-2.5 text-right">
+        <td className="py-2.5 text-right flex gap-2 justify-end">
           <button
-            onClick={onToggle}
+            onClick={onToggleFeedback}
             className="text-xs text-gray-500 hover:text-gray-200 transition"
           >
-            {isExpanded ? "Hide feedback" : "Feedback"}
+            {isExpanded && expandedPanel === "feedback"
+              ? "Hide feedback"
+              : "Feedback"}
           </button>
+          {hasBeltSystem && (
+            <button
+              onClick={onToggleBelts}
+              className="text-xs text-gray-500 hover:text-gray-200 transition"
+            >
+              {isExpanded && expandedPanel === "belts"
+                ? "Hide belts"
+                : "Belts"}
+            </button>
+          )}
         </td>
       </tr>
-      {isExpanded && (
+      {isExpanded && expandedPanel === "feedback" && (
         <tr>
           <td colSpan={4} className="pb-4 pt-2">
             <StudentFeedbackPanel
+              enrollmentId={student.enrollment_id}
+              studentName={student.first_name}
+            />
+          </td>
+        </tr>
+      )}
+      {isExpanded && expandedPanel === "belts" && (
+        <tr>
+          <td colSpan={4} className="pb-4 pt-2">
+            <StudentBeltPanel
               enrollmentId={student.enrollment_id}
               studentName={student.first_name}
             />
@@ -149,6 +189,26 @@ function StudentFeedbackPanel({
       </h4>
       <FeedbackForm enrollmentId={enrollmentId} />
       <FeedbackHistory feedback={feedback ?? []} isLoading={isLoading} />
+    </div>
+  );
+}
+
+function StudentBeltPanel({
+  enrollmentId,
+  studentName,
+}: {
+  enrollmentId: string;
+  studentName: string;
+}) {
+  const { data: belts, isLoading } = useBelts(enrollmentId);
+
+  return (
+    <div className="flex flex-col gap-3 pl-2 border-l-2 border-yellow-700 ml-1">
+      <h4 className="text-sm font-medium text-gray-300">
+        Belt history for {studentName}
+      </h4>
+      <AwardBeltForm enrollmentId={enrollmentId} />
+      <BeltTimeline belts={belts ?? []} isLoading={isLoading} />
     </div>
   );
 }
