@@ -271,6 +271,7 @@ export default class ClassesController {
     return response.status(200).send(
       enrollments.map((enr) => ({
         id: enr.studentId,
+        enrollment_id: enr.id,
         first_name: enr.student.firstName,
         enrolled_at: enr.joinedAt,
       }))

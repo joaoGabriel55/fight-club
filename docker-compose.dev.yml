@@ -58,7 +58,7 @@ services:
         condition: service_healthy
       valkey:
         condition: service_healthy
-    command: node ace.js serve --hmr
+    command: sh -c "node ace.js migration:run --force && node ace.js serve --hmr"
 
   frontend:
     build:
