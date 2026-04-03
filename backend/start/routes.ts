@@ -14,6 +14,8 @@ import { authRateLimit } from '#start/limiter'
 const AuthController = () => import('#controllers/auth_controller')
 const ClassesController = () => import('#controllers/classes_controller')
 const SchedulesController = () => import('#controllers/schedules_controller')
+const InvitationsController = () => import('#controllers/invitations_controller')
+const EnrollmentController = () => import('#controllers/enrollment_controller')
 
 router.get('/health', async ({ response }) => {
   return response.ok({ status: 'ok' })
@@ -53,6 +55,29 @@ router
         router.delete('/:id', [SchedulesController, 'destroy'])
       })
       .prefix('/:classId/schedules')
+
+    router
+      .group(() => {
+        router.post('/', [InvitationsController, 'store'])
+        router.get('/', [InvitationsController, 'index'])
+      })
+      .prefix('/:classId/invitations')
   })
   .prefix('/api/v1/classes')
+  .use(middleware.auth())
+
+// Invitation revoke (outside classes prefix to avoid classId param collision)
+router.delete('/api/v1/invitations/:id', [InvitationsController, 'destroy']).use(middleware.auth())
+
+// Public: get class info from invite token (used by /join/:token page before login)
+router.get('/api/v1/invitations/:token/class', [EnrollmentController, 'classFromToken'])
+
+// Enrollment routes (authenticated)
+router
+  .group(() => {
+    router.post('/join/:token', [EnrollmentController, 'join'])
+    router.get('/enrollments', [EnrollmentController, 'index'])
+    router.delete('/enrollments/:id', [EnrollmentController, 'leave'])
+  })
+  .prefix('/api/v1')
   .use(middleware.auth())

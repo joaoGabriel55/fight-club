@@ -5,7 +5,11 @@ import { registerSchema, type RegisterInput } from "../schemas/register.schema";
 import { useRegister } from "../hooks/useRegister";
 import { ConsentCheckbox } from "./ConsentCheckbox";
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  redirectTo?: string;
+}
+
+export function RegisterForm({ redirectTo }: RegisterFormProps) {
   const navigate = useNavigate();
   const { mutate: register, isPending, error } = useRegister();
 
@@ -26,7 +30,7 @@ export function RegisterForm() {
   const onSubmit = ({ consent: _consent, ...data }: RegisterInput) => {
     register(data, {
       onSuccess: () => {
-        navigate({ to: "/dashboard" });
+        navigate({ to: redirectTo || "/dashboard" });
       },
     });
   };

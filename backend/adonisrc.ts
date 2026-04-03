@@ -63,6 +63,7 @@ export default defineConfig({
     () => import('#start/routes'),
     () => import('#start/kernel'),
     () => import('#start/limiter'),
+    () => import('#start/events'),
   ],
 
   /*

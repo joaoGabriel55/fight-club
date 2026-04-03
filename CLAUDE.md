@@ -179,5 +179,39 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Service: `classes.service.ts` (full CRUD + schedule operations)
 - Hooks: `useClasses`, `useClass`, `useCreateClass`, `useUpdateClass`, `useDeleteClass`, `useClassStudents`
 - Components: `ClassCard`, `ClassForm` (RHF + Zod + FormProvider), `ScheduleManager` (useFieldArray), `StudentList`
-- Routes: `/classes` (list), `/classes/new` (create), `/classes/$classId` (layout with tabs + Outlet), `/classes/$classId/schedules`, `/classes/$classId/students`
+- Routes: `/classes` (list), `/classes/new` (create), `/classes/$classId` (layout with tabs + Outlet), `/classes/$classId/schedules`, `/classes/$classId/students`, `/classes/$classId/invitations`
 - Teacher-only guard: student `profile_type` redirects away in the list page.
+
+## Invitations & Enrollment (v0.4)
+
+**Database tables:** `invitations`, `enrollments`, `notifications`
+
+**Backend endpoints:**
+
+| Method   | Path                                   | Auth required | Description                                                                |
+| -------- | -------------------------------------- | ------------- | -------------------------------------------------------------------------- |
+| `POST`   | `/api/v1/classes/:classId/invitations` | Yes (teacher) | Generate invite link; returns `invite_url` = `${VITE_APP_URL}/join/:token` |
+| `GET`    | `/api/v1/classes/:classId/invitations` | Yes (teacher) | List active non-expired invitations                                        |
+| `DELETE` | `/api/v1/invitations/:id`              | Yes (teacher) | Revoke invitation (`is_active = false`)                                    |
+| `GET`    | `/api/v1/invitations/:token/class`     | No            | Public: get class name + teacher from token (for join page)                |
+| `POST`   | `/api/v1/join/:token`                  | Yes (student) | Join class via token; requires `{ consent: true }`                         |
+| `GET`    | `/api/v1/enrollments`                  | Yes           | Student's own active enrollments with class + schedules                    |
+| `DELETE` | `/api/v1/enrollments/:id`              | Yes (student) | Leave class (hard-delete enrollment row)                                   |
+
+**Key design decisions:**
+
+- `invite_url` = `${VITE_APP_URL}/join/${token}` — only UUID token in URL, no PII.
+- Joining without `consent: true` → `422`. Expired/revoked/exhausted token → `410`. Duplicate enrollment → `409`. Teacher trying to join → `403`.
+- Leave = hard delete of enrollment row (feedback + belt_progress cascade added in future tickets).
+- `StudentEnrolled` event emitted on join → `CreateNotification` listener writes to `notifications` table for the teacher.
+- Audit log actions: `invitation_created`, `invitation_revoked`, `student_enrolled`, `student_left`.
+- `CleanupExpiredInvitationsJob` defined in `app/jobs/` but not yet scheduled (v0.8).
+- Ownership checks inline in controllers (consistent with v0.3, no `@adonisjs/bouncer` dependency).
+- Events registered in `start/events.ts` (preloaded in `adonisrc.ts`).
+
+**Frontend** — domains in `src/domains/enrollments/` and `src/domains/invitations/`:
+
+- Enrollments: `enrollment.types.ts`, `join.schema.ts`, `enrollments.service.ts`, `useJoinClass`, `useEnrollments`, `useLeaveClass`, `ConsentDialog`
+- Invitations: `invitation.types.ts`, `invitations.service.ts`, `useInvitations`, `useCreateInvitation`, `useRevokeInvitation`, `InvitationManager`, `InviteLinkCard`
+- Routes: `/join/$token` (public), `/enrollments` (student), `/classes/$classId/invitations` (teacher tab)
+- `/join/$token` handles: unauthenticated → show register/login links; teacher → error; invalid/expired token → error; student → `ConsentDialog`.

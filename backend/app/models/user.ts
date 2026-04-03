@@ -3,11 +3,12 @@ import { withAuthFinder } from '@adonisjs/auth/mixins/lucid'
 import { compose } from '@adonisjs/core/helpers'
 import encryption from '@adonisjs/core/services/encryption'
 import hash from '@adonisjs/core/services/hash'
-import { BaseModel, column, hasOne } from '@adonisjs/lucid/orm'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
+import { BaseModel, column, hasMany, hasOne } from '@adonisjs/lucid/orm'
+import type { HasMany, HasOne } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import StudentProfile from '#models/student_profile'
 import TeacherProfile from '#models/teacher_profile'
+import Enrollment from '#models/enrollment'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
   uids: ['email'],
@@ -71,4 +72,7 @@ export default class User extends compose(BaseModel, AuthFinder) {
 
   @hasOne(() => TeacherProfile)
   declare teacherProfile: HasOne<typeof TeacherProfile>
+
+  @hasMany(() => Enrollment, { foreignKey: 'studentId' })
+  declare enrollments: HasMany<typeof Enrollment>
 }
