@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "WebFetch(domain:docs.adonisjs.com)",
+      "Bash(npm -v)",
+      "Bash(node ace:*)",
+      "Bash(docker-compose -f docker-compose.dev.yml build --no-cache backend)"
+    ]
+  }
+}
