@@ -57,13 +57,19 @@ export function setNavigateFn(fn: (path: string) => void): void {
 export interface ApiRequestOptions extends RequestInit {
   /** If true, do not automatically add Authorization header */
   unauthenticated?: boolean;
+  /** If true, do not redirect to /login on 401 (useful for auth probes) */
+  suppressRedirect?: boolean;
 }
 
 export async function apiClient<T = unknown>(
   path: string,
   options: ApiRequestOptions = {},
 ): Promise<T> {
-  const { unauthenticated = false, ...fetchOptions } = options;
+  const {
+    unauthenticated = false,
+    suppressRedirect = false,
+    ...fetchOptions
+  } = options;
 
   const headers = new Headers(fetchOptions.headers);
 
@@ -86,12 +92,14 @@ export async function apiClient<T = unknown>(
 
   if (response.status === 401) {
     clearToken();
-    if (_navigateTo) {
-      _navigateTo("/login");
-    } else {
-      window.location.href = "/login";
+    if (!suppressRedirect) {
+      if (_navigateTo) {
+        _navigateTo("/login");
+      } else {
+        window.location.href = "/login";
+      }
     }
-    throw new Error("Unauthorized — redirecting to login");
+    throw new ApiError(401, "Unauthorized", undefined);
   }
 
   if (!response.ok) {

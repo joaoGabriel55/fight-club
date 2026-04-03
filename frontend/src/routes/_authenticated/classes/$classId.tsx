@@ -88,6 +88,14 @@ function ClassDetailLayout() {
         >
           Students
         </Link>
+        <Link
+          to="/classes/$classId/invitations"
+          params={{ classId }}
+          className="px-4 py-2 text-sm text-gray-400 hover:text-gray-200 border-b-2 border-transparent [&.active]:border-red-500 [&.active]:text-gray-100 transition"
+          activeOptions={{ exact: true }}
+        >
+          Invite links
+        </Link>
       </div>
 
       <Outlet />

@@ -13,12 +13,15 @@ import { Route as RegisterRouteImport } from "./routes/register";
 import { Route as LoginRouteImport } from "./routes/login";
 import { Route as AuthenticatedRouteImport } from "./routes/_authenticated";
 import { Route as IndexRouteImport } from "./routes/index";
+import { Route as JoinTokenRouteImport } from "./routes/join.$token";
+import { Route as AuthenticatedEnrollmentsRouteImport } from "./routes/_authenticated/enrollments";
 import { Route as AuthenticatedDashboardRouteImport } from "./routes/_authenticated/dashboard";
 import { Route as AuthenticatedClassesIndexRouteImport } from "./routes/_authenticated/classes/index";
 import { Route as AuthenticatedClassesNewRouteImport } from "./routes/_authenticated/classes/new";
 import { Route as AuthenticatedClassesClassIdRouteImport } from "./routes/_authenticated/classes/$classId";
 import { Route as AuthenticatedClassesClassIdStudentsRouteImport } from "./routes/_authenticated/classes/$classId/students";
 import { Route as AuthenticatedClassesClassIdSchedulesRouteImport } from "./routes/_authenticated/classes/$classId/schedules";
+import { Route as AuthenticatedClassesClassIdInvitationsRouteImport } from "./routes/_authenticated/classes/$classId/invitations";
 
 const RegisterRoute = RegisterRouteImport.update({
   id: "/register",
@@ -39,6 +42,17 @@ const IndexRoute = IndexRouteImport.update({
   path: "/",
   getParentRoute: () => rootRouteImport,
 } as any);
+const JoinTokenRoute = JoinTokenRouteImport.update({
+  id: "/join/$token",
+  path: "/join/$token",
+  getParentRoute: () => rootRouteImport,
+} as any);
+const AuthenticatedEnrollmentsRoute =
+  AuthenticatedEnrollmentsRouteImport.update({
+    id: "/enrollments",
+    path: "/enrollments",
+    getParentRoute: () => AuthenticatedRoute,
+  } as any);
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: "/dashboard",
   path: "/dashboard",
@@ -73,15 +87,24 @@ const AuthenticatedClassesClassIdSchedulesRoute =
     path: "/schedules",
     getParentRoute: () => AuthenticatedClassesClassIdRoute,
   } as any);
+const AuthenticatedClassesClassIdInvitationsRoute =
+  AuthenticatedClassesClassIdInvitationsRouteImport.update({
+    id: "/invitations",
+    path: "/invitations",
+    getParentRoute: () => AuthenticatedClassesClassIdRoute,
+  } as any);
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/dashboard": typeof AuthenticatedDashboardRoute;
+  "/enrollments": typeof AuthenticatedEnrollmentsRoute;
+  "/join/$token": typeof JoinTokenRoute;
   "/classes/$classId": typeof AuthenticatedClassesClassIdRouteWithChildren;
   "/classes/new": typeof AuthenticatedClassesNewRoute;
   "/classes/": typeof AuthenticatedClassesIndexRoute;
+  "/classes/$classId/invitations": typeof AuthenticatedClassesClassIdInvitationsRoute;
   "/classes/$classId/schedules": typeof AuthenticatedClassesClassIdSchedulesRoute;
   "/classes/$classId/students": typeof AuthenticatedClassesClassIdStudentsRoute;
 }
@@ -90,9 +113,12 @@ export interface FileRoutesByTo {
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/dashboard": typeof AuthenticatedDashboardRoute;
+  "/enrollments": typeof AuthenticatedEnrollmentsRoute;
+  "/join/$token": typeof JoinTokenRoute;
   "/classes/$classId": typeof AuthenticatedClassesClassIdRouteWithChildren;
   "/classes/new": typeof AuthenticatedClassesNewRoute;
   "/classes": typeof AuthenticatedClassesIndexRoute;
+  "/classes/$classId/invitations": typeof AuthenticatedClassesClassIdInvitationsRoute;
   "/classes/$classId/schedules": typeof AuthenticatedClassesClassIdSchedulesRoute;
   "/classes/$classId/students": typeof AuthenticatedClassesClassIdStudentsRoute;
 }
@@ -103,9 +129,12 @@ export interface FileRoutesById {
   "/login": typeof LoginRoute;
   "/register": typeof RegisterRoute;
   "/_authenticated/dashboard": typeof AuthenticatedDashboardRoute;
+  "/_authenticated/enrollments": typeof AuthenticatedEnrollmentsRoute;
+  "/join/$token": typeof JoinTokenRoute;
   "/_authenticated/classes/$classId": typeof AuthenticatedClassesClassIdRouteWithChildren;
   "/_authenticated/classes/new": typeof AuthenticatedClassesNewRoute;
   "/_authenticated/classes/": typeof AuthenticatedClassesIndexRoute;
+  "/_authenticated/classes/$classId/invitations": typeof AuthenticatedClassesClassIdInvitationsRoute;
   "/_authenticated/classes/$classId/schedules": typeof AuthenticatedClassesClassIdSchedulesRoute;
   "/_authenticated/classes/$classId/students": typeof AuthenticatedClassesClassIdStudentsRoute;
 }
@@ -116,9 +145,12 @@ export interface FileRouteTypes {
     | "/login"
     | "/register"
     | "/dashboard"
+    | "/enrollments"
+    | "/join/$token"
     | "/classes/$classId"
     | "/classes/new"
     | "/classes/"
+    | "/classes/$classId/invitations"
     | "/classes/$classId/schedules"
     | "/classes/$classId/students";
   fileRoutesByTo: FileRoutesByTo;
@@ -127,9 +159,12 @@ export interface FileRouteTypes {
     | "/login"
     | "/register"
     | "/dashboard"
+    | "/enrollments"
+    | "/join/$token"
     | "/classes/$classId"
     | "/classes/new"
     | "/classes"
+    | "/classes/$classId/invitations"
     | "/classes/$classId/schedules"
     | "/classes/$classId/students";
   id:
@@ -139,9 +174,12 @@ export interface FileRouteTypes {
     | "/login"
     | "/register"
     | "/_authenticated/dashboard"
+    | "/_authenticated/enrollments"
+    | "/join/$token"
     | "/_authenticated/classes/$classId"
     | "/_authenticated/classes/new"
     | "/_authenticated/classes/"
+    | "/_authenticated/classes/$classId/invitations"
     | "/_authenticated/classes/$classId/schedules"
     | "/_authenticated/classes/$classId/students";
   fileRoutesById: FileRoutesById;
@@ -151,6 +189,7 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren;
   LoginRoute: typeof LoginRoute;
   RegisterRoute: typeof RegisterRoute;
+  JoinTokenRoute: typeof JoinTokenRoute;
 }
 
 declare module "@tanstack/react-router" {
@@ -182,6 +221,20 @@ declare module "@tanstack/react-router" {
       fullPath: "/";
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
+    };
+    "/join/$token": {
+      id: "/join/$token";
+      path: "/join/$token";
+      fullPath: "/join/$token";
+      preLoaderRoute: typeof JoinTokenRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
+    "/_authenticated/enrollments": {
+      id: "/_authenticated/enrollments";
+      path: "/enrollments";
+      fullPath: "/enrollments";
+      preLoaderRoute: typeof AuthenticatedEnrollmentsRouteImport;
+      parentRoute: typeof AuthenticatedRoute;
     };
     "/_authenticated/dashboard": {
       id: "/_authenticated/dashboard";
@@ -225,16 +278,26 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof AuthenticatedClassesClassIdSchedulesRouteImport;
       parentRoute: typeof AuthenticatedClassesClassIdRoute;
     };
+    "/_authenticated/classes/$classId/invitations": {
+      id: "/_authenticated/classes/$classId/invitations";
+      path: "/invitations";
+      fullPath: "/classes/$classId/invitations";
+      preLoaderRoute: typeof AuthenticatedClassesClassIdInvitationsRouteImport;
+      parentRoute: typeof AuthenticatedClassesClassIdRoute;
+    };
   }
 }
 
 interface AuthenticatedClassesClassIdRouteChildren {
+  AuthenticatedClassesClassIdInvitationsRoute: typeof AuthenticatedClassesClassIdInvitationsRoute;
   AuthenticatedClassesClassIdSchedulesRoute: typeof AuthenticatedClassesClassIdSchedulesRoute;
   AuthenticatedClassesClassIdStudentsRoute: typeof AuthenticatedClassesClassIdStudentsRoute;
 }
 
 const AuthenticatedClassesClassIdRouteChildren: AuthenticatedClassesClassIdRouteChildren =
   {
+    AuthenticatedClassesClassIdInvitationsRoute:
+      AuthenticatedClassesClassIdInvitationsRoute,
     AuthenticatedClassesClassIdSchedulesRoute:
       AuthenticatedClassesClassIdSchedulesRoute,
     AuthenticatedClassesClassIdStudentsRoute:
@@ -248,6 +311,7 @@ const AuthenticatedClassesClassIdRouteWithChildren =
 
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute;
+  AuthenticatedEnrollmentsRoute: typeof AuthenticatedEnrollmentsRoute;
   AuthenticatedClassesClassIdRoute: typeof AuthenticatedClassesClassIdRouteWithChildren;
   AuthenticatedClassesNewRoute: typeof AuthenticatedClassesNewRoute;
   AuthenticatedClassesIndexRoute: typeof AuthenticatedClassesIndexRoute;
@@ -255,6 +319,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedEnrollmentsRoute: AuthenticatedEnrollmentsRoute,
   AuthenticatedClassesClassIdRoute:
     AuthenticatedClassesClassIdRouteWithChildren,
   AuthenticatedClassesNewRoute: AuthenticatedClassesNewRoute,
@@ -270,6 +335,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  JoinTokenRoute: JoinTokenRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

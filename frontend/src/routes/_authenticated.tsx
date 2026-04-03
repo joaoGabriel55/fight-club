@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     if (isAuthenticated()) return;
     try {
-      await authService.getMe();
+      await authService.getMeSilent();
       markAuthenticated();
     } catch {
       throw redirect({ to: "/login" });

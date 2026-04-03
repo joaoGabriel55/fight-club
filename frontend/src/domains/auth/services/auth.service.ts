@@ -31,6 +31,11 @@ export const authService = {
     return apiClient<MeResponse>("/api/v1/auth/me");
   },
 
+  /** Like getMe but does not redirect to /login on 401 (for route guard probes). */
+  async getMeSilent(): Promise<MeResponse> {
+    return apiClient<MeResponse>("/api/v1/auth/me", { suppressRedirect: true });
+  },
+
   async updateMe(data: Partial<MeResponse>): Promise<MeResponse> {
     return apiClient<MeResponse>("/api/v1/auth/me", {
       method: "PUT",
