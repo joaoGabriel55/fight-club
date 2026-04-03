@@ -8,7 +8,7 @@ export const Route = createRootRoute({
 function RootLayout() {
   return (
     <>
-      <main className="min-h-screen bg-gray-950 text-gray-100">
+      <main className="min-h-screen bg-background text-foreground antialiased">
         <Outlet />
       </main>
       {import.meta.env.DEV && <TanStackRouterDevtools />}

@@ -1,4 +1,5 @@
 import type { FeedbackItem } from "../types/feedback.types";
+import { Card, CardContent, CardFooter } from "@/shared/components/ui/card";
 
 interface FeedbackCardProps {
   feedback: FeedbackItem;
@@ -16,18 +17,18 @@ export function FeedbackCard({
   });
 
   return (
-    <div
-      className={`rounded-xl border border-gray-700 bg-gray-900 p-5 flex flex-col gap-2 ${extraClass ?? ""}`}
-    >
-      <p className="text-sm text-gray-300 whitespace-pre-wrap">
-        {feedback.content}
-      </p>
+    <Card className={extraClass}>
+      <CardContent className="pt-5">
+        <p className="text-sm whitespace-pre-wrap">{feedback.content}</p>
+      </CardContent>
 
-      <div className="flex gap-2 text-xs text-gray-500 pt-2 border-t border-gray-800 mt-1">
-        <span>{feedback.teacher.first_name}</span>
-        <span>&middot;</span>
-        <span>{date}</span>
-      </div>
-    </div>
+      <CardFooter className="border-t pt-4">
+        <div className="flex gap-2 text-xs text-muted-foreground">
+          <span>{feedback.teacher.first_name}</span>
+          <span>&middot;</span>
+          <span>{date}</span>
+        </div>
+      </CardFooter>
+    </Card>
   );
 }

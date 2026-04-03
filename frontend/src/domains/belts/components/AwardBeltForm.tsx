@@ -1,8 +1,20 @@
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 import { awardBeltSchema } from "../schemas/belt.schema";
 import { useAwardBelt } from "../hooks/useAwardBelt";
 import type { AwardBeltInput } from "../types/belt.types";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
+import { Select } from "@/shared/components/ui/select";
+import { Calendar } from "@/shared/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
+import { cn } from "@/shared/lib/utils";
 
 interface AwardBeltFormProps {
   enrollmentId: string;
@@ -16,6 +28,7 @@ export function AwardBeltForm({ enrollmentId, onSuccess }: AwardBeltFormProps) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<AwardBeltInput>({
     resolver: zodResolver(awardBeltSchema),
@@ -35,16 +48,13 @@ export function AwardBeltForm({ enrollmentId, onSuccess }: AwardBeltFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
-      <h3 className="text-sm font-medium text-gray-300">Award belt</h3>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+      <Label className="text-sm">Award belt</Label>
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <select
-            {...register("belt_name")}
-            className="w-full rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-red-500 focus:ring-1 focus:ring-red-500 focus:outline-none"
-          >
-            <option value="">Select belt…</option>
+          <Select {...register("belt_name")}>
+            <option value="">Select belt...</option>
             <option value="White">White</option>
             <option value="Yellow">Yellow</option>
             <option value="Orange">Orange</option>
@@ -53,22 +63,49 @@ export function AwardBeltForm({ enrollmentId, onSuccess }: AwardBeltFormProps) {
             <option value="Purple">Purple</option>
             <option value="Brown">Brown</option>
             <option value="Black">Black</option>
-          </select>
+          </Select>
           {errors.belt_name && (
-            <p className="mt-1 text-xs text-red-400">
+            <p className="mt-1 text-xs text-destructive">
               {errors.belt_name.message}
             </p>
           )}
         </div>
 
         <div>
-          <input
-            type="date"
-            {...register("awarded_at")}
-            className="rounded-lg border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 focus:border-red-500 focus:ring-1 focus:ring-red-500 focus:outline-none"
+          <Controller
+            control={control}
+            name="awarded_at"
+            render={({ field }) => (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[180px] justify-start text-left font-normal",
+                      !field.value && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {field.value
+                      ? format(new Date(field.value), "PPP")
+                      : "Pick a date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value ? new Date(field.value) : undefined}
+                    onSelect={(date) =>
+                      field.onChange(date ? format(date, "yyyy-MM-dd") : "")
+                    }
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
           />
           {errors.awarded_at && (
-            <p className="mt-1 text-xs text-red-400">
+            <p className="mt-1 text-xs text-destructive">
               {errors.awarded_at.message}
             </p>
           )}
@@ -76,18 +113,14 @@ export function AwardBeltForm({ enrollmentId, onSuccess }: AwardBeltFormProps) {
       </div>
 
       {error && (
-        <p className="text-xs text-red-400">
+        <p className="text-xs text-destructive">
           {(error as any)?.body?.error?.message ?? "Failed to award belt"}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="self-start rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
-      >
-        {isPending ? "Awarding…" : "Award belt"}
-      </button>
+      <Button type="submit" disabled={isPending} size="sm">
+        {isPending ? "Awarding..." : "Award belt"}
+      </Button>
     </form>
   );
 }

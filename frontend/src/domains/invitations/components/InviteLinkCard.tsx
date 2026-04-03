@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { useRevokeInvitation } from "../hooks/useRevokeInvitation";
 import type { Invitation } from "../types/invitation.types";
+import { Card, CardContent, CardFooter } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Copy, Check, LinkIcon } from "lucide-react";
 
 interface InviteLinkCardProps {
   invitation: Invitation;
@@ -27,66 +30,86 @@ export function InviteLinkCard({ invitation, classId }: InviteLinkCardProps) {
       : null;
 
   return (
-    <div className="rounded-xl border border-gray-700 bg-gray-900 p-4 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 mb-1">Invite link</p>
-          <p className="text-sm text-gray-200 font-mono truncate">
-            {invitation.invite_url}
-          </p>
+    <Card>
+      <CardContent className="pt-5 space-y-3">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
+              <LinkIcon className="h-3 w-3" />
+              Invite link
+            </p>
+            <p className="text-sm font-mono truncate">
+              {invitation.invite_url}
+            </p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleCopy}>
+            {copied ? (
+              <>
+                <Check className="h-3 w-3 mr-1" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <Copy className="h-3 w-3 mr-1" />
+                Copy link
+              </>
+            )}
+          </Button>
         </div>
-        <button
-          onClick={handleCopy}
-          className="shrink-0 rounded border border-gray-700 px-3 py-1.5 text-xs text-gray-300 hover:bg-gray-800 transition"
-        >
-          {copied ? "Copied!" : "Copy link"}
-        </button>
-      </div>
 
-      <div className="flex flex-wrap gap-3 text-xs text-gray-400">
-        <span className={isExpiredSoon ? "text-yellow-400" : "text-gray-400"}>
-          Expires {expiresAt.toLocaleDateString()}
-        </span>
-        {usesLeft !== null ? (
-          <span>
-            {usesLeft} use{usesLeft !== 1 ? "s" : ""} left
+        <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+          <span
+            className={
+              isExpiredSoon ? "text-yellow-600 dark:text-yellow-400" : ""
+            }
+          >
+            Expires {expiresAt.toLocaleDateString()}
           </span>
-        ) : (
-          <span>
-            {invitation.use_count} use{invitation.use_count !== 1 ? "s" : ""}
-          </span>
-        )}
-      </div>
+          {usesLeft !== null ? (
+            <span>
+              {usesLeft} use{usesLeft !== 1 ? "s" : ""} left
+            </span>
+          ) : (
+            <span>
+              {invitation.use_count} use{invitation.use_count !== 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+      </CardContent>
 
-      <div className="flex justify-end border-t border-gray-800 pt-2">
+      <CardFooter className="justify-end border-t pt-4">
         {confirming ? (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Revoke link?</span>
-            <button
+            <span className="text-xs text-muted-foreground">Revoke link?</span>
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={() =>
                 revoke(invitation.id, { onSettled: () => setConfirming(false) })
               }
               disabled={isPending}
-              className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
             >
-              {isPending ? "Revoking…" : "Yes, revoke"}
-            </button>
-            <button
+              {isPending ? "Revoking..." : "Yes, revoke"}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setConfirming(false)}
-              className="text-xs text-gray-400 hover:text-gray-200"
             >
               Cancel
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-destructive"
             onClick={() => setConfirming(true)}
-            className="text-xs text-gray-500 hover:text-red-400 transition"
           >
             Revoke
-          </button>
+          </Button>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

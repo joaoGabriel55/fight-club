@@ -15,13 +15,14 @@ interface BeltBadgeProps {
 
 export function BeltBadge({ beltName }: BeltBadgeProps) {
   if (!beltName) {
-    return <span className="text-gray-500">—</span>;
+    return <span className="text-muted-foreground">&mdash;</span>;
   }
 
   return (
     <span
       className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
-        BELT_COLORS[beltName.toLowerCase()] ?? "bg-gray-700 text-gray-200"
+        BELT_COLORS[beltName.toLowerCase()] ??
+        "bg-secondary text-secondary-foreground"
       }`}
     >
       {beltName}

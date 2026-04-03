@@ -33,13 +33,13 @@ describe("NotificationItem", () => {
   it("has unread visual style when read_at === null", () => {
     renderItem({ read_at: null });
     // Unread indicator dot
-    const dot = document.querySelector(".bg-red-500");
+    const dot = document.querySelector(".bg-primary");
     expect(dot).toBeInTheDocument();
   });
 
   it("does not have unread indicator when read", () => {
     renderItem({ read_at: new Date().toISOString() });
-    const dot = document.querySelector(".bg-red-500");
+    const dot = document.querySelector(".bg-primary");
     expect(dot).not.toBeInTheDocument();
   });
 

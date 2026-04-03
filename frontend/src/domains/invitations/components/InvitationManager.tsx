@@ -2,6 +2,16 @@ import { useState } from "react";
 import { useInvitations } from "../hooks/useInvitations";
 import { useCreateInvitation } from "../hooks/useCreateInvitation";
 import { InviteLinkCard } from "./InviteLinkCard";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Plus, X } from "lucide-react";
 
 interface InvitationManagerProps {
   classId: string;
@@ -38,72 +48,90 @@ export function InvitationManager({ classId }: InvitationManagerProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-100">Invite links</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Invite Links</h2>
         {!hasActiveInvitation && (
-          <button
+          <Button
+            size="sm"
+            variant={showForm ? "outline" : "default"}
             onClick={() => setShowForm((v) => !v)}
-            className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-500 transition"
           >
-            {showForm ? "Cancel" : "+ Generate link"}
-          </button>
+            {showForm ? (
+              <>
+                <X className="h-3 w-3 mr-1" />
+                Cancel
+              </>
+            ) : (
+              <>
+                <Plus className="h-3 w-3 mr-1" />
+                Generate link
+              </>
+            )}
+          </Button>
         )}
       </div>
 
       {showForm && (
-        <div className="rounded-xl border border-gray-700 bg-gray-800 p-4 flex flex-col gap-3">
-          <h3 className="text-sm font-medium text-gray-200">New invite link</h3>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm">New invite link</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">Expires in (days)</Label>
+              <Input
+                type="number"
+                min={1}
+                value={expiresInDays}
+                onChange={(e) => setExpiresInDays(Number(e.target.value))}
+                className="w-32"
+              />
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-400">Expires in (days)</label>
-            <input
-              type="number"
-              min={1}
-              value={expiresInDays}
-              onChange={(e) => setExpiresInDays(Number(e.target.value))}
-              className="w-32 rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-gray-100 focus:border-red-500 focus:outline-none"
-            />
-          </div>
+            <div className="flex flex-col gap-1">
+              <Label className="text-xs">
+                Max uses{" "}
+                <span className="text-muted-foreground">
+                  (leave blank for unlimited)
+                </span>
+              </Label>
+              <Input
+                type="number"
+                min={1}
+                value={maxUses}
+                onChange={(e) => setMaxUses(e.target.value)}
+                placeholder="Unlimited"
+                className="w-32"
+              />
+            </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-gray-400">
-              Max uses{" "}
-              <span className="text-gray-600">(leave blank for unlimited)</span>
-            </label>
-            <input
-              type="number"
-              min={1}
-              value={maxUses}
-              onChange={(e) => setMaxUses(e.target.value)}
-              placeholder="Unlimited"
-              className="w-32 rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-gray-100 focus:border-red-500 focus:outline-none placeholder:text-gray-600"
-            />
-          </div>
-
-          <div className="flex justify-end">
-            <button
-              onClick={handleGenerate}
-              disabled={isCreating || expiresInDays < 1}
-              className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition disabled:opacity-40"
-            >
-              {isCreating ? "Generating…" : "Generate"}
-            </button>
-          </div>
-        </div>
+            <div className="flex justify-end">
+              <Button
+                onClick={handleGenerate}
+                disabled={isCreating || expiresInDays < 1}
+                size="sm"
+              >
+                {isCreating ? "Generating..." : "Generate"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {isLoading ? (
-        <p className="text-gray-400 text-sm">Loading…</p>
+        <p className="text-muted-foreground text-sm">Loading...</p>
       ) : !invitations || invitations.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-700 px-4 py-8 text-center">
-          <p className="text-gray-400">No active invite links.</p>
-          <p className="text-sm text-gray-600 mt-1">
-            Generate a link to share with your students.
-          </p>
-        </div>
+        <Card className="border-dashed">
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">No active invite links.</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Generate a link to share with your students.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="space-y-3">
           {invitations.map((inv) => (
             <InviteLinkCard key={inv.id} invitation={inv} classId={classId} />
           ))}

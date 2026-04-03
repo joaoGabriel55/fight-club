@@ -5,6 +5,16 @@ import {
   type CreateAnnouncementInput,
 } from "../schemas/announcement.schema";
 import { useCreateAnnouncement } from "../hooks/useCreateAnnouncement";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 interface AnnouncementFormProps {
   classId: string;
@@ -37,60 +47,61 @@ export function AnnouncementForm({
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="rounded-xl border border-gray-700 bg-gray-800 p-4 flex flex-col gap-3"
-      noValidate
-    >
-      <h3 className="text-sm font-medium text-gray-200">New announcement</h3>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="title" className="text-xs text-gray-400">
-          Title
-        </label>
-        <input
-          id="title"
-          type="text"
-          className="rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-          placeholder="e.g. Class cancelled this week"
-          {...register("title")}
-        />
-        {errors.title && (
-          <p className="text-sm text-red-400">{errors.title.message}</p>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="content" className="text-xs text-gray-400">
-          Content
-        </label>
-        <textarea
-          id="content"
-          rows={3}
-          className="rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
-          placeholder="Write your announcement…"
-          {...register("content")}
-        />
-        {errors.content && (
-          <p className="text-sm text-red-400">{errors.content.message}</p>
-        )}
-      </div>
-
-      {error && (
-        <p className="rounded-lg bg-red-900/40 px-3 py-2 text-sm text-red-400">
-          {error.message}
-        </p>
-      )}
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition disabled:opacity-40"
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm">New announcement</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-3"
+          noValidate
         >
-          {isPending ? "Posting…" : "Post announcement"}
-        </button>
-      </div>
-    </form>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="title" className="text-xs">
+              Title
+            </Label>
+            <Input
+              id="title"
+              type="text"
+              placeholder="e.g. Class cancelled this week"
+              {...register("title")}
+            />
+            {errors.title && (
+              <p className="text-sm text-destructive">{errors.title.message}</p>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="content" className="text-xs">
+              Content
+            </Label>
+            <Textarea
+              id="content"
+              rows={3}
+              placeholder="Write your announcement..."
+              {...register("content")}
+            />
+            {errors.content && (
+              <p className="text-sm text-destructive">
+                {errors.content.message}
+              </p>
+            )}
+          </div>
+
+          {error && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error.message}
+            </p>
+          )}
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isPending} size="sm">
+              {isPending ? "Posting..." : "Post announcement"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

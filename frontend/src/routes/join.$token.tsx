@@ -5,6 +5,15 @@ import { useMe } from "@/domains/auth/hooks/useMe";
 import { useJoinClass } from "@/domains/enrollments/hooks/useJoinClass";
 import { ConsentDialog } from "@/domains/enrollments/components/ConsentDialog";
 import { enrollmentsService } from "@/domains/enrollments/services/enrollments.service";
+import { Swords, AlertTriangle, ShieldX } from "lucide-react";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import bgImage from "@/assets/background-image.jpg";
 
 export const Route = createFileRoute("/join/$token")({
   component: JoinPage,
@@ -30,7 +39,7 @@ function JoinPage() {
   if (classLoading || meLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-400">Loading…</p>
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }
@@ -41,70 +50,96 @@ function JoinPage() {
 
   if (tokenInvalid || classError) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
-        <h1 className="text-2xl font-bold text-gray-100">Invitation expired</h1>
-        <p className="text-gray-400">
-          This invitation has expired or is no longer valid.
-        </p>
-        <Link
-          to="/login"
-          className="text-sm text-red-400 hover:text-red-300 transition"
-        >
-          Go to login
-        </Link>
+      <div className="relative flex min-h-screen items-center justify-center">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        />
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+        <Card className="relative z-10 w-full max-w-md mx-4 text-center">
+          <CardHeader>
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto mb-2" />
+            <CardTitle>Invitation expired</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              This invitation has expired or is no longer valid.
+            </p>
+            <Button asChild variant="outline">
+              <Link to="/login">Go to login</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (!authenticated || !me) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-5 px-4">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-100">
-            You've been invited to join
-          </h1>
-          {classInfo && (
-            <p className="mt-1 text-gray-400">
-              {classInfo.class_name} · {classInfo.martial_art}
+      <div className="relative flex min-h-screen items-center justify-center">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        />
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+        <Card className="relative z-10 w-full max-w-md mx-4 text-center">
+          <CardHeader>
+            <Swords className="h-10 w-10 text-primary mx-auto mb-2" />
+            <CardTitle>You've been invited to join</CardTitle>
+            {classInfo && (
+              <p className="text-sm text-muted-foreground mt-1">
+                {classInfo.class_name} &middot; {classInfo.martial_art}
+              </p>
+            )}
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm">
+              You need an account to join this class.
             </p>
-          )}
-        </div>
-        <p className="text-gray-400 text-center max-w-sm">
-          You need an account to join this class.
-        </p>
-        <div className="flex gap-3">
-          <a
-            href={`/register?redirect=${encodeURIComponent(`/join/${token}`)}`}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition"
-          >
-            Register
-          </a>
-          <a
-            href={`/login?redirect=${encodeURIComponent(`/join/${token}`)}`}
-            className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition"
-          >
-            Log in
-          </a>
-        </div>
+            <div className="flex gap-3 justify-center">
+              <Button asChild>
+                <a
+                  href={`/register?redirect=${encodeURIComponent(`/join/${token}`)}`}
+                >
+                  Register
+                </a>
+              </Button>
+              <Button asChild variant="outline">
+                <a
+                  href={`/login?redirect=${encodeURIComponent(`/join/${token}`)}`}
+                >
+                  Log in
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (me.profile_type === "teacher") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-4">
-        <h1 className="text-xl font-bold text-gray-100">
-          Cannot join as teacher
-        </h1>
-        <p className="text-gray-400">
-          Teachers cannot join classes as students.
-        </p>
-        <Link
-          to="/dashboard"
-          className="text-sm text-red-400 hover:text-red-300 transition"
-        >
-          Go to dashboard
-        </Link>
+      <div className="relative flex min-h-screen items-center justify-center">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        />
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+        <Card className="relative z-10 w-full max-w-md mx-4 text-center">
+          <CardHeader>
+            <ShieldX className="h-12 w-12 text-destructive mx-auto mb-2" />
+            <CardTitle>Cannot join as teacher</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground">
+              Teachers cannot join classes as students.
+            </p>
+            <Button asChild variant="outline">
+              <Link to="/dashboard">Go to dashboard</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }

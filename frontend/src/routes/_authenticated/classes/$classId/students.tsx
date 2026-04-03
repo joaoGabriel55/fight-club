@@ -15,11 +15,14 @@ function ClassStudentsPage() {
   const { data: cls } = useClass(classId);
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold text-gray-100 mb-4">
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold tracking-tight">
         Enrolled Students
       </h2>
-      <StudentList classId={classId} hasBeltSystem={cls?.has_belt_system ?? false} />
+      <StudentList
+        classId={classId}
+        hasBeltSystem={cls?.has_belt_system ?? false}
+      />
     </div>
   );
 }

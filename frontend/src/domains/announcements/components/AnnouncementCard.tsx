@@ -1,5 +1,14 @@
 import { useState } from "react";
 import type { Announcement } from "../types/announcement.types";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface AnnouncementCardProps {
   announcement: Announcement;
@@ -25,21 +34,19 @@ export function AnnouncementCard({
   });
 
   return (
-    <div
-      className={`rounded-xl border border-gray-700 bg-gray-900 p-5 flex flex-col gap-2 ${className ?? ""}`}
-    >
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="text-base font-semibold text-gray-100">
-          {announcement.title}
-        </h3>
-      </div>
+    <Card className={className}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{announcement.title}</CardTitle>
+      </CardHeader>
 
-      <p className="text-sm text-gray-300 line-clamp-3">
-        {announcement.content}
-      </p>
+      <CardContent>
+        <p className="text-sm text-muted-foreground line-clamp-3">
+          {announcement.content}
+        </p>
+      </CardContent>
 
-      <div className="flex items-center justify-between pt-2 border-t border-gray-800 mt-1">
-        <div className="flex gap-2 text-xs text-gray-500">
+      <CardFooter className="justify-between border-t pt-4">
+        <div className="flex gap-2 text-xs text-muted-foreground">
           <span>{announcement.author.first_name}</span>
           <span>&middot;</span>
           <span>{date}</span>
@@ -49,35 +56,40 @@ export function AnnouncementCard({
           <>
             {confirming ? (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-400">Delete?</span>
-                <button
+                <span className="text-xs text-muted-foreground">Delete?</span>
+                <Button
+                  variant="destructive"
+                  size="sm"
                   onClick={() => {
                     onDelete(announcement.id);
                     setConfirming(false);
                   }}
                   disabled={isDeleting}
-                  className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
                 >
-                  {isDeleting ? "Deleting…" : "Yes, delete"}
-                </button>
-                <button
+                  {isDeleting ? "Deleting..." : "Yes, delete"}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setConfirming(false)}
-                  className="text-xs text-gray-400 hover:text-gray-200"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             ) : (
-              <button
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-destructive"
                 onClick={() => setConfirming(true)}
-                className="text-xs text-gray-500 hover:text-red-400 transition"
               >
+                <Trash2 className="h-3 w-3 mr-1" />
                 Delete
-              </button>
+              </Button>
             )}
           </>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

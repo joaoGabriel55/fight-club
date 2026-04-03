@@ -1,10 +1,18 @@
 import { z } from "zod";
+import { differenceInYears } from "date-fns";
 
 export const registerSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   first_name: z.string().min(1, "First name is required").max(100),
   last_name: z.string().min(1, "Last name is required").max(100),
+  birth_date: z
+    .string()
+    .min(1, "Date of birth is required")
+    .refine(
+      (val) => differenceInYears(new Date(), new Date(val)) >= 18,
+      "You must be at least 18 years old",
+    ),
   profile_type: z.enum(["teacher", "student"], {
     required_error: "Profile type is required",
   }),

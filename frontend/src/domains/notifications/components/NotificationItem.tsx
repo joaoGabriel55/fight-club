@@ -18,26 +18,26 @@ export function NotificationItem({ notification }: NotificationItemProps) {
   return (
     <button
       onClick={handleClick}
-      className={`w-full text-left px-4 py-3 border-b border-gray-800 transition hover:bg-gray-800/50 ${
-        isUnread ? "bg-gray-800/30" : ""
+      className={`w-full text-left px-4 py-3 border-b transition hover:bg-accent ${
+        isUnread ? "bg-accent/50" : ""
       }`}
     >
       <div className="flex items-start gap-2">
         {isUnread && (
-          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-red-500" />
+          <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
         )}
         <div className="flex-1 min-w-0">
           <p
-            className={`text-sm ${isUnread ? "text-gray-100 font-medium" : "text-gray-400"}`}
+            className={`text-sm ${isUnread ? "font-medium" : "text-muted-foreground"}`}
           >
             {notification.title}
           </p>
           {notification.body && (
-            <p className="text-xs text-gray-500 mt-0.5 truncate">
+            <p className="text-xs text-muted-foreground mt-0.5 truncate">
               {notification.body}
             </p>
           )}
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             {new Date(notification.created_at).toLocaleString()}
           </p>
         </div>

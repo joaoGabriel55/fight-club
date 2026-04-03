@@ -3,6 +3,9 @@ import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useClass } from "@/domains/classes/hooks/useClass";
 import { classesService } from "@/domains/classes/services/classes.service";
 import { useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Button } from "@/shared/components/ui/button";
+import { Clock, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute(
   "/_authenticated/classes/$classId/schedules",
@@ -39,43 +42,48 @@ function ClassSchedulesPage() {
   };
 
   if (isLoading) {
-    return <p className="text-gray-400">Loading schedules…</p>;
+    return <p className="text-muted-foreground">Loading schedules...</p>;
   }
 
   const schedules = cls?.schedules ?? [];
 
   return (
-    <div>
-      <h2 className="text-lg font-semibold text-gray-100 mb-4">Schedules</h2>
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold tracking-tight">Schedules</h2>
 
       {schedules.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-700 px-4 py-8 text-center">
-          <p className="text-gray-400">No schedules yet.</p>
-        </div>
+        <Card className="border-dashed">
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">No schedules yet.</p>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="flex flex-col gap-2">
+        <div className="space-y-2">
           {schedules.map((schedule) => (
-            <div
-              key={schedule.id}
-              className="flex items-center justify-between rounded-lg border border-gray-700 bg-gray-900 px-4 py-3"
-            >
-              <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-100 w-28">
-                  {DAY_NAMES[schedule.day_of_week]}
-                </span>
-                <span className="text-sm text-gray-400">
-                  {schedule.start_time.slice(0, 5)} —{" "}
-                  {schedule.end_time.slice(0, 5)}
-                </span>
-              </div>
-              <button
-                onClick={() => handleDeleteSchedule(schedule.id)}
-                disabled={deletingId === schedule.id}
-                className="text-xs text-gray-500 hover:text-red-400 disabled:opacity-50 transition"
-              >
-                {deletingId === schedule.id ? "Removing…" : "Remove"}
-              </button>
-            </div>
+            <Card key={schedule.id}>
+              <CardContent className="flex items-center justify-between py-3 px-4">
+                <div className="flex items-center gap-4">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium w-28">
+                    {DAY_NAMES[schedule.day_of_week]}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {schedule.start_time.slice(0, 5)} &mdash;{" "}
+                    {schedule.end_time.slice(0, 5)}
+                  </span>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteSchedule(schedule.id)}
+                  disabled={deletingId === schedule.id}
+                  className="text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  {deletingId === schedule.id ? "Removing..." : "Remove"}
+                </Button>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
