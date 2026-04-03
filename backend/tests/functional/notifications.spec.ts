@@ -7,20 +7,6 @@ import Notification from '#models/notification'
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function registerTeacher(
-  client: any,
-  overrides: Record<string, unknown> = {}
-): Promise<{ token: string; user: { id: string; first_name: string } }> {
-  const response = await client.post('/api/v1/auth/register').json({
-    email: 'teacher-notif@example.com',
-    password: 'password123',
-    first_name: 'Alice',
-    profile_type: 'teacher',
-    ...overrides,
-  })
-  return response.body()
-}
-
 async function registerStudent(
   client: any,
   overrides: Record<string, unknown> = {}
@@ -33,49 +19,6 @@ async function registerStudent(
     ...overrides,
   })
   return response.body()
-}
-
-async function createClass(client: any, token: string) {
-  const response = await client
-    .post('/api/v1/classes')
-    .header('Authorization', `Bearer ${token}`)
-    .json({
-      name: 'Test Class',
-      martial_art: 'BJJ',
-      has_belt_system: true,
-      schedules: [{ day_of_week: 1, start_time: '09:00', end_time: '10:00' }],
-    })
-  return response.body()
-}
-
-async function enrollStudent(
-  client: any,
-  teacherToken: string,
-  studentToken: string,
-  classId: string
-) {
-  const inv = await client
-    .post(`/api/v1/classes/${classId}/invitations`)
-    .header('Authorization', `Bearer ${teacherToken}`)
-    .json({
-      expires_at: DateTime.now().plus({ days: 7 }).toISO(),
-      max_uses: null,
-    })
-
-  let invToken = inv.body().token
-  if (!invToken) {
-    const listResp = await client
-      .get(`/api/v1/classes/${classId}/invitations`)
-      .header('Authorization', `Bearer ${teacherToken}`)
-    invToken = listResp.body()[0].token
-  }
-
-  const joinResp = await client
-    .post(`/api/v1/join/${invToken}`)
-    .header('Authorization', `Bearer ${studentToken}`)
-    .json({ consent: true })
-
-  return joinResp.body()
 }
 
 async function createNotificationsForUser(userId: string, count: number) {
