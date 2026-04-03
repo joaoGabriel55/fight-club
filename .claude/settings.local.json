@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "WebFetch(domain:docs.adonisjs.com)",
+      "Bash(npm -v)",
+      "Bash(node ace:*)"
+    ]
+  }
+}
