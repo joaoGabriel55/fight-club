@@ -5,7 +5,7 @@ export const registerValidator = vine.compile(
     email: vine.string().email().normalizeEmail(),
     password: vine.string().minLength(8),
     first_name: vine.string().trim().minLength(1).maxLength(100),
-    last_name: vine.string().trim().minLength(1).maxLength(100),
+    last_name: vine.string().trim().minLength(1).maxLength(100).optional(),
     profile_type: vine.enum(['teacher', 'student'] as const),
   })
 )
