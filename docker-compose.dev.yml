@@ -38,10 +38,10 @@ services:
       NODE_ENV: development
       PORT: 3333
       HOST: "0.0.0.0"
+      TZ: UTC
       APP_KEY: "${APP_KEY:-base64:PLACEHOLDER_REPLACE_WITH_GENERATED_KEY_32CHARS=}"
-      APP_URL: "http://localhost:3333"
+      APP_NAME: FightClub
       LOG_LEVEL: info
-      DB_CONNECTION: pg
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: fightclub
@@ -49,8 +49,8 @@ services:
       DB_DATABASE: fightclub_dev
       REDIS_HOST: valkey
       REDIS_PORT: 6379
-      CORS_ORIGIN: "http://localhost:3000"
-      TOKEN_EXPIRY: 7d
+      VITE_APP_URL: "http://localhost:3000"
+      LIMITER_STORE: database
     depends_on:
       postgres:
         condition: service_healthy
