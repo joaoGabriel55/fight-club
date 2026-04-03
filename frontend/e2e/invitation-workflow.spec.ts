@@ -36,7 +36,8 @@ async function loginUI(page: Page, email: string, password: string) {
   await page.getByRole("button", { name: "Sign in" }).click();
 }
 
-test.describe.serial("Invitation & Enrollment Workflow", () => {
+test.describe("Invitation & Enrollment Workflow", () => {
+  test.describe.configure({ mode: "serial" });
   test.beforeAll(async () => {
     await registerViaAPI(TEACHER);
   });

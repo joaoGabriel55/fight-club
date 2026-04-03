@@ -15,6 +15,6 @@ export default class CleanupExpiredInvitationsJob {
       .where('expires_at', '<=', DateTime.now().toSQL()!)
       .update({ is_active: false })
 
-    return result
+    return result as unknown as number
   }
 }
