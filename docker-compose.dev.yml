@@ -51,6 +51,7 @@ services:
       REDIS_PORT: 6379
       VITE_APP_URL: "http://localhost:3000"
       LIMITER_STORE: database
+      TOKEN_EXPIRY: "7 days"
     depends_on:
       postgres:
         condition: service_healthy
