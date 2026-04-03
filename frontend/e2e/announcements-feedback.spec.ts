@@ -150,9 +150,11 @@ test.describe("Announcements & Feedback", () => {
 
     // Navigate to class → announcements tab
     await page.goto(`/classes/${classId}/announcements`);
-    await expect(page.getByText("Announcements")).toBeVisible({
-      timeout: 10000,
-    });
+    await expect(page.getByRole("link", { name: "Announcements" })).toBeVisible(
+      {
+        timeout: 10000,
+      },
+    );
 
     // Empty state
     await expect(page.getByText("No announcements yet.")).toBeVisible();
@@ -234,7 +236,9 @@ test.describe("Announcements & Feedback", () => {
 
     // Feedback panel opens
     await expect(page.getByText("Feedback for StudentA")).toBeVisible();
-    await expect(page.getByText("Send feedback")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Send feedback" }),
+    ).toBeVisible();
 
     // Fill and send feedback
     await page
