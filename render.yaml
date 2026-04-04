@@ -5,7 +5,7 @@ services:
     runtime: node
     plan: free
     rootDir: backend
-    buildCommand: npm ci && node ace.js migration:run
+    buildCommand: cd .. && npm ci && cd backend && node ace.js migration:run
     startCommand: node ace.js serve
     buildFilter:
       paths:
@@ -47,7 +47,7 @@ services:
     name: fight-club-app
     runtime: static
     rootDir: frontend
-    buildCommand: npm ci && npm run build
+    buildCommand: cd .. && npm ci && cd frontend && npm run build
     staticPublishPath: dist
     buildFilter:
       paths:

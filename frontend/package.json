@@ -4,14 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 3000",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
+    "dev": "nx serve --host 0.0.0.0 --port 3000",
+    "build": "tsc -b && nx vite:build",
+    "preview": "nx vite:preview",
+    "test": "nx vite:test run",
+    "test:watch": "nx vite:test",
     "lint": "tsc --noEmit",
-    "e2e": "playwright test",
-    "e2e:headed": "playwright test --headed"
+    "e2e": "nx playwright:e2e",
+    "e2e:headed": "nx playwright:e2e --headed"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",

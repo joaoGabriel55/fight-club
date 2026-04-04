@@ -66,31 +66,26 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: backend
 
-      - name: Audit dependencies
+      - name: Audit backend dependencies
         run: npm audit --audit-level=moderate
         working-directory: backend
         continue-on-error: true
 
       - name: Lint
-        run: npm run lint
-        working-directory: backend
+        run: npx nx lint fight-club-backend
 
       - name: Typecheck
-        run: npm run typecheck
-        working-directory: backend
+        run: npx nx typecheck fight-club-backend
 
       - name: Test
-        run: npm run test
-        working-directory: backend
+        run: npx nx test fight-club-backend
 
   frontend:
-    name: Frontend - Audit, Lint, Test
+    name: Frontend - Audit, Lint, Test, Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -104,28 +99,23 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
-        working-directory: frontend
 
-      - name: Audit dependencies
+      - name: Audit frontend dependencies
         run: npm audit --audit-level=moderate
         working-directory: frontend
         continue-on-error: true
 
       - name: Lint
-        run: npm run lint
-        working-directory: frontend
+        run: npx nx lint fight-club-frontend
 
       - name: Test
-        run: npm test
-        working-directory: frontend
+        run: npx nx test fight-club-frontend
 
       - name: Build check
-        run: npm run build
-        working-directory: frontend
+        run: npx nx build fight-club-frontend
 
   # e2e:
   #   name: E2E - Playwright
@@ -188,25 +178,17 @@ jobs:
   #       with:
   #         node-version: ${{ matrix.node-version }}
 
-  #     - name: Install backend dependencies
+  #     - name: Install dependencies
   #       run: npm ci
-  #       working-directory: backend
 
   #     - name: Run migrations
-  #       run: node ace.js migration:run
-  #       working-directory: backend
+  #       run: npx nx migrate fight-club-backend
 
   #     - name: Start backend
-  #       run: node ace.js serve &
-  #       working-directory: backend
-
-  #     - name: Install frontend dependencies
-  #       run: npm ci
-  #       working-directory: frontend
+  #       run: npx nx dev fight-club-backend &
 
   #     - name: Start frontend
-  #       run: npm run dev &
-  #       working-directory: frontend
+  #       run: npx nx dev fight-club-frontend &
 
   #     - name: Install Playwright browsers
   #       run: npx playwright install --with-deps chromium
@@ -224,8 +206,7 @@ jobs:
   #         done
 
   #     - name: Run E2E tests
-  #       run: npm run e2e
-  #       working-directory: frontend
+  #       run: npx nx e2e fight-club-frontend
   #       env:
   #         CI: true
   #         E2E_BASE_URL: http://localhost:3000
