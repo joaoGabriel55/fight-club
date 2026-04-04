@@ -8,7 +8,7 @@ export interface AuditLogOptions {
 
 export class AuditLogService {
   static async log(
-    userId: string,
+    userId: string | null,
     action: string,
     resourceType: string,
     options: AuditLogOptions = {}

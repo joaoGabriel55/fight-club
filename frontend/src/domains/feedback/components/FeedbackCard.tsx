@@ -1,14 +1,17 @@
-import type { FeedbackItem } from "../types/feedback.types";
 import { Card, CardContent, CardFooter } from "@/shared/components/ui/card";
+import type { FeedbackItem } from "../types/feedback.types";
 
 interface FeedbackCardProps {
   feedback: FeedbackItem;
   className?: string;
+  showAiTips?: boolean;
+  martialArt?: string;
 }
 
 export function FeedbackCard({
   feedback,
   className: extraClass,
+  martialArt,
 }: FeedbackCardProps) {
   const date = new Date(feedback.created_at).toLocaleDateString("en-US", {
     month: "short",
@@ -22,7 +25,7 @@ export function FeedbackCard({
         <p className="text-sm whitespace-pre-wrap">{feedback.content}</p>
       </CardContent>
 
-      <CardFooter className="border-t pt-4">
+      <CardFooter className="border-t pt-4 flex justify-between items-center">
         <div className="flex gap-2 text-xs text-muted-foreground">
           <span>{feedback.teacher.first_name}</span>
           <span>&middot;</span>

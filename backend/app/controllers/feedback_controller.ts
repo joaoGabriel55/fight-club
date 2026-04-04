@@ -132,6 +132,7 @@ export default class FeedbackController {
         class_name: f.enrollment.class.name,
         class_id: f.enrollment.classId,
         enrollment_id: f.enrollmentId,
+        martial_art: f.enrollment.class.martialArt,
         created_at: f.createdAt,
       }))
     )

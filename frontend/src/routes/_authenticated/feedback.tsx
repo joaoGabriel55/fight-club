@@ -42,7 +42,7 @@ function MyFeedbackPage() {
               <p className="text-xs text-muted-foreground mb-1 font-medium uppercase tracking-wide">
                 {f.class_name}
               </p>
-              <FeedbackCard feedback={f} />
+              <FeedbackCard feedback={f} martialArt={f.martial_art} />
             </div>
           ))}
         </div>

@@ -6,6 +6,7 @@ import User from '#models/user'
 import StudentProfile from '#models/student_profile'
 import TeacherProfile from '#models/teacher_profile'
 import { AuditLogService } from '#services/audit_log_service'
+import { UserAnonymizer } from '#services/user_anonymizer'
 import {
   registerValidator,
   loginValidator,
@@ -19,6 +20,19 @@ import env from '#start/env'
  */
 function hashEmail(email: string): string {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex')
+}
+
+/**
+ * Convert a stored avatar URL (Supabase or local dev path) into a
+ * proxied URL that hides the real storage location from clients.
+ * e.g. "https://xyz.supabase.co/.../avatar123.jpg" → "/api/v1/avatars/avatar123.jpg"
+ * e.g. "/api/v1/dev/avatars/avatar123.jpg" → "/api/v1/avatars/avatar123.jpg"
+ */
+function toProxiedAvatarUrl(avatarUrl: string | null): string | null {
+  if (!avatarUrl) return null
+  const fileName = avatarUrl.split('/').pop()
+  if (!fileName) return null
+  return `/api/v1/avatars/${fileName}`
 }
 
 export default class AuthController {
@@ -165,11 +179,12 @@ export default class AuthController {
       email: user.email,
       birth_date: user.birthDate,
       profile_type: user.profileType,
-      avatar_url: user.avatarUrl,
+      avatar_url: toProxiedAvatarUrl(user.avatarUrl),
       student_profile: user.studentProfile
         ? {
             weight_kg: user.studentProfile.weightKg,
             height_cm: user.studentProfile.heightCm,
+            fight_experience: user.studentProfile.fightExperience,
           }
         : null,
       teacher_profile: user.teacherProfile
@@ -194,22 +209,38 @@ export default class AuthController {
 
     await user.save()
 
-    if (
-      user.profileType === 'student' &&
-      (data.weight_kg !== undefined || data.height_cm !== undefined)
-    ) {
-      let profile = await StudentProfile.findBy('user_id', user.id)
-      if (!profile) {
-        profile = await StudentProfile.create({ userId: user.id })
+    if (user.profileType === 'student') {
+      if (
+        data.weight_kg !== undefined ||
+        data.height_cm !== undefined ||
+        data.fight_experience !== undefined
+      ) {
+        let profile = await StudentProfile.findBy('user_id', user.id)
+        if (!profile) {
+          profile = await StudentProfile.create({ userId: user.id })
+        }
+        if (data.weight_kg !== undefined) profile.weightKg = data.weight_kg
+        if (data.height_cm !== undefined) profile.heightCm = data.height_cm
+        if (data.fight_experience !== undefined) profile.fightExperience = data.fight_experience
+        await profile.save()
       }
-      if (data.weight_kg !== undefined) profile.weightKg = data.weight_kg
-      if (data.height_cm !== undefined) profile.heightCm = data.height_cm
+    }
+
+    if (user.profileType === 'teacher' && data.fight_experience !== undefined) {
+      let profile = await TeacherProfile.findBy('user_id', user.id)
+      if (!profile) {
+        profile = await TeacherProfile.create({ userId: user.id })
+      }
+      profile.fightExperience = data.fight_experience
       await profile.save()
     }
 
     await AuditLogService.log(user.id, 'profile_update', 'user', {
       ipAddress: request.ip(),
     })
+
+    await user.load('studentProfile')
+    await user.load('teacherProfile')
 
     return response.status(200).send({
       id: user.id,
@@ -218,7 +249,19 @@ export default class AuthController {
       email: user.email,
       birth_date: user.birthDate,
       profile_type: user.profileType,
-      avatar_url: user.avatarUrl,
+      avatar_url: toProxiedAvatarUrl(user.avatarUrl),
+      student_profile: user.studentProfile
+        ? {
+            weight_kg: user.studentProfile.weightKg,
+            height_cm: user.studentProfile.heightCm,
+            fight_experience: user.studentProfile.fightExperience,
+          }
+        : null,
+      teacher_profile: user.teacherProfile
+        ? {
+            fight_experience: user.teacherProfile.fightExperience,
+          }
+        : null,
     })
   }
 
@@ -237,21 +280,7 @@ export default class AuthController {
     const currentToken = auth.user!.currentAccessToken
     await User.accessTokens.delete(user, currentToken.identifier)
 
-    // Anonymise: replace email with a SHA-256 hash so it can never be
-    // reverse-looked-up, and clear the lookup hash.
-    const emailHash = createHash('sha256').update(user.email).digest('hex')
-
-    user.firstName = 'Deleted'
-    user.lastName = 'User'
-    user.email = `deleted:${emailHash}`
-    user.emailHash = null
-    user.passwordHash = ''
-    user.deletedAt = DateTime.now()
-    await user.save()
-
-    // Remove profile rows
-    await StudentProfile.query().where('user_id', user.id).delete()
-    await TeacherProfile.query().where('user_id', user.id).delete()
+    await UserAnonymizer.anonymize(user)
 
     return response.status(204).send(null)
   }

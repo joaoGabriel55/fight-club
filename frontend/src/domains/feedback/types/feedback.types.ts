@@ -9,6 +9,7 @@ export interface MyFeedbackItem extends FeedbackItem {
   class_name: string;
   class_id: string;
   enrollment_id: string;
+  martial_art: string;
 }
 
 export interface SendFeedbackInput {

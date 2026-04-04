@@ -88,22 +88,22 @@ npm run lint         # tsc --noEmit
 
 ### Database schema (PostgreSQL)
 
-| Table                | Purpose                                                 |
-| -------------------- | ------------------------------------------------------- |
-| `users`              | Core accounts; `profile_type` is `teacher` or `student` |
-| `auth_access_tokens` | Hashed opaque tokens with expiry                        |
-| `student_profiles`   | Weight, height, data consent timestamp                  |
-| `teacher_profiles`   | Fight experience                                        |
-| `audit_logs`         | JSONB metadata per action per user                      |
-| `rate_limits`        | Database-backed rate limiter state                      |
-| `classes`            | Martial arts classes; `has_belt_system` flag; soft delete|
-| `class_schedules`    | Weekly schedule entries per class                       |
-| `invitations`        | Join tokens with expiry and use counting                |
-| `enrollments`        | Student-class enrollment with consent tracking          |
-| `announcements`      | Class announcements by teacher                          |
-| `feedback`           | Teacher feedback per enrollment (encrypted content)     |
-| `notifications`      | User notifications with type, title, body, expiry       |
-| `belt_progress`      | Belt awards per enrollment with awarded_at and awarder  |
+| Table                | Purpose                                                   |
+| -------------------- | --------------------------------------------------------- |
+| `users`              | Core accounts; `profile_type` is `teacher` or `student`   |
+| `auth_access_tokens` | Hashed opaque tokens with expiry                          |
+| `student_profiles`   | Weight, height, data consent timestamp                    |
+| `teacher_profiles`   | Fight experience                                          |
+| `audit_logs`         | JSONB metadata per action per user                        |
+| `rate_limits`        | Database-backed rate limiter state                        |
+| `classes`            | Martial arts classes; `has_belt_system` flag; soft delete |
+| `class_schedules`    | Weekly schedule entries per class                         |
+| `invitations`        | Join tokens with expiry and use counting                  |
+| `enrollments`        | Student-class enrollment with consent tracking            |
+| `announcements`      | Class announcements by teacher                            |
+| `feedback`           | Teacher feedback per enrollment (encrypted content)       |
+| `notifications`      | User notifications with type, title, body, expiry         |
+| `belt_progress`      | Belt awards per enrollment with awarded_at and awarder    |
 
 ## Environment variables
 
@@ -265,13 +265,13 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 
 **Backend endpoints:**
 
-| Method | Path                                      | Auth required | Description                                                        |
-| ------ | ----------------------------------------- | ------------- | ------------------------------------------------------------------ |
-| `POST` | `/api/v1/enrollments/:enrollmentId/belts` | Yes (teacher) | Award belt. Requires `has_belt_system = true`. Emits `BeltAwarded` |
-| `GET`  | `/api/v1/enrollments/:enrollmentId/belts` | Yes           | Belt history (teacher or enrolled student), asc by `awarded_at`    |
+| Method | Path                                      | Auth required | Description                                                              |
+| ------ | ----------------------------------------- | ------------- | ------------------------------------------------------------------------ |
+| `POST` | `/api/v1/enrollments/:enrollmentId/belts` | Yes (teacher) | Award belt. Requires `has_belt_system = true`. Emits `BeltAwarded`       |
+| `GET`  | `/api/v1/enrollments/:enrollmentId/belts` | Yes           | Belt history (teacher or enrolled student), asc by `awarded_at`          |
 | `GET`  | `/api/v1/notifications`                   | Yes           | User's non-expired notifications with `{ data, meta: { unread_count } }` |
-| `PUT`  | `/api/v1/notifications/:id/read`          | Yes           | Mark single notification as read (owner only)                      |
-| `PUT`  | `/api/v1/notifications/read-all`          | Yes           | Mark all user's unread notifications as read                       |
+| `PUT`  | `/api/v1/notifications/:id/read`          | Yes           | Mark single notification as read (owner only)                            |
+| `PUT`  | `/api/v1/notifications/read-all`          | Yes           | Mark all user's unread notifications as read                             |
 
 **Key design decisions:**
 
@@ -291,3 +291,38 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Routes: `/notifications` (full page view)
 - `NotificationBell` added to authenticated layout header (`_authenticated.tsx`).
 - `StudentList` updated with belt panel toggle (only when `has_belt_system = true`). Shows `AwardBeltForm` and `BeltTimeline` inline per student.
+
+## AI Features & Privacy Center (v0.7)
+
+**New dependencies:** `@anthropic-ai/sdk` (backend)
+
+**New services:** `UserAnonymizer` (`app/services/user_anonymizer.ts`) — encapsulates all deletion/anonymization logic, used by both `DELETE /auth/me` and `DELETE /privacy/my-data`.
+
+**New migration:** `audit_logs.user_id` made nullable to support anonymization (user_id set to null on account erasure).
+
+**Backend endpoints:**
+
+| Method   | Path                          | Auth required | Description                                                                    |
+| -------- | ----------------------------- | ------------- | ------------------------------------------------------------------------------ |
+| `POST`   | `/api/v1/ai/improvement-tips` | Yes (student) | AI tips from Claude API based on feedback or martial art. Rate limited 10/min. |
+| `GET`    | `/api/v1/privacy/my-data`     | Yes           | Export all personal data as JSON (decrypted).                                  |
+| `DELETE` | `/api/v1/privacy/my-data`     | Yes           | Full account erasure via `UserAnonymizer`.                                     |
+| `GET`    | `/api/v1/privacy/policy`      | No            | Privacy policy text (public).                                                  |
+
+**Key design decisions:**
+
+- AI prompt never contains student PII (name, email, birth_date). Only anonymized context: martial art, belt level, months enrolled, teacher feedback content, focus area.
+- `focus_area` is enum-validated server-side. No free-text input from students (prompt injection prevention).
+- AI rate limit: 10 requests/min per student (keyed by user ID) via `aiRateLimit` in `start/limiter.ts`.
+- `UserAnonymizer.anonymize()`: sets `deleted_at`, anonymizes PII, hard-deletes enrollments + cascading feedback/belt_progress, nullifies audit log `user_id`.
+- Privacy data export returns decrypted fields (user is requesting their own data).
+- Audit log actions: `ai_tips_requested`, `data_export_requested`, `account_erasure_requested`.
+- Environment variable: `ANTHROPIC_API_KEY` (optional, returns 503 if not set).
+
+**Frontend** — domains in `src/domains/ai/` and `src/domains/privacy/`:
+
+- AI: `ai.types.ts` (FOCUS_AREAS, ImprovementTipsRequest/Response), `ai.service.ts`, `useImprovementTips`, `ImprovementTipsDialog`, `GlobalAITipsDialog`
+- Privacy: `privacy.service.ts` (exportMyData, eraseMyData, getPrivacyPolicy), `useExportData`, `useDeleteAccount`, `DataExportButton`, `DeleteAccountDialog`, `PrivacyPolicyViewer`
+- Routes: `/privacy` (Privacy Center page with data export, account deletion, privacy policy)
+- Global AI Tips button in authenticated layout (students only, floating button).
+- Privacy link added to nav for both teachers and students.

@@ -54,4 +54,11 @@ export default await Env.create(new URL('../', import.meta.url), {
   |----------------------------------------------------------
   */
   TOKEN_EXPIRY: Env.schema.string.optional(),
+
+  /*
+  |----------------------------------------------------------
+  | Variables for AI features (Claude API)
+  |----------------------------------------------------------
+  */
+  ANTHROPIC_API_KEY: Env.schema.string.optional(),
 })
