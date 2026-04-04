@@ -7,7 +7,7 @@ import { useAwardBelt } from "../hooks/useAwardBelt";
 import type { AwardBeltInput } from "../types/belt.types";
 import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
-import { Select } from "@/shared/components/ui/select";
+import { NativeSelect } from "@/shared/components/ui/select";
 import { Calendar } from "@/shared/components/ui/calendar";
 import {
   Popover,
@@ -53,7 +53,7 @@ export function AwardBeltForm({ enrollmentId, onSuccess }: AwardBeltFormProps) {
 
       <div className="flex gap-3">
         <div className="flex-1">
-          <Select {...register("belt_name")}>
+          <NativeSelect {...register("belt_name")}>
             <option value="">Select belt...</option>
             <option value="White">White</option>
             <option value="Yellow">Yellow</option>
@@ -63,7 +63,7 @@ export function AwardBeltForm({ enrollmentId, onSuccess }: AwardBeltFormProps) {
             <option value="Purple">Purple</option>
             <option value="Brown">Brown</option>
             <option value="Black">Black</option>
-          </Select>
+          </NativeSelect>
           {errors.belt_name && (
             <p className="mt-1 text-xs text-destructive">
               {errors.belt_name.message}

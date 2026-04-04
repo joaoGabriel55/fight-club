@@ -20,10 +20,14 @@ import {
   Menu,
   X,
   LogOut,
+  Shield,
+  UserCog,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
 import { useState } from "react";
+import { GlobalAITipsDialog } from "@/domains/ai/components/GlobalAITipsDialog";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
@@ -43,8 +47,10 @@ function AuthenticatedLayout() {
   const { logout } = useAuth();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAITipsDialog, setShowAITipsDialog] = useState(false);
 
   const isTeacher = user?.profile_type === "teacher";
+  const isStudent = !isTeacher;
 
   const handleLogout = async () => {
     await logout();
@@ -64,6 +70,8 @@ function AuthenticatedLayout() {
           label: "Notifications",
           icon: MessageSquare,
         },
+        { to: "/profile" as const, label: "Profile", icon: UserCog },
+        { to: "/privacy" as const, label: "Privacy", icon: Shield },
       ]
     : [
         {
@@ -78,6 +86,8 @@ function AuthenticatedLayout() {
           label: "Notifications",
           icon: MessageSquare,
         },
+        { to: "/profile" as const, label: "Profile", icon: UserCog },
+        { to: "/privacy" as const, label: "Privacy", icon: Shield },
       ];
 
   return (
@@ -182,6 +192,25 @@ function AuthenticatedLayout() {
           <Outlet />
         </div>
       </div>
+
+      {/* Global AI Tips Button - Students only */}
+      {isStudent && (
+        <>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => setShowAITipsDialog(true)}
+            className="fixed bottom-6 right-6 z-30 shadow-lg gap-2"
+          >
+            <Sparkles className="h-4 w-4" />
+            Get AI Tips
+          </Button>
+
+          {showAITipsDialog && (
+            <GlobalAITipsDialog onClose={() => setShowAITipsDialog(false)} />
+          )}
+        </>
+      )}
     </div>
   );
 }

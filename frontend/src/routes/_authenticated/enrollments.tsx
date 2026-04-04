@@ -118,7 +118,6 @@ function EnrollmentsPage() {
                 <p className="text-xs text-muted-foreground">
                   Joined {new Date(enrollment.joined_at).toLocaleDateString()}
                 </p>
-
                 {confirmingId === enrollment.id ? (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">

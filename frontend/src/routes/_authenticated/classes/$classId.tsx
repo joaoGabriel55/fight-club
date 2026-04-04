@@ -2,6 +2,7 @@ import {
   createFileRoute,
   Link,
   Outlet,
+  useLocation,
   useParams,
 } from "@tanstack/react-router";
 import { useClass } from "@/domains/classes/hooks/useClass";
@@ -9,14 +10,22 @@ import { useAuth } from "@/shared/hooks/useAuth";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/shared/components/ui/tabs";
+import { useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/classes/$classId")({
   component: ClassDetailLayout,
 });
 
 function ClassDetailLayout() {
+  const { pathname } = useLocation();
   const { classId } = useParams({ from: "/_authenticated/classes/$classId" });
-  const { data: cls, isLoading, error } = useClass(classId);
+  const { data: currentClass, isLoading, error } = useClass(classId);
   const { user } = useAuth();
 
   const isTeacher = user?.profile_type === "teacher";
@@ -47,7 +56,9 @@ function ClassDetailLayout() {
     );
   }
 
-  if (!cls) return null;
+  if (!currentClass) return null;
+
+  const currentTab = pathname.split("/").pop();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -61,10 +72,12 @@ function ClassDetailLayout() {
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">{cls.name}</h1>
-            <p className="text-muted-foreground">{cls.martial_art}</p>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {currentClass.name}
+            </h1>
+            <p className="text-muted-foreground">{currentClass.martial_art}</p>
           </div>
-          {cls.has_belt_system && (
+          {currentClass.has_belt_system && (
             <Badge
               variant="outline"
               className="text-yellow-600 border-yellow-600 dark:text-yellow-400 dark:border-yellow-400"
@@ -73,52 +86,82 @@ function ClassDetailLayout() {
             </Badge>
           )}
         </div>
-        {cls.description && (
-          <p className="text-sm text-muted-foreground">{cls.description}</p>
+        {currentClass.description && (
+          <p className="text-sm text-muted-foreground">
+            {currentClass.description}
+          </p>
         )}
       </div>
 
       {/* Tab navigation */}
-      <div className="flex gap-1 border-b">
-        {isTeacher && (
-          <Link
-            to="/classes/$classId/schedules"
-            params={{ classId }}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
-            activeOptions={{ exact: true }}
+      <Tabs defaultValue="overview">
+        <TabsList variant="line">
+          {isTeacher && (
+            <TabsTrigger
+              value="schedules"
+              {...{ "data-active": currentTab === "schedules" }}
+              className="p-4"
+              asChild
+            >
+              <Link
+                to="/classes/$classId/schedules"
+                params={{ classId }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
+                activeOptions={{ exact: true }}
+              >
+                Schedules
+              </Link>
+            </TabsTrigger>
+          )}
+          {isTeacher && (
+            <TabsTrigger
+              value="students"
+              {...{ "data-active": currentTab === "students" }}
+              className="p-4"
+              asChild
+            >
+              <Link
+                to="/classes/$classId/students"
+                params={{ classId }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
+                activeOptions={{ exact: true }}
+              >
+                Students
+              </Link>
+            </TabsTrigger>
+          )}
+          <TabsTrigger
+            value="announcements"
+            {...{ "data-active": currentTab === "announcements" }}
+            className="p-4"
+            asChild
           >
-            Schedules
-          </Link>
-        )}
-        {isTeacher && (
-          <Link
-            to="/classes/$classId/students"
-            params={{ classId }}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
-            activeOptions={{ exact: true }}
+            <Link
+              to="/classes/$classId/announcements"
+              params={{ classId }}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
+              activeOptions={{ exact: true }}
+            >
+              Announcements
+            </Link>
+          </TabsTrigger>
+          <TabsTrigger
+            value="invitations"
+            {...{ "data-active": currentTab === "invitations" }}
+            className="p-4"
+            asChild
           >
-            Students
-          </Link>
-        )}
-        <Link
-          to="/classes/$classId/announcements"
-          params={{ classId }}
-          className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
-          activeOptions={{ exact: true }}
-        >
-          Announcements
-        </Link>
-        {isTeacher && (
-          <Link
-            to="/classes/$classId/invitations"
-            params={{ classId }}
-            className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
-            activeOptions={{ exact: true }}
-          >
-            Invite links
-          </Link>
-        )}
-      </div>
+            <Link
+              to="/classes/$classId/invitations"
+              params={{ classId }}
+              className="text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
+              activeOptions={{ exact: true }}
+            >
+              Invite links
+            </Link>
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       <Outlet />
     </div>

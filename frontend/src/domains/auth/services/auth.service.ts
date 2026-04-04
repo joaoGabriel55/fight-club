@@ -36,7 +36,7 @@ export const authService = {
     return apiClient<MeResponse>("/api/v1/auth/me", { suppressRedirect: true });
   },
 
-  async updateMe(data: Partial<MeResponse>): Promise<MeResponse> {
+  async updateMe(data: Record<string, unknown>): Promise<MeResponse> {
     return apiClient<MeResponse>("/api/v1/auth/me", {
       method: "PUT",
       body: JSON.stringify(data),

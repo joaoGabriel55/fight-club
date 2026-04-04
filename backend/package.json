@@ -59,6 +59,7 @@
     "@adonisjs/limiter": "^2.4.0",
     "@adonisjs/lucid": "^21.6.1",
     "@adonisjs/redis": "^9.2.0",
+    "@anthropic-ai/sdk": "^0.82.0",
     "@vinejs/vine": "^3.0.1",
     "luxon": "^3.7.2",
     "pg": "^8.20.0",

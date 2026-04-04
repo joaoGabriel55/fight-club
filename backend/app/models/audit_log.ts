@@ -8,7 +8,7 @@ export default class AuditLog extends BaseModel {
   declare id: string
 
   @column()
-  declare userId: string
+  declare userId: string | null
 
   @column()
   declare action: string

@@ -3,7 +3,7 @@ import type { CreateClassInput } from "../schemas/class.schema";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Button } from "@/shared/components/ui/button";
-import { Select } from "@/shared/components/ui/select";
+import { NativeSelect } from "@/shared/components/ui/select";
 import { Card, CardContent } from "@/shared/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
 
@@ -89,7 +89,7 @@ export function ScheduleManager() {
               <Label htmlFor={`schedule-day-${index}`} className="text-xs">
                 Day
               </Label>
-              <Select
+              <NativeSelect
                 id={`schedule-day-${index}`}
                 {...register(`schedules.${index}.day_of_week`, {
                   valueAsNumber: true,
@@ -100,7 +100,7 @@ export function ScheduleManager() {
                     {day.label}
                   </option>
                 ))}
-              </Select>
+              </NativeSelect>
             </div>
 
             <div className="grid grid-cols-2 gap-2">

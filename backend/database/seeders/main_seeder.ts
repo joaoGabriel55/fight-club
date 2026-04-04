@@ -19,16 +19,19 @@ function hashEmail(email: string): string {
 }
 
 const MARTIAL_ARTS = [
-  'Brazilian Jiu-Jitsu',
-  'Muay Thai',
-  'Boxing',
-  'Karate',
-  'Judo',
-  'Taekwondo',
-  'Wrestling',
-  'MMA',
   'Kickboxing',
+  'Muay Thai',
+  'Brazilian Jiu-Jitsu (BJJ)',
+  'Boxing',
+  'Wrestling',
+  'Catch Wrestling',
+  'Judo',
+  'Luta Livre',
+  'Karate',
   'Capoeira',
+  'Taekwondo',
+  'Sanda/Sanshou',
+  'Sambo',
 ]
 
 const BELT_NAMES = ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Purple', 'Brown', 'Black']
@@ -61,7 +64,14 @@ export default class MainSeeder extends BaseSeeder {
     })
     await TeacherProfile.create({
       userId: fixedTeacher.id,
-      fightExperience: '15 years of Brazilian Jiu-Jitsu, 3rd degree black belt',
+      fightExperience: [
+        {
+          martial_art: 'Brazilian Jiu-Jitsu (BJJ)',
+          experience_years: 15,
+          belt_level: 'Black',
+          competition_level: 'professional',
+        },
+      ],
     })
     teachers.push(fixedTeacher)
 
@@ -79,15 +89,24 @@ export default class MainSeeder extends BaseSeeder {
           .split('T')[0],
         profileType: 'teacher',
       })
+      const BELT_ARTS = new Set([
+        'Brazilian Jiu-Jitsu (BJJ)',
+        'Judo',
+        'Karate',
+        'Taekwondo',
+        'Capoeira',
+      ])
+      const BELTS = ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Purple', 'Brown', 'Black']
       await TeacherProfile.create({
         userId: teacher.id,
-        fightExperience: faker.helpers.arrayElement([
-          '10 years competitive MMA',
-          '8 years Muay Thai instruction',
-          'Former amateur boxing champion',
-          '20 years martial arts practice',
-          '5 years BJJ coaching',
-        ]),
+        fightExperience: faker.helpers
+          .arrayElements(MARTIAL_ARTS, { min: 1, max: 3 })
+          .map((art) => ({
+            martial_art: art,
+            experience_years: faker.number.int({ min: 1, max: 20 }),
+            belt_level: BELT_ARTS.has(art) ? faker.helpers.arrayElement(BELTS) : null,
+            competition_level: faker.helpers.arrayElement(['amateur', 'professional', null]),
+          })),
       })
       teachers.push(teacher)
     }
