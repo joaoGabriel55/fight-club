@@ -4,7 +4,7 @@ services:
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     preDeployCommand: node ace.js migration:run
-    dockerCommand: node ace.js serve
+    dockerCommand: node bin/server.js
     plan: free
     buildFilter:
       paths:
