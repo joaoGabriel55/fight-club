@@ -7,7 +7,7 @@
     "dev": "nx serve --host 0.0.0.0 --port 3000",
     "build": "tsc -b && nx vite:build",
     "preview": "nx vite:preview",
-    "test": "nx vite:test run",
+    "test": "vitest run",
     "test:watch": "nx vite:test",
     "lint": "tsc --noEmit",
     "e2e": "nx playwright:e2e",
