@@ -26,5 +26,7 @@ ENV NODE_ENV=production
 COPY --from=build /app/build ./
 RUN npm ci --omit=dev
 
+COPY docker-entrypoint.js ./
+
 EXPOSE 3333
-CMD ["node", "bin/server.js"]
+CMD ["node", "docker-entrypoint.js"]
