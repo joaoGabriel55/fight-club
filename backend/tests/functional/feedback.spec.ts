@@ -290,8 +290,8 @@ test.group('Feedback — My feedback', (group) => {
       .header('Authorization', `Bearer ${student.token}`)
 
     response.assertStatus(200)
-    assert.lengthOf(response.body(), 2)
-    assert.exists(response.body()[0].class_name)
+    assert.lengthOf(response.body().data, 2)
+    assert.exists(response.body().data[0].class_name)
   })
 })
 

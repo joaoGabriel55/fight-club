@@ -326,3 +326,61 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Routes: `/privacy` (Privacy Center page with data export, account deletion, privacy policy)
 - Global AI Tips button in authenticated layout (students only, floating button).
 - Privacy link added to nav for both teachers and students.
+
+## Scheduled Jobs, Security Headers & UX Polish (v0.8)
+
+### Backend
+
+**Security Headers Middleware** (`app/middleware/security_headers_middleware.ts`):
+
+- Applied globally via `start/kernel.ts` (server-wide middleware).
+- Sets: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy`.
+- `Strict-Transport-Security` only in production.
+- Generates `X-Request-ID` header (UUID) per request for traceability.
+
+**Pagination:**
+
+- List endpoints (`GET /classes`, `GET /notifications`, `GET /feedback`, `GET /announcements`) now return `{ data: [...], meta: { total, page, per_page } }`.
+- Query params: `?page=1&per_page=20` (defaults).
+- Frontend services extract `.data` from paginated responses to maintain backward compatibility with hooks.
+
+**Scheduled Jobs** (in `app/jobs/`):
+
+- `CleanupExpiredInvitationsJob` — deletes invitation rows where `expires_at < now()`.
+- `PurgeExpiredNotificationsJob` — deletes notification rows where `expires_at < now()`.
+- `PurgeExpiredTokensJob` — deletes expired auth tokens from `auth_access_tokens`.
+- `PaymentReminderJob` — stub that logs reminder for each active enrollment. Ready for `@adonisjs/mail` integration.
+- Import path: `#jobs/cleanup_expired_invitations_job` etc.
+
+### Frontend
+
+**PWA Support:**
+
+- `public/manifest.json` — web app manifest with standalone display mode.
+- `public/sw.js` — service worker with network-first navigation, cache-first assets, push notification support.
+- PWA meta tags in `index.html`.
+
+**Design System Components** (in `src/shared/components/ui/`):
+
+- `Spinner` — SVG spinner with `sm`/`md`/`lg` sizes.
+- `Button` — enhanced with `isLoading` prop (shows spinner, disables click).
+- `EmptyState` — icon + message + optional description + CTA button.
+- `Toast` / `ToastProvider` — global toast system with auto-dismiss (5s). Variants: `success`, `error`, `info`, `warning`. Both context hook (`useToast`) and imperative (`showToast`) API.
+- `Modal` — accessible modal with focus trap, ESC to close, backdrop click to close.
+- `ErrorBoundary` — class component wrapping routes, shows "Something went wrong" with retry button.
+
+**Layout & Navigation:**
+
+- Mobile bottom tab bar (`<nav>` fixed at bottom, visible below 768px) for PWA experience.
+- AI Tips button repositioned above bottom nav on mobile.
+- Content area has `pb-16` on mobile to avoid overlap with bottom nav.
+
+**UX Enhancements:**
+
+- Browser notification permission requested on first dashboard visit.
+- API errors automatically show toast notifications (integrated in `api-client.ts`).
+- Network errors show "Connection error" toast.
+- Loading states use `Spinner` instead of text.
+- Empty states use `EmptyState` component with icons and CTAs.
+- Teacher dashboard: total students, classes, today's day, unread notifications, recent activity feed.
+- Student dashboard: enrolled classes, announcements count, unread notifications, recent announcements feed.

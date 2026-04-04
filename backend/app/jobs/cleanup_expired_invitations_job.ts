@@ -1,20 +1,23 @@
 import { DateTime } from 'luxon'
 import Invitation from '#models/invitation'
+import logger from '@adonisjs/core/services/logger'
 
 /**
  * CleanupExpiredInvitationsJob
  *
- * Marks expired invitations as inactive.
- * Defined here but not yet scheduled — wired to the scheduler in v0.8.
- * Can be run manually in tests or via ace if needed.
+ * Deletes invitation rows where expires_at < now().
+ * Intended to run daily at 02:00.
  */
 export default class CleanupExpiredInvitationsJob {
   async run(): Promise<number> {
-    const result = await Invitation.query()
-      .where('is_active', true)
-      .where('expires_at', '<=', DateTime.now().toSQL()!)
-      .update({ is_active: false })
+    const expired = await Invitation.query().where('expires_at', '<', DateTime.now().toSQL()!)
 
-    return result as unknown as number
+    const count = expired.length
+    for (const inv of expired) {
+      await inv.delete()
+    }
+
+    logger.info(`CleanupExpiredInvitationsJob: deleted ${count} expired invitations`)
+    return count
   }
 }

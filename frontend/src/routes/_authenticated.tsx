@@ -22,6 +22,7 @@ import {
   LogOut,
   Shield,
   UserCog,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
@@ -68,7 +69,7 @@ function AuthenticatedLayout() {
         {
           to: "/notifications" as const,
           label: "Notifications",
-          icon: MessageSquare,
+          icon: Bell,
         },
         { to: "/profile" as const, label: "Profile", icon: UserCog },
         { to: "/privacy" as const, label: "Privacy", icon: Shield },
@@ -84,17 +85,20 @@ function AuthenticatedLayout() {
         {
           to: "/notifications" as const,
           label: "Notifications",
-          icon: MessageSquare,
+          icon: Bell,
         },
         { to: "/profile" as const, label: "Profile", icon: UserCog },
         { to: "/privacy" as const, label: "Privacy", icon: Shield },
       ];
 
+  // Bottom nav shows first 4 items on mobile
+  const bottomNavLinks = navLinks.slice(0, 4);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Top header bar - inspired by UFC/PFL clean top bar */}
+    <div className="min-h-screen flex flex-col pb-16 md:pb-0">
+      {/* Top header bar */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        {/* Red accent line at top like PFL */}
+        {/* Red accent line at top */}
         <div className="h-0.5 bg-primary" />
 
         <div className="flex h-14 items-center px-4 max-w-7xl mx-auto">
@@ -155,7 +159,7 @@ function AuthenticatedLayout() {
           </div>
         </div>
 
-        {/* Mobile menu */}
+        {/* Mobile slide-down menu (for overflow items) */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t bg-background pb-4">
             <nav className="flex flex-col px-4 pt-2 gap-1">
@@ -200,7 +204,7 @@ function AuthenticatedLayout() {
             variant="default"
             size="sm"
             onClick={() => setShowAITipsDialog(true)}
-            className="fixed bottom-6 right-6 z-30 shadow-lg gap-2"
+            className="fixed bottom-20 md:bottom-6 right-6 z-30 shadow-lg gap-2"
           >
             <Sparkles className="h-4 w-4" />
             Get AI Tips
@@ -211,6 +215,28 @@ function AuthenticatedLayout() {
           )}
         </>
       )}
+
+      {/* Mobile bottom tab bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex items-center justify-around h-16">
+          {bottomNavLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="flex flex-col items-center justify-center gap-0.5 px-2 py-1 text-muted-foreground no-underline transition-colors [&.active]:text-primary min-w-0 flex-1"
+                activeOptions={{ exact: link.to === "/dashboard" }}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-[10px] font-medium truncate">
+                  {link.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 }

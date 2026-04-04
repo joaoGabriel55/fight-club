@@ -1,4 +1,5 @@
 import { apiClient } from "@/shared/lib/api-client";
+import type { PaginatedResponse } from "@/shared/types/pagination.types";
 import type {
   Class,
   ClassListItem,
@@ -11,7 +12,9 @@ import type {
 
 export const classesService = {
   async getClasses(): Promise<ClassListItem[]> {
-    return apiClient<ClassListItem[]>("/api/v1/classes");
+    const res =
+      await apiClient<PaginatedResponse<ClassListItem>>("/api/v1/classes");
+    return res.data;
   },
 
   async getClass(id: string): Promise<Class> {

@@ -1,4 +1,5 @@
 import { apiClient } from "@/shared/lib/api-client";
+import type { PaginatedResponse } from "@/shared/types/pagination.types";
 import type {
   FeedbackItem,
   MyFeedbackItem,
@@ -13,7 +14,9 @@ export const feedbackService = {
   },
 
   async getMyFeedback(): Promise<MyFeedbackItem[]> {
-    return apiClient<MyFeedbackItem[]>("/api/v1/feedback");
+    const res =
+      await apiClient<PaginatedResponse<MyFeedbackItem>>("/api/v1/feedback");
+    return res.data;
   },
 
   async sendFeedback(

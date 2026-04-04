@@ -199,13 +199,13 @@ test.group('Classes — List', (group) => {
       .get('/api/v1/classes')
       .header('Authorization', `Bearer ${teacherA.token}`)
     responseA.assertStatus(200)
-    assert.lengthOf(responseA.body(), 2)
+    assert.lengthOf(responseA.body().data, 2)
 
     const responseB = await client
       .get('/api/v1/classes')
       .header('Authorization', `Bearer ${teacherB.token}`)
     responseB.assertStatus(200)
-    assert.lengthOf(responseB.body(), 1)
+    assert.lengthOf(responseB.body().data, 1)
   })
 
   test('soft-deleted class does not appear in list', async ({ client, assert }) => {
@@ -219,7 +219,7 @@ test.group('Classes — List', (group) => {
       .get('/api/v1/classes')
       .header('Authorization', `Bearer ${token}`)
     listResponse.assertStatus(200)
-    const ids = listResponse.body().map((c: any) => c.id)
+    const ids = listResponse.body().data.map((c: any) => c.id)
     assert.notInclude(ids, classId)
   })
 
@@ -236,7 +236,7 @@ test.group('Classes — List', (group) => {
       .get('/api/v1/classes')
       .header('Authorization', `Bearer ${token}`)
     listResponse.assertStatus(200)
-    assert.equal(listResponse.body()[0].schedule_count, 2)
+    assert.equal(listResponse.body().data[0].schedule_count, 2)
   })
 
   test('student token → 403', async ({ client }) => {
@@ -404,7 +404,7 @@ test.group('Classes — Delete (soft)', (group) => {
     const listResponse = await client
       .get('/api/v1/classes')
       .header('Authorization', `Bearer ${token}`)
-    const ids = listResponse.body().map((c: any) => c.id)
+    const ids = listResponse.body().data.map((c: any) => c.id)
     assert.notInclude(ids, classId)
   })
 

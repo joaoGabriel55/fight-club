@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMyFeedback } from "@/domains/feedback/hooks/useMyFeedback";
 import { FeedbackCard } from "@/domains/feedback/components/FeedbackCard";
 import { MessageSquare } from "lucide-react";
-import { Card, CardContent } from "@/shared/components/ui/card";
+import { Spinner } from "@/shared/components/ui/spinner";
+import { EmptyState } from "@/shared/components/ui/empty-state";
 
 export const Route = createFileRoute("/_authenticated/feedback")({
   component: MyFeedbackPage,
@@ -14,7 +15,7 @@ function MyFeedbackPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -27,14 +28,11 @@ function MyFeedbackPage() {
       </div>
 
       {!feedbackList || feedbackList.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">No feedback yet.</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Your teachers will send you feedback as you progress.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={MessageSquare}
+          message="No feedback yet."
+          description="Your teachers will send you feedback as you progress."
+        />
       ) : (
         <div className="space-y-4">
           {feedbackList.map((f) => (

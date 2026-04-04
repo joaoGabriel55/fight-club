@@ -1,4 +1,5 @@
 import { apiClient } from "@/shared/lib/api-client";
+import type { PaginatedResponse } from "@/shared/types/pagination.types";
 import type {
   Announcement,
   MyAnnouncement,
@@ -13,7 +14,10 @@ export const announcementsService = {
   },
 
   async getMyAnnouncements(): Promise<MyAnnouncement[]> {
-    return apiClient<MyAnnouncement[]>("/api/v1/announcements");
+    const res = await apiClient<PaginatedResponse<MyAnnouncement>>(
+      "/api/v1/announcements",
+    );
+    return res.data;
   },
 
   async createAnnouncement(

@@ -84,11 +84,21 @@ export async function apiClient<T = unknown>(
     headers.set("Authorization", `Bearer ${_token}`);
   }
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...fetchOptions,
-    headers,
-    credentials: "include", // send httpOnly auth cookie on every request
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...fetchOptions,
+      headers,
+      credentials: "include", // send httpOnly auth cookie on every request
+    });
+  } catch {
+    import("@/shared/components/ui/toast")
+      .then(({ showToast }) => {
+        showToast("Connection error. Please check your internet.", "error");
+      })
+      .catch(() => {});
+    throw new ApiError(0, "Network error");
+  }
 
   if (response.status === 401) {
     clearToken();
@@ -106,11 +116,14 @@ export async function apiClient<T = unknown>(
     const body = await response
       .json()
       .catch(() => ({ error: { message: response.statusText } }));
-    throw new ApiError(
-      response.status,
-      body?.error?.message ?? response.statusText,
-      body,
-    );
+    const message = body?.error?.message ?? response.statusText;
+    // Import showToast dynamically to avoid circular dependency
+    import("@/shared/components/ui/toast")
+      .then(({ showToast }) => {
+        showToast(message, "error");
+      })
+      .catch(() => {});
+    throw new ApiError(response.status, message, body);
   }
 
   // 204 No Content

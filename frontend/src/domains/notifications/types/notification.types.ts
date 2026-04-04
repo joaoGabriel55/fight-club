@@ -11,6 +11,9 @@ export interface NotificationItem {
 export interface NotificationsResponse {
   data: NotificationItem[];
   meta: {
+    total: number;
+    page: number;
+    per_page: number;
     unread_count: number;
   };
 }
