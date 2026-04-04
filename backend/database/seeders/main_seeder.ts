@@ -38,7 +38,7 @@ const BELT_NAMES = ['White', 'Yellow', 'Orange', 'Green', 'Blue', 'Purple', 'Bro
 
 const DAYS_OF_WEEK = [0, 1, 2, 3, 4, 5, 6] // Sun–Sat
 
-const DEFAULT_PASSWORD = 'Password123!'
+const DEFAULT_PASSWORD = 'Demo1234!'
 
 export default class MainSeeder extends BaseSeeder {
   async run() {

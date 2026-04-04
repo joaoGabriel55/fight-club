@@ -384,3 +384,41 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Empty states use `EmptyState` component with icons and CTAs.
 - Teacher dashboard: total students, classes, today's day, unread notifications, recent activity feed.
 - Student dashboard: enrolled classes, announcements count, unread notifications, recent announcements feed.
+
+## Deployment & Production (v1.0)
+
+### Render.com Monorepo Deployment
+
+**Platform:** Render.com with [monorepo support](https://render.com/docs/monorepo-support). Both services defined in `render.yaml` at the repo root.
+
+**Services:**
+
+| Service          | Type        | Root Dir   | Build Command                         | Start Command       |
+| ---------------- | ----------- | ---------- | ------------------------------------- | ------------------- |
+| `fight-club-api` | Web Service | `backend`  | `npm ci && node ace.js migration:run` | `node ace.js serve` |
+| `fight-club-app` | Static Site | `frontend` | `npm ci && npm run build`             | — (serves `dist/`)  |
+
+- Build filters ensure each service only redeploys when its own directory changes.
+- Frontend SPA fallback via rewrite rule (`/* → /index.html`).
+
+### Database Connection
+
+`DATABASE_URL` env var (Supabase PostgreSQL connection string) takes precedence over individual `DB_*` vars. Configured in:
+
+- `start/env.ts` — both `DATABASE_URL` and `DB_*` vars are optional (one set must be provided).
+- `config/database.ts` — if `DATABASE_URL` is set, uses `connectionString` with `ssl: { rejectUnauthorized: false }` for Supabase; otherwise falls back to individual `DB_*` vars.
+
+### CI/CD
+
+- **CI:** GitHub Actions (`.github/workflows/ci.yml`) — backend tests (PostgreSQL + Valkey service containers), frontend tests + build check on push to `main` and PRs.
+- **CD:** Render auto-deploys on push to `main` (no deploy workflow needed).
+
+### Demo Seeder
+
+`backend/database/seeders/main_seeder.ts` — idempotent seeder creating demo data:
+
+- Teacher: `teacher@demo.com` / `Demo1234!`
+- Student: `student@demo.com` / `Demo1234!`
+- Plus random teachers, students, classes, schedules, enrollments, announcements, feedback, belts, and notifications.
+
+Run on production: `node ace.js db:seed` (via Render Shell).
