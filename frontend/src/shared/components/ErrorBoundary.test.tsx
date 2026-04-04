@@ -1,9 +1,10 @@
+import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { ErrorBoundary } from "./ErrorBoundary";
 
-function ThrowingComponent(): JSX.Element {
+function ThrowingComponent(): React.JSX.Element {
   throw new Error("Test error");
 }
 

@@ -1,8 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { createElement } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, type FieldValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ScheduleManager } from "./ScheduleManager";
 import {
@@ -15,11 +14,21 @@ function Wrapper({ children }: { children: React.ReactNode }) {
     resolver: zodResolver(createClassSchema),
     defaultValues: { schedules: [] },
   });
-  return createElement(FormProvider, { ...methods }, children);
+  return (
+    <FormProvider
+      {...(methods as unknown as ReturnType<typeof useForm<FieldValues>>)}
+    >
+      {children}
+    </FormProvider>
+  );
 }
 
 function renderScheduleManager() {
-  return render(createElement(Wrapper, null, createElement(ScheduleManager)));
+  return render(
+    <Wrapper>
+      <ScheduleManager />
+    </Wrapper>,
+  );
 }
 
 describe("ScheduleManager", () => {

@@ -14,7 +14,7 @@ describe("useNotifications", () => {
       "getNotifications",
     ).mockResolvedValue({
       data: [],
-      meta: { unread_count: 0 },
+      meta: { total: 0, page: 1, per_page: 20, unread_count: 0 },
     });
 
     const qc = new QueryClient({
@@ -31,6 +31,8 @@ describe("useNotifications", () => {
     // Check the query options via the query cache
     const queryCache = qc.getQueryCache();
     const query = queryCache.find({ queryKey: ["notifications"] });
-    expect(query?.options.refetchInterval).toBe(60000);
+    expect((query?.options as Record<string, unknown>).refetchInterval).toBe(
+      60000,
+    );
   });
 });
