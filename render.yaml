@@ -3,7 +3,9 @@ services:
     name: fight-club-api
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     dockerCommand: node docker-entrypoint.js
+    port: 3333
     plan: free
     buildFilter:
       paths:
@@ -46,7 +48,9 @@ services:
     name: fight-club-app
     runtime: docker
     dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
     dockerCommand: nginx -g 'daemon off;'
+    port: 80
     plan: free
     buildFilter:
       paths:
