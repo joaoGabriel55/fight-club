@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as JoinTokenRouteImport } from './routes/join.$token'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedFeedbackRouteImport } from './routes/_authenticated/feedback'
 import { Route as AuthenticatedEnrollmentsRouteImport } from './routes/_authenticated/enrollments'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -49,6 +50,12 @@ const JoinTokenRoute = JoinTokenRouteImport.update({
   path: '/join/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedFeedbackRoute = AuthenticatedFeedbackRouteImport.update({
   id: '/feedback',
   path: '/feedback',
@@ -114,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/enrollments': typeof AuthenticatedEnrollmentsRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/join/$token': typeof JoinTokenRoute
   '/classes/$classId': typeof AuthenticatedClassesClassIdRouteWithChildren
   '/classes/new': typeof AuthenticatedClassesNewRoute
@@ -130,6 +138,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/enrollments': typeof AuthenticatedEnrollmentsRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/join/$token': typeof JoinTokenRoute
   '/classes/$classId': typeof AuthenticatedClassesClassIdRouteWithChildren
   '/classes/new': typeof AuthenticatedClassesNewRoute
@@ -148,6 +157,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/enrollments': typeof AuthenticatedEnrollmentsRoute
   '/_authenticated/feedback': typeof AuthenticatedFeedbackRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/join/$token': typeof JoinTokenRoute
   '/_authenticated/classes/$classId': typeof AuthenticatedClassesClassIdRouteWithChildren
   '/_authenticated/classes/new': typeof AuthenticatedClassesNewRoute
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/enrollments'
     | '/feedback'
+    | '/notifications'
     | '/join/$token'
     | '/classes/$classId'
     | '/classes/new'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/enrollments'
     | '/feedback'
+    | '/notifications'
     | '/join/$token'
     | '/classes/$classId'
     | '/classes/new'
@@ -199,6 +211,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/enrollments'
     | '/_authenticated/feedback'
+    | '/_authenticated/notifications'
     | '/join/$token'
     | '/_authenticated/classes/$classId'
     | '/_authenticated/classes/new'
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/join/$token'
       preLoaderRoute: typeof JoinTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/feedback': {
       id: '/_authenticated/feedback'
@@ -355,6 +375,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedEnrollmentsRoute: typeof AuthenticatedEnrollmentsRoute
   AuthenticatedFeedbackRoute: typeof AuthenticatedFeedbackRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedClassesClassIdRoute: typeof AuthenticatedClassesClassIdRouteWithChildren
   AuthenticatedClassesNewRoute: typeof AuthenticatedClassesNewRoute
   AuthenticatedClassesIndexRoute: typeof AuthenticatedClassesIndexRoute
@@ -364,6 +385,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedEnrollmentsRoute: AuthenticatedEnrollmentsRoute,
   AuthenticatedFeedbackRoute: AuthenticatedFeedbackRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedClassesClassIdRoute:
     AuthenticatedClassesClassIdRouteWithChildren,
   AuthenticatedClassesNewRoute: AuthenticatedClassesNewRoute,

@@ -3,6 +3,9 @@ import { useAnnouncements } from "../hooks/useAnnouncements";
 import { useDeleteAnnouncement } from "../hooks/useDeleteAnnouncement";
 import { AnnouncementCard } from "./AnnouncementCard";
 import { AnnouncementForm } from "./AnnouncementForm";
+import { Button } from "@/shared/components/ui/button";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Plus, X } from "lucide-react";
 
 interface AnnouncementFeedProps {
   classId: string;
@@ -19,16 +22,27 @@ export function AnnouncementFeed({
   const [showForm, setShowForm] = useState(false);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-gray-100">Announcements</h2>
+        <h2 className="text-lg font-semibold tracking-tight">Announcements</h2>
         {isTeacher && (
-          <button
+          <Button
+            size="sm"
+            variant={showForm ? "outline" : "default"}
             onClick={() => setShowForm((v) => !v)}
-            className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-500 transition"
           >
-            {showForm ? "Cancel" : "+ New announcement"}
-          </button>
+            {showForm ? (
+              <>
+                <X className="h-3 w-3 mr-1" />
+                Cancel
+              </>
+            ) : (
+              <>
+                <Plus className="h-3 w-3 mr-1" />
+                New announcement
+              </>
+            )}
+          </Button>
         )}
       </div>
 
@@ -40,18 +54,20 @@ export function AnnouncementFeed({
       )}
 
       {isLoading ? (
-        <p className="text-gray-400 text-sm">Loading…</p>
+        <p className="text-muted-foreground text-sm">Loading...</p>
       ) : !announcements || announcements.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-gray-700 px-4 py-8 text-center">
-          <p className="text-gray-400">No announcements yet.</p>
-          {isTeacher && (
-            <p className="text-sm text-gray-600 mt-1">
-              Post an announcement to notify your students.
-            </p>
-          )}
-        </div>
+        <Card className="border-dashed">
+          <CardContent className="py-8 text-center">
+            <p className="text-muted-foreground">No announcements yet.</p>
+            {isTeacher && (
+              <p className="text-sm text-muted-foreground mt-1">
+                Post an announcement to notify your students.
+              </p>
+            )}
+          </CardContent>
+        </Card>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="space-y-3">
           {announcements.map((a) => (
             <AnnouncementCard
               key={a.id}

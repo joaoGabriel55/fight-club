@@ -13,6 +13,7 @@ async function registerUser(client: any, overrides: Record<string, unknown> = {}
     password: 'password123',
     first_name: 'John',
     profile_type: 'student',
+    birth_date: '2000-01-01',
     ...overrides,
   })
 }

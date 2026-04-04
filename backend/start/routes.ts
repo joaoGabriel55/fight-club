@@ -18,6 +18,8 @@ const InvitationsController = () => import('#controllers/invitations_controller'
 const EnrollmentController = () => import('#controllers/enrollment_controller')
 const AnnouncementsController = () => import('#controllers/announcements_controller')
 const FeedbackController = () => import('#controllers/feedback_controller')
+const BeltProgressController = () => import('#controllers/belt_progress_controller')
+const NotificationsController = () => import('#controllers/notifications_controller')
 
 router.get('/health', async ({ response }) => {
   return response.ok({ status: 'ok' })
@@ -92,6 +94,15 @@ router
     // Feedback on enrollments
     router.post('/enrollments/:enrollmentId/feedback', [FeedbackController, 'store'])
     router.get('/enrollments/:enrollmentId/feedback', [FeedbackController, 'index'])
+
+    // Belt progress on enrollments
+    router.post('/enrollments/:enrollmentId/belts', [BeltProgressController, 'store'])
+    router.get('/enrollments/:enrollmentId/belts', [BeltProgressController, 'index'])
+
+    // Notifications
+    router.get('/notifications', [NotificationsController, 'index'])
+    router.put('/notifications/read-all', [NotificationsController, 'markAllRead'])
+    router.put('/notifications/:id/read', [NotificationsController, 'markRead'])
 
     // Student aggregate views
     router.get('/announcements', [AnnouncementsController, 'myAnnouncements'])

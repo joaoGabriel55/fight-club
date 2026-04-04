@@ -25,14 +25,16 @@ function renderScheduleManager() {
 describe("ScheduleManager", () => {
   it("renders 'Add schedule' button", () => {
     renderScheduleManager();
-    expect(screen.getByText("+ Add schedule")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /add schedule/i }),
+    ).toBeInTheDocument();
   });
 
   it("each row has day selector, start time, end time fields", async () => {
     const user = userEvent.setup();
     renderScheduleManager();
 
-    await user.click(screen.getByText("+ Add schedule"));
+    await user.click(screen.getByRole("button", { name: /add schedule/i }));
 
     expect(screen.getByLabelText(/day/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/start time/i)).toBeInTheDocument();
@@ -43,8 +45,8 @@ describe("ScheduleManager", () => {
     const user = userEvent.setup();
     renderScheduleManager();
 
-    await user.click(screen.getByText("+ Add schedule"));
-    await user.click(screen.getByText("+ Add schedule"));
+    await user.click(screen.getByRole("button", { name: /add schedule/i }));
+    await user.click(screen.getByRole("button", { name: /add schedule/i }));
 
     expect(screen.getByText("Schedule 1")).toBeInTheDocument();
     expect(screen.getByText("Schedule 2")).toBeInTheDocument();
@@ -54,7 +56,7 @@ describe("ScheduleManager", () => {
     const user = userEvent.setup();
     renderScheduleManager();
 
-    await user.click(screen.getByText("+ Add schedule"));
+    await user.click(screen.getByRole("button", { name: /add schedule/i }));
 
     const select = screen.getByLabelText(/day/i) as HTMLSelectElement;
     expect(select.options.length).toBe(7);

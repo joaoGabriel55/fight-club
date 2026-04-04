@@ -1,5 +1,11 @@
 import { useFieldArray, useFormContext } from "react-hook-form";
 import type { CreateClassInput } from "../schemas/class.schema";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Button } from "@/shared/components/ui/button";
+import { Select } from "@/shared/components/ui/select";
+import { Card, CardContent } from "@/shared/components/ui/card";
+import { Plus, Trash2 } from "lucide-react";
 
 const DAY_OPTIONS = [
   { value: 0, label: "Sunday" },
@@ -30,113 +36,112 @@ export function ScheduleManager() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between">
-        <span className="text-sm font-medium text-gray-300">Schedules</span>
-        <button
+        <Label>Schedules</Label>
+        <Button
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={handleAddSchedule}
-          className="text-sm text-red-400 hover:text-red-300 transition"
+          className="text-primary"
         >
-          + Add schedule
-        </button>
+          <Plus className="h-3 w-3 mr-1" />
+          Add schedule
+        </Button>
       </div>
 
       {(errors.schedules as any)?.root?.message && (
-        <p className="text-sm text-red-400">
+        <p className="text-sm text-destructive">
           {(errors.schedules as any).root.message}
         </p>
       )}
       {typeof (errors.schedules as any)?.message === "string" && (
-        <p className="text-sm text-red-400">
+        <p className="text-sm text-destructive">
           {(errors.schedules as any).message}
         </p>
       )}
 
       {fields.length === 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           No schedules yet. Add at least one to create the class.
         </p>
       )}
 
       {fields.map((field, index) => (
-        <div
-          key={field.id}
-          className="rounded-lg border border-gray-700 bg-gray-800 p-3 flex flex-col gap-2"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-gray-400">Schedule {index + 1}</span>
-            <button
-              type="button"
-              onClick={() => remove(index)}
-              className="text-xs text-gray-500 hover:text-red-400 transition"
-            >
-              Remove
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label
-              htmlFor={`schedule-day-${index}`}
-              className="text-xs text-gray-400"
-            >
-              Day
-            </label>
-            <select
-              id={`schedule-day-${index}`}
-              className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-gray-100 focus:border-red-500 focus:outline-none"
-              {...register(`schedules.${index}.day_of_week`, {
-                valueAsNumber: true,
-              })}
-            >
-              {DAY_OPTIONS.map((day) => (
-                <option key={day.value} value={day.value}>
-                  {day.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col gap-1">
-              <label
-                htmlFor={`schedule-start-${index}`}
-                className="text-xs text-gray-400"
+        <Card key={field.id}>
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                Schedule {index + 1}
+              </span>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => remove(index)}
+                className="text-muted-foreground hover:text-destructive h-7"
+                aria-label="Remove"
               >
-                Start time
-              </label>
-              <input
-                id={`schedule-start-${index}`}
-                type="time"
-                className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-gray-100 focus:border-red-500 focus:outline-none"
-                {...register(`schedules.${index}.start_time`)}
-              />
-              {errors.schedules?.[index]?.start_time && (
-                <p className="text-xs text-red-400">
-                  {errors.schedules[index].start_time.message}
-                </p>
-              )}
+                <Trash2 className="h-3 w-3" />
+              </Button>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label
-                htmlFor={`schedule-end-${index}`}
-                className="text-xs text-gray-400"
+              <Label htmlFor={`schedule-day-${index}`} className="text-xs">
+                Day
+              </Label>
+              <Select
+                id={`schedule-day-${index}`}
+                {...register(`schedules.${index}.day_of_week`, {
+                  valueAsNumber: true,
+                })}
               >
-                End time
-              </label>
-              <input
-                id={`schedule-end-${index}`}
-                type="time"
-                className="rounded border border-gray-700 bg-gray-900 px-2 py-1.5 text-sm text-gray-100 focus:border-red-500 focus:outline-none"
-                {...register(`schedules.${index}.end_time`)}
-              />
-              {errors.schedules?.[index]?.end_time && (
-                <p className="text-xs text-red-400">
-                  {errors.schedules[index].end_time.message}
-                </p>
-              )}
+                {DAY_OPTIONS.map((day) => (
+                  <option key={day.value} value={day.value}>
+                    {day.label}
+                  </option>
+                ))}
+              </Select>
             </div>
-          </div>
-        </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex flex-col gap-1">
+                <Label htmlFor={`schedule-start-${index}`} className="text-xs">
+                  Start time
+                </Label>
+                <Input
+                  id={`schedule-start-${index}`}
+                  type="time"
+                  step="60"
+                  className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  {...register(`schedules.${index}.start_time`)}
+                />
+                {errors.schedules?.[index]?.start_time && (
+                  <p className="text-xs text-destructive">
+                    {errors.schedules[index].start_time.message}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <Label htmlFor={`schedule-end-${index}`} className="text-xs">
+                  End time
+                </Label>
+                <Input
+                  id={`schedule-end-${index}`}
+                  type="time"
+                  step="60"
+                  className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
+                  {...register(`schedules.${index}.end_time`)}
+                />
+                {errors.schedules?.[index]?.end_time && (
+                  <p className="text-xs text-destructive">
+                    {errors.schedules[index].end_time.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

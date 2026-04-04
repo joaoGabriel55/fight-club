@@ -58,7 +58,7 @@ services:
         condition: service_healthy
       valkey:
         condition: service_healthy
-    command: sh -c "node ace.js migration:run --force && node ace.js serve --hmr"
+    command: sh -c "node ace.js migration:run --force && node ace.js db:seed && node ace.js serve --hmr"
 
   frontend:
     build:
@@ -76,6 +76,14 @@ services:
     depends_on:
       - backend
     command: npm run dev
+
+  adminer:
+    image: adminer:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pg_data_dev:

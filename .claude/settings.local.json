@@ -10,7 +10,12 @@
       "Bash(docker-compose -f \"C:/Users/jquar/projects/fight-club/docker-compose.dev.yml\" exec backend npm run test)",
       "Bash(docker-compose -f \"C:/Users/jquar/projects/fight-club/docker-compose.dev.yml\" run --rm backend npm run test)",
       "Bash(docker-compose -f \"C:/Users/jquar/projects/fight-club/docker-compose.dev.yml\" run --rm frontend npm test)",
-      "Bash(docker-compose:*)"
+      "Bash(docker-compose:*)",
+      "Bash(npx playwright:*)",
+      "Bash(mkdir -p /c/Users/jquar/projects/fight-club/frontend/src/shared/components/ui)",
+      "Bash(mkdir -p /c/Users/jquar/projects/fight-club/frontend/src/assets)",
+      "Bash(mv /c/Users/jquar/projects/fight-club/frontend/background-image.jpg /c/Users/jquar/projects/fight-club/frontend/src/assets/background-image.jpg)",
+      "WebFetch(domain:ui.shadcn.com)"
     ]
   }
 }

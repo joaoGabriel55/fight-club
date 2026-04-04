@@ -1,5 +1,6 @@
 import { FeedbackCard } from "./FeedbackCard";
 import type { FeedbackItem } from "../types/feedback.types";
+import { Card, CardContent } from "@/shared/components/ui/card";
 
 interface FeedbackHistoryProps {
   feedback: FeedbackItem[];
@@ -8,19 +9,21 @@ interface FeedbackHistoryProps {
 
 export function FeedbackHistory({ feedback, isLoading }: FeedbackHistoryProps) {
   if (isLoading) {
-    return <p className="text-gray-400 text-sm">Loading…</p>;
+    return <p className="text-muted-foreground text-sm">Loading...</p>;
   }
 
   if (feedback.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-gray-700 px-4 py-8 text-center">
-        <p className="text-gray-400">No feedback yet.</p>
-      </div>
+      <Card className="border-dashed">
+        <CardContent className="py-8 text-center">
+          <p className="text-muted-foreground">No feedback yet.</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="space-y-3">
       {feedback.map((f) => (
         <FeedbackCard key={f.id} feedback={f} />
       ))}

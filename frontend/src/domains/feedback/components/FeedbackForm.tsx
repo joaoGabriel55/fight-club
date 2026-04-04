@@ -5,6 +5,14 @@ import {
   type SendFeedbackInput,
 } from "../schemas/feedback.schema";
 import { useSendFeedback } from "../hooks/useSendFeedback";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 interface FeedbackFormProps {
   enrollmentId: string;
@@ -34,41 +42,43 @@ export function FeedbackForm({ enrollmentId, onSuccess }: FeedbackFormProps) {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="rounded-xl border border-gray-700 bg-gray-800 p-4 flex flex-col gap-3"
-      noValidate
-    >
-      <h3 className="text-sm font-medium text-gray-200">Send feedback</h3>
-
-      <div className="flex flex-col gap-1">
-        <textarea
-          id="feedback-content"
-          rows={4}
-          className="rounded border border-gray-700 bg-gray-900 px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
-          placeholder="Write your feedback…"
-          {...register("content")}
-        />
-        {errors.content && (
-          <p className="text-sm text-red-400">{errors.content.message}</p>
-        )}
-      </div>
-
-      {error && (
-        <p className="rounded-lg bg-red-900/40 px-3 py-2 text-sm text-red-400">
-          {error.message}
-        </p>
-      )}
-
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition disabled:opacity-40"
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm">Send feedback</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="space-y-3"
+          noValidate
         >
-          {isPending ? "Sending…" : "Send feedback"}
-        </button>
-      </div>
-    </form>
+          <div className="flex flex-col gap-1">
+            <Textarea
+              id="feedback-content"
+              rows={4}
+              placeholder="Write your feedback..."
+              {...register("content")}
+            />
+            {errors.content && (
+              <p className="text-sm text-destructive">
+                {errors.content.message}
+              </p>
+            )}
+          </div>
+
+          {error && (
+            <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+              {error.message}
+            </p>
+          )}
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={isPending} size="sm">
+              {isPending ? "Sending..." : "Send feedback"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,4 +1,13 @@
 import { useState } from "react";
+import { Button } from "@/shared/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Shield } from "lucide-react";
 
 interface ConsentDialogProps {
   className: string;
@@ -19,61 +28,54 @@ export function ConsentDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4">
-      <div className="w-full max-w-md rounded-xl border border-gray-700 bg-gray-900 p-6 flex flex-col gap-5">
-        <div>
-          <h2 className="text-xl font-bold text-gray-100">Join {className}</h2>
-          <p className="mt-1 text-sm text-gray-400">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-xl">Join {className}</CardTitle>
+          <p className="text-sm text-muted-foreground">
             Taught by {teacherFirstName}
           </p>
-        </div>
+        </CardHeader>
 
-        <div className="rounded-lg border border-gray-700 bg-gray-800 p-4 text-sm text-gray-300 flex flex-col gap-2">
-          <p className="font-medium text-gray-200">
-            Data shared with the teacher:
-          </p>
-          <ul className="list-disc list-inside space-y-1 text-gray-400">
-            <li>Your first name</li>
-            <li>Your belt level (when set)</li>
-            <li>Your enrollment date</li>
-          </ul>
-          <p className="mt-2 text-xs text-gray-500">
-            Your email address, last name, birth date, weight, and height are
-            never shared with teachers.
-          </p>
-        </div>
+        <CardContent className="space-y-4">
+          <div className="rounded-lg bg-secondary p-4 text-sm space-y-2">
+            <p className="font-medium flex items-center gap-2">
+              <Shield className="h-4 w-4 text-primary" />
+              Data shared with the teacher:
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-muted-foreground ml-6">
+              <li>Your first name</li>
+              <li>Your belt level (when set)</li>
+              <li>Your enrollment date</li>
+            </ul>
+            <p className="text-xs text-muted-foreground mt-2">
+              Your email address, last name, birth date, weight, and height are
+              never shared with teachers.
+            </p>
+          </div>
 
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={consented}
-            onChange={(e) => setConsented(e.target.checked)}
-            className="mt-0.5 h-4 w-4 rounded border-gray-600 bg-gray-800 accent-red-500 cursor-pointer"
-          />
-          <span className="text-sm text-gray-300">
-            I understand and consent to the data listed above being shared with
-            the teacher.
-          </span>
-        </label>
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={consented}
+              onChange={(e) => setConsented(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 rounded border border-input accent-primary cursor-pointer"
+            />
+            <span className="text-sm text-muted-foreground">
+              I understand and consent to the data listed above being shared
+              with the teacher.
+            </span>
+          </label>
+        </CardContent>
 
-        <div className="flex justify-end gap-3 pt-1">
-          <button
-            type="button"
-            onClick={onCancel}
-            disabled={isPending}
-            className="rounded-lg border border-gray-700 px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 transition disabled:opacity-50"
-          >
+        <CardFooter className="justify-end gap-3 border-t pt-4">
+          <Button variant="outline" onClick={onCancel} disabled={isPending}>
             Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            disabled={!consented || isPending}
-            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-500 transition disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {isPending ? "Joining…" : "Join class"}
-          </button>
-        </div>
-      </div>
+          </Button>
+          <Button onClick={onConfirm} disabled={!consented || isPending}>
+            {isPending ? "Joining..." : "Join class"}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

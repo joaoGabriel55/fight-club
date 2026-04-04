@@ -7,6 +7,11 @@ import {
 } from "../schemas/class.schema";
 import { useCreateClass } from "../hooks/useCreateClass";
 import { ScheduleManager } from "./ScheduleManager";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { Textarea } from "@/shared/components/ui/textarea";
+import { Button } from "@/shared/components/ui/button";
+import { Separator } from "@/shared/components/ui/separator";
 
 export function ClassForm() {
   const navigate = useNavigate();
@@ -44,58 +49,51 @@ export function ClassForm() {
         className="flex flex-col gap-5"
         noValidate
       >
-        <div className="flex flex-col gap-1">
-          <label htmlFor="name" className="text-sm font-medium text-gray-300">
-            Class name
-          </label>
-          <input
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="name">Class name</Label>
+          <Input
             id="name"
             type="text"
-            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="e.g. Monday BJJ"
             {...register("name")}
           />
           {errors.name && (
-            <p className="text-sm text-red-400">{errors.name.message}</p>
+            <p className="text-sm text-destructive">{errors.name.message}</p>
           )}
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="martial_art"
-            className="text-sm font-medium text-gray-300"
-          >
-            Martial art
-          </label>
-          <input
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="martial_art">Martial art</Label>
+          <Input
             id="martial_art"
             type="text"
-            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
             placeholder="e.g. BJJ, Muay Thai, Boxing"
             {...register("martial_art")}
           />
           {errors.martial_art && (
-            <p className="text-sm text-red-400">{errors.martial_art.message}</p>
+            <p className="text-sm text-destructive">
+              {errors.martial_art.message}
+            </p>
           )}
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label
-            htmlFor="description"
-            className="text-sm font-medium text-gray-300"
-          >
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="description">
             Description{" "}
-            <span className="text-gray-500 font-normal">(optional)</span>
-          </label>
-          <textarea
+            <span className="text-muted-foreground font-normal">
+              (optional)
+            </span>
+          </Label>
+          <Textarea
             id="description"
             rows={3}
-            className="rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-gray-100 placeholder-gray-500 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 resize-none"
-            placeholder="Describe the class…"
+            placeholder="Describe the class..."
             {...register("description")}
           />
           {errors.description && (
-            <p className="text-sm text-red-400">{errors.description.message}</p>
+            <p className="text-sm text-destructive">
+              {errors.description.message}
+            </p>
           )}
         </div>
 
@@ -103,31 +101,30 @@ export function ClassForm() {
           <input
             id="has_belt_system"
             type="checkbox"
-            className="h-4 w-4 rounded border-gray-700 bg-gray-800 text-red-500 focus:ring-red-500"
+            className="h-4 w-4 shrink-0 rounded border border-input accent-primary"
             {...register("has_belt_system")}
           />
-          <label htmlFor="has_belt_system" className="text-sm text-gray-300">
+          <Label
+            htmlFor="has_belt_system"
+            className="font-normal cursor-pointer"
+          >
             This class uses a belt/rank system
-          </label>
+          </Label>
         </div>
 
-        <div className="border-t border-gray-800 pt-4">
-          <ScheduleManager />
-        </div>
+        <Separator />
+
+        <ScheduleManager />
 
         {error && (
-          <p className="rounded-lg bg-red-900/40 px-3 py-2 text-sm text-red-400">
+          <p className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error.message}
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={isPending}
-          className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-500 disabled:opacity-50"
-        >
-          {isPending ? "Creating…" : "Create class"}
-        </button>
+        <Button type="submit" disabled={isPending} className="w-full">
+          {isPending ? "Creating..." : "Create class"}
+        </Button>
       </form>
     </FormProvider>
   );

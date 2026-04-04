@@ -55,6 +55,7 @@ export default class AuthController {
       emailHash,
       passwordHash,
       profileType: data.profile_type,
+      birthDate: data.birth_date,
     })
 
     if (data.profile_type === 'student') {

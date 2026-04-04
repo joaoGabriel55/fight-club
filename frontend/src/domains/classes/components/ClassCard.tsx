@@ -2,6 +2,16 @@ import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useDeleteClass } from "../hooks/useDeleteClass";
 import type { ClassListItem } from "../types/class.types";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
+import { Badge } from "@/shared/components/ui/badge";
+import { Button } from "@/shared/components/ui/button";
+import { Users, Calendar, Trash2 } from "lucide-react";
 
 interface ClassCardProps {
   cls: ClassListItem;
@@ -26,82 +36,95 @@ export function ClassCard({ cls }: ClassCardProps) {
   };
 
   return (
-    <div className="rounded-xl border border-gray-700 bg-gray-900 p-5 flex flex-col gap-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <Link
-            to="/classes/$classId"
-            params={{ classId: cls.id }}
-            className="text-lg font-semibold text-gray-100 hover:text-red-400 transition"
-          >
-            {cls.name}
-          </Link>
-          <p className="text-sm text-gray-400">{cls.martial_art}</p>
+    <Card className="flex flex-col">
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <Link
+              to="/classes/$classId"
+              params={{ classId: cls.id }}
+              className="no-underline"
+            >
+              <CardTitle className="hover:text-primary transition-colors">
+                {cls.name}
+              </CardTitle>
+            </Link>
+            <p className="text-sm text-muted-foreground mt-1">
+              {cls.martial_art}
+            </p>
+          </div>
+          {cls.has_belt_system && (
+            <Badge
+              variant="outline"
+              className="text-yellow-600 border-yellow-600 dark:text-yellow-400 dark:border-yellow-400"
+            >
+              Belt system
+            </Badge>
+          )}
         </div>
-        {cls.has_belt_system && (
-          <span className="rounded-full bg-yellow-900/40 px-2 py-0.5 text-xs text-yellow-400 border border-yellow-800">
-            Belt system
-          </span>
+      </CardHeader>
+
+      <CardContent className="space-y-3 flex-1">
+        {cls.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {cls.description}
+          </p>
         )}
-      </div>
 
-      {cls.description && (
-        <p className="text-sm text-gray-500 line-clamp-2">{cls.description}</p>
-      )}
+        <div className="flex gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {cls.schedule_count} schedule{cls.schedule_count !== 1 ? "s" : ""}
+          </span>
+          <span className="flex items-center gap-1">
+            <Users className="h-3 w-3" />
+            {cls.enrollment_count} student
+            {cls.enrollment_count !== 1 ? "s" : ""}
+          </span>
+        </div>
+      </CardContent>
 
-      <div className="flex gap-4 text-sm text-gray-400">
-        <span>
-          {cls.schedule_count} schedule{cls.schedule_count !== 1 ? "s" : ""}
-        </span>
-        <span>
-          {cls.enrollment_count} student{cls.enrollment_count !== 1 ? "s" : ""}
-        </span>
-      </div>
-
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-gray-800">
+      <CardFooter className="justify-between border-t pt-4">
         <div className="flex gap-2">
-          <Link
-            to="/classes/$classId/schedules"
-            params={{ classId: cls.id }}
-            className="text-xs text-gray-400 hover:text-gray-200 transition"
-          >
-            Schedules
-          </Link>
-          <Link
-            to="/classes/$classId/students"
-            params={{ classId: cls.id }}
-            className="text-xs text-gray-400 hover:text-gray-200 transition"
-          >
-            Students
-          </Link>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/classes/$classId/schedules" params={{ classId: cls.id }}>
+              Schedules
+            </Link>
+          </Button>
+          <Button asChild variant="ghost" size="sm">
+            <Link to="/classes/$classId/students" params={{ classId: cls.id }}>
+              Students
+            </Link>
+          </Button>
         </div>
 
         {confirming ? (
           <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Delete class?</span>
-            <button
+            <span className="text-xs text-muted-foreground">Delete class?</span>
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={handleConfirmDelete}
               disabled={isPending}
-              className="text-xs text-red-400 hover:text-red-300 disabled:opacity-50"
             >
-              {isPending ? "Deleting…" : "Yes, delete"}
-            </button>
-            <button
-              onClick={handleCancelDelete}
-              className="text-xs text-gray-400 hover:text-gray-200"
-            >
+              {isPending ? "Deleting..." : "Yes, delete"}
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleCancelDelete}>
               Cancel
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-destructive"
             onClick={handleDeleteClick}
-            className="text-xs text-gray-500 hover:text-red-400 transition"
           >
+            <Trash2 className="h-3 w-3 mr-1" />
             Delete
-          </button>
+          </Button>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }

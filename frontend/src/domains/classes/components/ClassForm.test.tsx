@@ -38,7 +38,7 @@ describe("ClassForm — schedule field array", () => {
     const user = userEvent.setup();
     renderForm();
 
-    const addBtn = await screen.findByText("+ Add schedule");
+    const addBtn = await screen.findByRole("button", { name: /add schedule/i });
     await user.click(addBtn);
 
     expect(screen.getByText("Schedule 1")).toBeInTheDocument();
@@ -48,11 +48,11 @@ describe("ClassForm — schedule field array", () => {
     const user = userEvent.setup();
     renderForm();
 
-    const addBtn = await screen.findByText("+ Add schedule");
+    const addBtn = await screen.findByRole("button", { name: /add schedule/i });
     await user.click(addBtn);
     expect(screen.getByText("Schedule 1")).toBeInTheDocument();
 
-    await user.click(screen.getByText("Remove"));
+    await user.click(screen.getByRole("button", { name: /remove/i }));
     expect(screen.queryByText("Schedule 1")).not.toBeInTheDocument();
   });
 
