@@ -8,20 +8,33 @@ export default class NotificationsController {
    * GET /api/v1/notifications
    * List authenticated user's notifications, excluding expired ones.
    */
-  async index({ auth, response }: HttpContext) {
+  async index({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
-    const notifications = await Notification.query()
+    const page = Number(request.input('page', 1))
+    const perPage = Number(request.input('per_page', 20))
+
+    const paginated = await Notification.query()
       .where('user_id', user.id)
       .where((q) => {
         q.whereNull('expires_at').orWhere('expires_at', '>', DateTime.now().toSQL()!)
       })
       .orderBy('created_at', 'desc')
+      .paginate(page, perPage)
 
-    const unreadCount = notifications.filter((n) => !n.readAt).length
+    // Unread count across ALL non-expired notifications (not just current page)
+    const unreadResult = await Notification.query()
+      .where('user_id', user.id)
+      .whereNull('read_at')
+      .where((q) => {
+        q.whereNull('expires_at').orWhere('expires_at', '>', DateTime.now().toSQL()!)
+      })
+      .count('* as total')
+
+    const unreadCount = Number(unreadResult[0].$extras.total)
 
     return response.status(200).send({
-      data: notifications.map((n) => ({
+      data: paginated.all().map((n) => ({
         id: n.id,
         type: n.type,
         title: n.title,
@@ -31,6 +44,9 @@ export default class NotificationsController {
         created_at: n.createdAt,
       })),
       meta: {
+        total: paginated.total,
+        page: paginated.currentPage,
+        per_page: paginated.perPage,
         unread_count: unreadCount,
       },
     })

@@ -101,7 +101,7 @@ export default class FeedbackController {
    * Student view: all feedback across all enrollments.
    * Teacher calling this → 403.
    */
-  async myFeedback({ auth, response }: HttpContext) {
+  async myFeedback({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
     if (user.profileType === 'teacher') {
@@ -115,17 +115,21 @@ export default class FeedbackController {
     const enrollmentIds = enrollments.map((e) => e.id)
 
     if (enrollmentIds.length === 0) {
-      return response.status(200).send([])
+      return response.status(200).send({ data: [], meta: { total: 0, page: 1, per_page: 20 } })
     }
 
-    const feedbackList = await Feedback.query()
+    const page = Number(request.input('page', 1))
+    const perPage = Number(request.input('per_page', 20))
+
+    const paginated = await Feedback.query()
       .whereIn('enrollment_id', enrollmentIds)
       .preload('teacher')
       .preload('enrollment', (q) => q.preload('class'))
       .orderBy('created_at', 'desc')
+      .paginate(page, perPage)
 
-    return response.status(200).send(
-      feedbackList.map((f) => ({
+    return response.status(200).send({
+      data: paginated.all().map((f) => ({
         id: f.id,
         content: f.content,
         teacher: { first_name: f.teacher.firstName },
@@ -134,7 +138,12 @@ export default class FeedbackController {
         enrollment_id: f.enrollmentId,
         martial_art: f.enrollment.class.martialArt,
         created_at: f.createdAt,
-      }))
-    )
+      })),
+      meta: {
+        total: paginated.total,
+        page: paginated.currentPage,
+        per_page: paginated.perPage,
+      },
+    })
   }
 }

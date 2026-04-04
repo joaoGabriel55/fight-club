@@ -90,7 +90,7 @@ export default class AnnouncementsController {
    * Student view: all announcements across all enrolled classes.
    * Teacher calling this → 403.
    */
-  async myAnnouncements({ auth, response }: HttpContext) {
+  async myAnnouncements({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
     if (user.profileType === 'teacher') {
@@ -104,17 +104,21 @@ export default class AnnouncementsController {
     const classIds = enrollments.map((e) => e.classId)
 
     if (classIds.length === 0) {
-      return response.status(200).send([])
+      return response.status(200).send({ data: [], meta: { total: 0, page: 1, per_page: 20 } })
     }
 
-    const announcements = await Announcement.query()
+    const page = Number(request.input('page', 1))
+    const perPage = Number(request.input('per_page', 20))
+
+    const paginated = await Announcement.query()
       .whereIn('class_id', classIds)
       .preload('author')
       .preload('class')
       .orderBy('created_at', 'desc')
+      .paginate(page, perPage)
 
-    return response.status(200).send(
-      announcements.map((a) => ({
+    return response.status(200).send({
+      data: paginated.all().map((a) => ({
         id: a.id,
         title: a.title,
         content: a.content,
@@ -122,8 +126,13 @@ export default class AnnouncementsController {
         class_name: a.class.name,
         class_id: a.classId,
         created_at: a.createdAt,
-      }))
-    )
+      })),
+      meta: {
+        total: paginated.total,
+        page: paginated.currentPage,
+        per_page: paginated.perPage,
+      },
+    })
   }
 
   /**

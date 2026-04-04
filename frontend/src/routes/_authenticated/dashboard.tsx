@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { useMe } from "@/domains/auth/hooks/useMe";
 import { Swords } from "lucide-react";
 import { TeacherDashboard } from "@/domains/dashboard/components/TeacherDashboard";
 import { StudentDashboard } from "@/domains/dashboard/components/StudentDashboard";
+import { Spinner } from "@/shared/components/ui/spinner";
+import { useNotificationPermission } from "@/shared/hooks/useNotificationPermission";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   component: DashboardPage,
@@ -10,11 +13,20 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 
 function DashboardPage() {
   const { data: user, isLoading } = useMe();
+  const { permission, isSupported, requestPermission } =
+    useNotificationPermission();
+
+  // Ask for notification permission on first dashboard visit
+  useEffect(() => {
+    if (isSupported && permission === "default") {
+      requestPermission();
+    }
+  }, [isSupported, permission, requestPermission]);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-muted-foreground">Loading...</p>
+        <Spinner size="lg" />
       </div>
     );
   }

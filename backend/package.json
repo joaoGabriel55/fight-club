@@ -24,6 +24,7 @@
     "#middleware/*": "./app/middleware/*.js",
     "#validators/*": "./app/validators/*.js",
     "#providers/*": "./providers/*.js",
+    "#jobs/*": "./app/jobs/*.js",
     "#policies/*": "./app/policies/*.js",
     "#abilities/*": "./app/abilities/*.js",
     "#database/*": "./database/*.js",

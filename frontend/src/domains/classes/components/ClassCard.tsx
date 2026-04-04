@@ -120,8 +120,7 @@ export function ClassCard({ cls }: ClassCardProps) {
             className="text-muted-foreground hover:text-destructive"
             onClick={handleDeleteClick}
           >
-            <Trash2 className="h-3 w-3 mr-1" />
-            Delete
+            <Trash2 className="h-3 w-3" />
           </Button>
         )}
       </CardFooter>

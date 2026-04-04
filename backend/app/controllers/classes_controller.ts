@@ -96,22 +96,26 @@ export default class ClassesController {
   /**
    * GET /api/v1/classes
    */
-  async index({ auth, response }: HttpContext) {
+  async index({ auth, request, response }: HttpContext) {
     const user = auth.getUserOrFail()
 
     if (user.profileType !== 'teacher') {
       return response.status(403).send({ error: { message: 'Forbidden' } })
     }
 
-    const classes = await Class.query()
+    const page = Number(request.input('page', 1))
+    const perPage = Number(request.input('per_page', 20))
+
+    const paginated = await Class.query()
       .where('teacher_id', user.id)
       .whereNull('deleted_at')
       .withCount('schedules')
       .withCount('enrollments', (q) => q.where('status', 'active'))
       .orderBy('created_at', 'desc')
+      .paginate(page, perPage)
 
-    return response.status(200).send(
-      classes.map((cls) => ({
+    return response.status(200).send({
+      data: paginated.all().map((cls) => ({
         id: cls.id,
         name: cls.name,
         martial_art: cls.martialArt,
@@ -120,8 +124,13 @@ export default class ClassesController {
         schedule_count: Number(cls.$extras.schedules_count),
         enrollment_count: Number(cls.$extras.enrollments_count),
         created_at: cls.createdAt,
-      }))
-    )
+      })),
+      meta: {
+        total: paginated.total,
+        page: paginated.currentPage,
+        per_page: paginated.perPage,
+      },
+    })
   }
 
   /**

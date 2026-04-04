@@ -266,9 +266,9 @@ test.group('Announcements — My announcements', (group) => {
       .header('Authorization', `Bearer ${student.token}`)
 
     response.assertStatus(200)
-    assert.lengthOf(response.body(), 2)
+    assert.lengthOf(response.body().data, 2)
     // Should include class_name
-    assert.exists(response.body()[0].class_name)
+    assert.exists(response.body().data[0].class_name)
   })
 
   test('teacher → 403', async ({ client }) => {
