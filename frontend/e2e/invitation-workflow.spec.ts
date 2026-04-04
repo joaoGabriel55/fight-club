@@ -1,12 +1,12 @@
-import { test, expect, type Page } from "@playwright/test";
-
-const API_URL = process.env.E2E_API_URL || "http://localhost:3333";
+import { test, expect } from "@playwright/test";
+import { registerViaAPI, loginUI } from "./helpers";
 
 const TEACHER = {
   email: `teacher-e2e-${Date.now()}@test.com`,
   password: "Test1234!",
   first_name: "TeacherE2E",
   profile_type: "teacher" as const,
+  birth_date: "1990-01-15",
 };
 
 const STUDENT = {
@@ -14,27 +14,10 @@ const STUDENT = {
   password: "Test1234!",
   first_name: "StudentE2E",
   profile_type: "student" as const,
+  birth_date: "2000-05-20",
 };
 
 let inviteToken: string;
-
-async function registerViaAPI(user: typeof TEACHER) {
-  const res = await fetch(`${API_URL}/api/v1/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user),
-  });
-  if (!res.ok) throw new Error(`Register failed: ${res.status}`);
-  const data = await res.json();
-  return data.token as string;
-}
-
-async function loginUI(page: Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
-}
 
 test.describe("Invitation & Enrollment Workflow", () => {
   test.describe.configure({ mode: "serial" });
@@ -52,7 +35,7 @@ test.describe("Invitation & Enrollment Workflow", () => {
     await page.goto("/classes/new");
     await page.getByLabel("Class name").fill("E2E Test Class");
     await page.getByLabel("Martial art").fill("Boxing");
-    await page.getByText("+ Add schedule").click();
+    await page.getByRole("button", { name: /Add schedule/i }).click();
     await page.getByRole("button", { name: "Create class" }).click();
 
     await page.waitForURL(/\/classes\/[a-f0-9-]+/, { timeout: 10000 });
@@ -116,7 +99,9 @@ test.describe("Invitation & Enrollment Workflow", () => {
     const redirectUrl = encodeURIComponent(`/join/${inviteToken}`);
     await page.goto(`/register?redirect=${redirectUrl}`);
 
-    await expect(page.getByText("Join Fight Club")).toBeVisible({
+    await expect(
+      page.getByRole("heading", { name: "Create account" }),
+    ).toBeVisible({
       timeout: 10000,
     });
 
@@ -125,6 +110,11 @@ test.describe("Invitation & Enrollment Workflow", () => {
     await page.getByLabel("Last name").fill("E2ETest");
     await page.getByLabel("Email").fill(STUDENT.email);
     await page.getByLabel("Password").fill(STUDENT.password);
+
+    // Select date of birth via the calendar popover
+    await page.getByText("Select date").click();
+    await page.getByRole("gridcell", { name: "15" }).first().click();
+
     await page.getByRole("radio", { name: "Student" }).check();
     await page.getByRole("checkbox").first().check();
 

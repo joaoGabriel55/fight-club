@@ -1,6 +1,5 @@
-import { test, expect, type Page } from "@playwright/test";
-
-const API_URL = process.env.E2E_API_URL || "http://localhost:3333";
+import { test, expect } from "@playwright/test";
+import { API_URL, registerViaAPI, loginUI, fetchWithRetry } from "./helpers";
 
 const ts = Date.now();
 
@@ -9,6 +8,7 @@ const TEACHER = {
   password: "Test1234!",
   first_name: "TeacherBN",
   profile_type: "teacher" as const,
+  birth_date: "1990-01-15",
 };
 
 const STUDENT = {
@@ -16,6 +16,7 @@ const STUDENT = {
   password: "Test1234!",
   first_name: "StudentBN",
   profile_type: "student" as const,
+  birth_date: "2000-05-20",
 };
 
 let teacherToken: string;
@@ -27,23 +28,12 @@ let noBeltClassId: string;
 // Helpers
 // ---------------------------------------------------------------------------
 
-async function registerViaAPI(user: typeof TEACHER): Promise<string> {
-  const res = await fetch(`${API_URL}/api/v1/auth/register`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(user),
-  });
-  if (!res.ok) throw new Error(`Register failed: ${res.status}`);
-  const data = await res.json();
-  return data.token as string;
-}
-
 async function createClassViaAPI(
   token: string,
   hasBeltSystem: boolean,
   name: string,
 ): Promise<string> {
-  const res = await fetch(`${API_URL}/api/v1/classes`, {
+  const res = await fetchWithRetry(`${API_URL}/api/v1/classes`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -66,20 +56,23 @@ async function enrollStudentViaAPI(
   studentTk: string,
   clsId: string,
 ): Promise<string> {
-  const invRes = await fetch(`${API_URL}/api/v1/classes/${clsId}/invitations`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${teacherTk}`,
+  const invRes = await fetchWithRetry(
+    `${API_URL}/api/v1/classes/${clsId}/invitations`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${teacherTk}`,
+      },
+      body: JSON.stringify({
+        expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
+      }),
     },
-    body: JSON.stringify({
-      expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
-    }),
-  });
+  );
   if (!invRes.ok) throw new Error(`Create invitation failed: ${invRes.status}`);
   const inv = await invRes.json();
 
-  const joinRes = await fetch(`${API_URL}/api/v1/join/${inv.token}`, {
+  const joinRes = await fetchWithRetry(`${API_URL}/api/v1/join/${inv.token}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -91,19 +84,12 @@ async function enrollStudentViaAPI(
   const enrollment = await joinRes.json();
 
   // Revoke invitation for cleanup
-  await fetch(`${API_URL}/api/v1/invitations/${inv.id}`, {
+  await fetchWithRetry(`${API_URL}/api/v1/invitations/${inv.id}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${teacherTk}` },
   });
 
   return enrollment.id as string;
-}
-
-async function loginUI(page: Page, email: string, password: string) {
-  await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign in" }).click();
 }
 
 // ---------------------------------------------------------------------------
@@ -150,9 +136,7 @@ test.describe("Belts & Notifications", () => {
     await studentRow.getByRole("button", { name: /Belts/i }).click();
 
     // Belt panel opens
-    await expect(
-      page.getByText("Belt history for StudentBN"),
-    ).toBeVisible();
+    await expect(page.getByText("Belt history for StudentBN")).toBeVisible();
     await expect(page.getByText("No belts awarded yet")).toBeVisible();
 
     // Award a belt
@@ -160,7 +144,9 @@ test.describe("Belts & Notifications", () => {
     await page.getByRole("button", { name: /Award belt/i }).click();
 
     // Belt appears in timeline (use locator to avoid matching the <option>)
-    await expect(page.locator("span").filter({ hasText: "Blue" })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator("span").filter({ hasText: "Blue" })).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("Student sees notification in bell and can mark all read", async ({
@@ -176,7 +162,7 @@ test.describe("Belts & Notifications", () => {
     await expect(bell).toBeVisible({ timeout: 10000 });
 
     // There should be a badge with a count (at least enrollment notifications + belt)
-    const badge = bell.locator("span.bg-red-600");
+    const badge = bell.locator("span.bg-primary");
     await expect(badge).toBeVisible({ timeout: 10000 });
 
     // Open notification panel and mark all read
@@ -214,5 +200,4 @@ test.describe("Belts & Notifications", () => {
       studentRow.getByRole("button", { name: /Belts/i }),
     ).not.toBeVisible();
   });
-
 });
