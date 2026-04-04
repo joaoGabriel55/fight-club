@@ -64,6 +64,10 @@ export default defineConfig({
     () => import('#start/kernel'),
     () => import('#start/limiter'),
     () => import('#start/events'),
+    {
+      file: () => import('#start/jobs'),
+      environment: ['web'],
+    },
   ],
 
   /*

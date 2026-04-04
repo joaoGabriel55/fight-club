@@ -2,7 +2,7 @@
 
 A privacy-first martial arts class management platform for teachers and students. Teachers create classes, manage schedules, send announcements, provide feedback, and track belt progression. Students join via invitation links, view their dashboard, and receive AI-powered improvement tips — all with strong data privacy guarantees including encryption at rest, GDPR-style data export, and full account erasure.
 
-Built as a full-stack **Nx monorepo** with a clear separation between backend API and frontend SPA, deployed to Render.com with a Supabase PostgreSQL database.
+Built as a full-stack **npm workspaces** monorepo with a clear separation between backend API and frontend SPA. Deployable to Render.com, any VPS via Docker Compose, or any container platform.
 
 ## Tech Stack
 
@@ -12,10 +12,10 @@ Built as a full-stack **Nx monorepo** with a clear separation between backend AP
 | Frontend | React 19, Vite, TanStack Router, TanStack Query, React Hook Form, Zod |
 | Styling  | Tailwind CSS                                                          |
 | Database | PostgreSQL 16 (Supabase in production)                                |
-| Cache    | Redis / Valkey                                                        |
+| Cache    | Valkey (Redis-compatible)                                             |
+| Jobs     | BullMQ (scheduled jobs backed by Valkey)                              |
 | AI       | Anthropic Claude API (improvement tips)                               |
-| Monorepo | Nx (task orchestration, caching, affected commands)                   |
-| Infra    | Docker Compose (dev), Render.com (prod), GitHub Actions (CI)          |
+| Infra    | Docker Compose (dev + prod), Render.com, GitHub Actions (CI)          |
 
 ## Live Demo
 
@@ -89,43 +89,23 @@ cd frontend
 npm run dev
 ```
 
-### Nx Commands
-
-Run tasks across the monorepo using Nx:
-
-```bash
-# Run a single project target
-npx nx build fight-club-frontend
-npx nx test fight-club-backend
-npx nx lint fight-club-backend
-
-# Run tasks across all projects
-npx nx run-many -t build test lint
-
-# Run only affected projects (based on git changes)
-npx nx affected -t build test lint
-
-# Visualize project dependency graph
-npx nx graph
-```
-
 ## Running Tests
 
 ```bash
-# Run all tests across the monorepo
-npx nx run-many -t test
-
 # Backend (Japa)
-npx nx test fight-club-backend
+cd backend && npm run test
 
 # Single backend test file
 cd backend && node ace.js test --files="tests/functional/auth.spec.ts"
 
 # Frontend (Vitest)
-npx nx test fight-club-frontend
+cd frontend && npm test
 
 # Frontend watch mode
 cd frontend && npm run test:watch
+
+# Frontend E2E (Playwright)
+cd frontend && npm run e2e
 ```
 
 ## Environment Variables
@@ -203,56 +183,68 @@ This project was developed with assistance from Claude (Anthropic's AI):
 
 ## Deployment
 
-### Architecture
-
-The app is deployed as a **monorepo on Render.com** using [Render's monorepo support](https://render.com/docs/monorepo-support):
+### Project Structure
 
 ```
 fight-club/
-  nx.json              # Nx workspace configuration
-  package.json         # Root workspace with npm workspaces
-  render.yaml          # Render Blueprint — defines both services
-  backend/             # AdonisJS API  -> Render Web Service (rootDir: backend)
-  frontend/            # React SPA     -> Render Static Site (rootDir: frontend)
+  package.json             # Root workspace (npm workspaces)
+  render.yaml              # Render Blueprint — defines both services
+  docker-compose.dev.yml   # Development environment
+  docker-compose.prod.yml  # VPS production environment
+  backend/                 # AdonisJS API  (Dockerfile for production)
+  frontend/                # React SPA     (Dockerfile with nginx)
 ```
 
-### Services
+### Option 1: Render.com
 
-| Service          | Type        | Root Dir   | URL                                   |
-| ---------------- | ----------- | ---------- | ------------------------------------- |
-| `fight-club-api` | Web Service | `backend`  | `https://fight-club-api.onrender.com` |
-| `fight-club-app` | Static Site | `frontend` | `https://fight-club-app.onrender.com` |
+Both services are defined in `render.yaml`, each built via its own Dockerfile:
+
+| Service          | Type           | Dockerfile             | URL                                   |
+| ---------------- | -------------- | ---------------------- | ------------------------------------- |
+| `fight-club-api` | Docker Web Svc | `backend/Dockerfile`   | `https://fight-club-api.onrender.com` |
+| `fight-club-app` | Docker Web Svc | `frontend/Dockerfile`  | `https://fight-club-app.onrender.com` |
+
+- **Build filters:** Backend only redeploys when `backend/**` changes; frontend only when `frontend/**` changes.
+- **Secrets:** All sensitive env vars use `sync: false` — set manually in the Render dashboard.
+- Render provides **free managed TLS** with automatic certificate provisioning and HTTP-to-HTTPS redirect.
+
+### Option 2: VPS / Self-hosted (Docker Compose)
+
+For deploying to any VPS with Docker installed:
+
+```bash
+# Create .env at the repo root with required vars
+cat > .env <<EOF
+APP_KEY=your-32-char-key
+DB_PASSWORD=your-db-password
+VITE_APP_URL=https://your-domain.com
+VITE_API_URL=https://api.your-domain.com
+# Optional:
+REDIS_PASSWORD=your-redis-password
+ANTHROPIC_API_KEY=your-key
+EOF
+
+# Build and start all services
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Services included: PostgreSQL 16, Valkey, backend (port 3333), frontend/nginx (port 80). Data is persisted in named Docker volumes (`pgdata`, `valkeydata`).
 
 ### Database
 
-Production uses **Supabase PostgreSQL** (external to Render):
+Production uses **Supabase PostgreSQL** (on Render) or local PostgreSQL (on VPS):
 
-- Connection string set as `DATABASE_URL` environment variable in the Render dashboard.
-- Supabase provides managed backups, connection pooling, and a SQL dashboard.
-- Migrations run automatically during the backend build step (`npm ci && node ace.js migration:run`).
+- **Render:** Set `DATABASE_URL` in the dashboard. Uses SSL connection to Supabase.
+- **VPS:** PostgreSQL runs in the compose stack. Configure `DB_USER`, `DB_PASSWORD`, `DB_DATABASE` in `.env`.
+- Migrations run automatically during the backend Docker build (`node ace.js migration:run`).
 
-### Redis
+### Valkey (Redis-compatible)
 
-A Render-managed Redis instance (or external provider like Upstash) provides caching and rate limiting. Configure via `REDIS_HOST`, `REDIS_PORT`, and `REDIS_PASSWORD` in the Render dashboard.
-
-### render.yaml Blueprint
-
-The `render.yaml` file at the repository root defines the entire infrastructure. Render reads it to create/update services. Key features:
-
-- **Build filters:** Backend only redeploys when `backend/**` changes; frontend only when `frontend/**` changes.
-- **SPA fallback:** Frontend uses a rewrite rule (`/* -> /index.html`) for client-side routing.
-- **Security headers:** `X-Frame-Options: DENY` and `X-Content-Type-Options: nosniff` set on all frontend responses.
-- **Secrets:** All sensitive env vars use `sync: false` — they must be set manually in the Render dashboard, never committed to the repo.
-
-### HTTPS
-
-- Render provides **free managed TLS** for all services with automatic certificate provisioning.
-- HTTP-to-HTTPS redirect is enforced automatically by Render.
-- `Strict-Transport-Security` header is set by the backend's security headers middleware in production.
+Valkey provides the backing store for BullMQ scheduled jobs and `@adonisjs/redis`. Configure via `REDIS_HOST`, `REDIS_PORT`, and `REDIS_PASSWORD`.
 
 ### CI/CD
 
-- **CI:** GitHub Actions (`.github/workflows/ci.yml`) runs backend tests (with PostgreSQL + Valkey service containers), frontend tests, and build checks using Nx commands on every push to `main` and on PRs. Nx caching speeds up repeat runs.
+- **CI:** GitHub Actions (`.github/workflows/ci.yml`) runs backend tests (with PostgreSQL + Valkey service containers), frontend tests, and build checks on every push to `main` and on PRs.
 - **CD:** Render auto-deploys on push to `main` via native Git integration — no separate deploy workflow needed.
 
 ### Seeding Production

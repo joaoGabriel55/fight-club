@@ -62,6 +62,7 @@ npm run lint         # tsc --noEmit
 - `start/kernel.ts` — middleware registration (server-wide, router-wide, named)
 - `start/env.ts` — Vine-validated env schema; the canonical list of required env vars
 - `start/limiter.ts` — rate limit rules
+- `start/jobs.ts` — BullMQ scheduled jobs (preloaded in `web` environment only)
 - `app/models/` — Lucid ORM models
 - `app/controllers/` — route handlers
 - `app/middleware/` — `auth` (named), `force_json_response`, `container_bindings`
@@ -213,7 +214,7 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Leave = hard delete of enrollment row (feedback + belt_progress cascade added in future tickets).
 - `StudentEnrolled` event emitted on join → `CreateNotification` listener writes to `notifications` table for the teacher.
 - Audit log actions: `invitation_created`, `invitation_revoked`, `student_enrolled`, `student_left`.
-- `CleanupExpiredInvitationsJob` defined in `app/jobs/` but not yet scheduled (v0.8).
+- `CleanupExpiredInvitationsJob` defined in `app/jobs/`, scheduled via BullMQ + Valkey in `start/jobs.ts`.
 - Ownership checks inline in controllers (consistent with v0.3, no `@adonisjs/bouncer` dependency).
 - Events registered in `start/events.ts` (preloaded in `adonisrc.ts`).
 
@@ -344,13 +345,16 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Query params: `?page=1&per_page=20` (defaults).
 - Frontend services extract `.data` from paginated responses to maintain backward compatibility with hooks.
 
-**Scheduled Jobs** (in `app/jobs/`):
+**Scheduled Jobs** (in `app/jobs/`, scheduled via `start/jobs.ts`):
 
-- `CleanupExpiredInvitationsJob` — deletes invitation rows where `expires_at < now()`.
-- `PurgeExpiredNotificationsJob` — deletes notification rows where `expires_at < now()`.
-- `PurgeExpiredTokensJob` — deletes expired auth tokens from `auth_access_tokens`.
-- `PaymentReminderJob` — stub that logs reminder for each active enrollment. Ready for `@adonisjs/mail` integration.
+Jobs are plain classes with an `async run(): Promise<number>` method. They are wired up via BullMQ repeatable jobs backed by Valkey. The scheduler preload (`start/jobs.ts`) runs only in the `web` environment (not during tests).
+
+- `CleanupExpiredInvitationsJob` — deletes invitation rows where `expires_at < now()`. Cron: `0 2 * * *` (daily 02:00).
+- `PurgeExpiredNotificationsJob` — deletes notification rows where `expires_at < now()`. Cron: `30 2 * * *` (daily 02:30).
+- `PurgeExpiredTokensJob` — deletes expired auth tokens from `auth_access_tokens`. Cron: `0 3 * * *` (daily 03:00).
+- `PaymentReminderJob` — stub that logs reminder for each active enrollment. Ready for `@adonisjs/mail` integration. Cron: `0 9 1 * *` (monthly 1st at 09:00).
 - Import path: `#jobs/cleanup_expired_invitations_job` etc.
+- BullMQ dependency: `bullmq` — uses the same Valkey connection as `@adonisjs/redis` (`REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`).
 
 ### Frontend
 
@@ -387,19 +391,31 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 
 ## Deployment & Production (v1.0)
 
-### Render.com Monorepo Deployment
+### Render.com Deployment
 
-**Platform:** Render.com with [monorepo support](https://render.com/docs/monorepo-support). Both services defined in `render.yaml` at the repo root.
+**Platform:** Render.com. Both services defined in `render.yaml` at the repo root, each built via its own Dockerfile.
 
 **Services:**
 
-| Service          | Type        | Root Dir   | Build Command                         | Start Command       |
-| ---------------- | ----------- | ---------- | ------------------------------------- | ------------------- |
-| `fight-club-api` | Web Service | `backend`  | `npm ci && node ace.js migration:run` | `node ace.js serve` |
-| `fight-club-app` | Static Site | `frontend` | `npm ci && npm run build`             | — (serves `dist/`)  |
+| Service          | Type            | Dockerfile           | Start Command                    |
+| ---------------- | --------------- | -------------------- | -------------------------------- |
+| `fight-club-api` | Docker Web Svc  | `backend/Dockerfile` | `node ace.js serve`              |
+| `fight-club-app` | Docker Web Svc  | `frontend/Dockerfile`| `nginx -g 'daemon off;'`        |
 
 - Build filters ensure each service only redeploys when its own directory changes.
-- Frontend SPA fallback via rewrite rule (`/* → /index.html`).
+- Frontend uses nginx with `envsubst` for runtime `VITE_API_URL` injection into CSP headers.
+- Backend Dockerfile is multi-stage: deps → `node ace build` → production runtime (`node bin/server.js`).
+
+### VPS / Self-hosted Deployment
+
+For deploying to any VPS with Docker, use `docker-compose.prod.yml`:
+
+```bash
+# Create .env with required vars (APP_KEY, DB_PASSWORD, VITE_APP_URL, etc.)
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Services: PostgreSQL 16, Valkey, backend (port 3333), frontend (port 80). All env vars are read from a `.env` file at the repo root.
 
 ### Database Connection
 
@@ -413,6 +429,20 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - **CI:** GitHub Actions (`.github/workflows/ci.yml`) — backend tests (PostgreSQL + Valkey service containers), frontend tests + build check on push to `main` and PRs.
 - **CD:** Render auto-deploys on push to `main` (no deploy workflow needed).
 
+### Project Structure
+
+This is an **npm workspaces** monorepo (no NX). Each sub-project is self-contained:
+
+```
+fight-club/
+  package.json             # Root workspace (npm workspaces)
+  render.yaml              # Render Blueprint
+  docker-compose.dev.yml   # Dev environment
+  docker-compose.prod.yml  # VPS production environment
+  backend/                 # AdonisJS API
+  frontend/                # React SPA (Vite)
+```
+
 ### Demo Seeder
 
 `backend/database/seeders/main_seeder.ts` — idempotent seeder creating demo data:
@@ -422,27 +452,3 @@ Required backend vars are validated at startup by `start/env.ts`. The full list 
 - Plus random teachers, students, classes, schedules, enrollments, announcements, feedback, belts, and notifications.
 
 Run on production: `node ace.js db:seed` (via Render Shell).
-
-<!-- nx configuration start-->
-<!-- Leave the start & end comments to automatically receive updates. -->
-
-## General Guidelines for working with Nx
-
-- For navigating/exploring the workspace, invoke the `nx-workspace` skill first - it has patterns for querying projects, targets, and dependencies
-- When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
-- Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
-- You have access to the Nx MCP server and its tools, use them to help the user
-- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
-- NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
-
-## Scaffolding & Generators
-
-- For scaffolding tasks (creating apps, libs, project structure, setup), ALWAYS invoke the `nx-generate` skill FIRST before exploring or calling MCP tools
-
-## When to use nx_docs
-
-- USE for: advanced config options, unfamiliar flags, migration guides, plugin configuration, edge cases
-- DON'T USE for: basic generator syntax (`nx g @nx/react:app`), standard commands, things you already know
-- The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
-
-<!-- nx configuration end-->
