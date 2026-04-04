@@ -458,7 +458,9 @@ describe("ProfilePage", () => {
   it("calls avatar upload service when file is selected", async () => {
     const uploadSpy = vi
       .spyOn(avatarService.avatarService, "upload")
-      .mockResolvedValue({ avatar_url: "/uploads/avatars/new.jpg" });
+      .mockResolvedValue({
+        avatar_url: "/uploads/avatars/new.jpg",
+      } as MeResponse);
 
     renderPage(studentUser);
 
@@ -485,7 +487,7 @@ describe("ProfilePage", () => {
   it("calls avatar remove service when remove button clicked", async () => {
     const removeSpy = vi
       .spyOn(avatarService.avatarService, "remove")
-      .mockResolvedValue({ avatar_url: null });
+      .mockResolvedValue({ avatar_url: null } as unknown as MeResponse);
 
     const userWithAvatar: MeResponse = {
       ...studentUser,

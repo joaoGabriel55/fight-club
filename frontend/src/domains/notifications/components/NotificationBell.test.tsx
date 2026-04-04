@@ -43,7 +43,7 @@ describe("NotificationBell", () => {
           created_at: new Date().toISOString(),
         },
       ],
-      meta: { unread_count: 2 },
+      meta: { total: 2, page: 1, per_page: 20, unread_count: 2 },
     });
 
     renderBell();
@@ -58,7 +58,7 @@ describe("NotificationBell", () => {
       "getNotifications",
     ).mockResolvedValue({
       data: [],
-      meta: { unread_count: 0 },
+      meta: { total: 0, page: 1, per_page: 20, unread_count: 0 },
     });
 
     renderBell();
