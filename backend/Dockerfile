@@ -22,6 +22,7 @@ RUN node ace build
 FROM base AS production
 WORKDIR /app
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
 
 COPY --from=build /app/build ./
 RUN npm ci --omit=dev
