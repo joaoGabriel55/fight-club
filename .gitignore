@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+
+# Nx
+.nx/cache
+.nx/workspace-data
+.nx/polygraph
+
+# Vite
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+
+# Build outputs
+dist
+build
+tmp
+
+# Secrets
+.env
+.env.local
+.env.production.local
+.env.development.local
+
+# Frontend assets compiled code
+public/assets
+
+# Build tools specific
+npm-debug.log
+yarn-error.log
+
+# Editors specific
+.fleet
+.idea
+.vscode
+
+# Platform specific
+.DS_Store
+
+# Test results
+test-results/
+playwright-report/
+
+# Claude Code
+.claude/worktrees
+.claude/settings.local.json

@@ -2,7 +2,7 @@
 
 A privacy-first martial arts class management platform for teachers and students. Teachers create classes, manage schedules, send announcements, provide feedback, and track belt progression. Students join via invitation links, view their dashboard, and receive AI-powered improvement tips — all with strong data privacy guarantees including encryption at rest, GDPR-style data export, and full account erasure.
 
-Built as a full-stack monorepo with a clear separation between backend API and frontend SPA, deployed to Render.com with a Supabase PostgreSQL database.
+Built as a full-stack **Nx monorepo** with a clear separation between backend API and frontend SPA, deployed to Render.com with a Supabase PostgreSQL database.
 
 ## Tech Stack
 
@@ -14,6 +14,7 @@ Built as a full-stack monorepo with a clear separation between backend API and f
 | Database | PostgreSQL 16 (Supabase in production)                                |
 | Cache    | Redis / Valkey                                                        |
 | AI       | Anthropic Claude API (improvement tips)                               |
+| Monorepo | Nx (task orchestration, caching, affected commands)                   |
 | Infra    | Docker Compose (dev), Render.com (prod), GitHub Actions (CI)          |
 
 ## Live Demo
@@ -70,32 +71,58 @@ The dev compose file automatically runs migrations and seeds the database on sta
 ### Local (non-Docker)
 
 ```bash
-# Backend
-cd backend
+# Install all workspace dependencies from the root
 npm install
-cp .env.example .env   # fill in APP_KEY, DB_*, REDIS_*
+
+# Copy environment files
+cp backend/.env.example backend/.env   # fill in APP_KEY, DB_*, REDIS_*
+cp frontend/.env.example frontend/.env
+
+# Run backend
+cd backend
 node ace.js migration:run
 node ace.js db:seed
 node ace.js serve --hmr
 
 # Frontend (separate terminal)
 cd frontend
-npm install
-cp .env.example .env
 npm run dev
+```
+
+### Nx Commands
+
+Run tasks across the monorepo using Nx:
+
+```bash
+# Run a single project target
+npx nx build fight-club-frontend
+npx nx test fight-club-backend
+npx nx lint fight-club-backend
+
+# Run tasks across all projects
+npx nx run-many -t build test lint
+
+# Run only affected projects (based on git changes)
+npx nx affected -t build test lint
+
+# Visualize project dependency graph
+npx nx graph
 ```
 
 ## Running Tests
 
 ```bash
+# Run all tests across the monorepo
+npx nx run-many -t test
+
 # Backend (Japa)
-cd backend && npm run test
+npx nx test fight-club-backend
 
 # Single backend test file
 cd backend && node ace.js test --files="tests/functional/auth.spec.ts"
 
 # Frontend (Vitest)
-cd frontend && npm test
+npx nx test fight-club-frontend
 
 # Frontend watch mode
 cd frontend && npm run test:watch
@@ -182,6 +209,8 @@ The app is deployed as a **monorepo on Render.com** using [Render's monorepo sup
 
 ```
 fight-club/
+  nx.json              # Nx workspace configuration
+  package.json         # Root workspace with npm workspaces
   render.yaml          # Render Blueprint — defines both services
   backend/             # AdonisJS API  -> Render Web Service (rootDir: backend)
   frontend/            # React SPA     -> Render Static Site (rootDir: frontend)
@@ -223,7 +252,7 @@ The `render.yaml` file at the repository root defines the entire infrastructure.
 
 ### CI/CD
 
-- **CI:** GitHub Actions (`.github/workflows/ci.yml`) runs backend tests (with PostgreSQL + Valkey service containers), frontend tests, and build checks on every push to `main` and on PRs.
+- **CI:** GitHub Actions (`.github/workflows/ci.yml`) runs backend tests (with PostgreSQL + Valkey service containers), frontend tests, and build checks using Nx commands on every push to `main` and on PRs. Nx caching speeds up repeat runs.
 - **CD:** Render auto-deploys on push to `main` via native Git integration — no separate deploy workflow needed.
 
 ### Seeding Production
