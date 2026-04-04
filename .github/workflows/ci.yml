@@ -66,26 +66,28 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
-        # npm install instead of npm ci: workaround for npm optional deps bug
-        # (https://github.com/npm/cli/issues/4828) — lockfile generated on
-        # Windows lacks Linux-specific rollup binaries that Nx/Vite need.
         run: npm install
+        working-directory: backend
 
-      - name: Audit backend dependencies
+      - name: Audit dependencies
         run: npm audit --audit-level=moderate
         working-directory: backend
         continue-on-error: true
 
       - name: Lint
-        run: npx nx lint fight-club-backend
+        run: npm run lint
+        working-directory: backend
 
       - name: Typecheck
-        run: npx nx typecheck fight-club-backend
+        run: npm run typecheck
+        working-directory: backend
 
       - name: Test
-        run: npx nx test fight-club-backend
+        run: npm test
+        working-directory: backend
 
   frontend:
     name: Frontend - Audit, Lint, Test, Build
@@ -102,24 +104,28 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: npm
+          cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        # See backend job comment — same npm optional deps workaround.
         run: npm install
+        working-directory: frontend
 
-      - name: Audit frontend dependencies
+      - name: Audit dependencies
         run: npm audit --audit-level=moderate
         working-directory: frontend
         continue-on-error: true
 
       - name: Lint
-        run: npx nx lint fight-club-frontend
+        run: npm run lint
+        working-directory: frontend
 
       - name: Test
-        run: npx nx test fight-club-frontend
+        run: npm test
+        working-directory: frontend
 
       - name: Build check
-        run: npx nx build fight-club-frontend
+        run: npm run build
+        working-directory: frontend
 
   # e2e:
   #   name: E2E - Playwright
@@ -182,17 +188,25 @@ jobs:
   #       with:
   #         node-version: ${{ matrix.node-version }}
 
-  #     - name: Install dependencies
-  #       run: npm ci
+  #     - name: Install backend dependencies
+  #       run: npm install
+  #       working-directory: backend
+
+  #     - name: Install frontend dependencies
+  #       run: npm install
+  #       working-directory: frontend
 
   #     - name: Run migrations
-  #       run: npx nx migrate fight-club-backend
+  #       run: node ace.js migration:run
+  #       working-directory: backend
 
   #     - name: Start backend
-  #       run: npx nx dev fight-club-backend &
+  #       run: npm run dev &
+  #       working-directory: backend
 
   #     - name: Start frontend
-  #       run: npx nx dev fight-club-frontend &
+  #       run: npm run dev &
+  #       working-directory: frontend
 
   #     - name: Install Playwright browsers
   #       run: npx playwright install --with-deps chromium
@@ -210,7 +224,8 @@ jobs:
   #         done
 
   #     - name: Run E2E tests
-  #       run: npx nx e2e fight-club-frontend
+  #       run: npm run e2e
+  #       working-directory: frontend
   #       env:
   #         CI: true
   #         E2E_BASE_URL: http://localhost:3000
