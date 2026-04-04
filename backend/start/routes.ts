@@ -130,13 +130,15 @@ router.get('/api/v1/avatars/:fileName', async ({ params, response }) => {
   const { join } = await import('node:path')
   const { existsSync } = await import('node:fs')
   const { readFile } = await import('node:fs/promises')
-  const app = (await import('@adonisjs/core/services/app')).default
-  const envMod = (await import('#start/env')).default
+  const appMod = await import('@adonisjs/core/services/app')
+  const app = appMod.default
+  const envMod = await import('#start/env')
+  const envService = envMod.default
 
   const { default: User } = await import('#models/user')
 
   // Try local file first (dev/test)
-  if (envMod.get('NODE_ENV') !== 'production') {
+  if (envService.get('NODE_ENV') !== 'production') {
     const localPath = join(app.tmpPath(), 'uploads', 'avatars', params.fileName)
     if (existsSync(localPath)) {
       const buffer = await readFile(localPath)
@@ -173,7 +175,8 @@ router.get('/api/v1/avatars/:fileName', async ({ params, response }) => {
 
 // Dev-only: avatar upload proxy (frontend uploads directly to Supabase in production)
 router.post('/api/v1/dev/avatar-upload', async ({ request, response }) => {
-  const env = (await import('#start/env')).default
+  const envImport = await import('#start/env')
+  const env = envImport.default
   if (env.get('NODE_ENV') === 'production') {
     return response.status(404).send({ error: { message: 'Not found' } })
   }
@@ -191,7 +194,8 @@ router.post('/api/v1/dev/avatar-upload', async ({ request, response }) => {
   const { join } = await import('node:path')
   const { existsSync } = await import('node:fs')
   const { mkdir } = await import('node:fs/promises')
-  const app = (await import('@adonisjs/core/services/app')).default
+  const appMod2 = await import('@adonisjs/core/services/app')
+  const app = appMod2.default
   const dir = join(app.tmpPath(), 'uploads', 'avatars')
   if (!existsSync(dir)) {
     await mkdir(dir, { recursive: true })
@@ -205,7 +209,8 @@ router.post('/api/v1/dev/avatar-upload', async ({ request, response }) => {
 
 // Dev-only: serve avatar files
 router.get('/api/v1/dev/avatars/:fileName', async ({ params, response }) => {
-  const env = (await import('#start/env')).default
+  const envImport2 = await import('#start/env')
+  const env = envImport2.default
   if (env.get('NODE_ENV') === 'production') {
     return response.status(404).send({ error: { message: 'Not found' } })
   }
@@ -213,7 +218,8 @@ router.get('/api/v1/dev/avatars/:fileName', async ({ params, response }) => {
   const { join } = await import('node:path')
   const { existsSync } = await import('node:fs')
   const { readFile } = await import('node:fs/promises')
-  const app = (await import('@adonisjs/core/services/app')).default
+  const appMod3 = await import('@adonisjs/core/services/app')
+  const app = appMod3.default
   const filePath = join(app.tmpPath(), 'uploads', 'avatars', params.fileName)
 
   if (!existsSync(filePath)) {
