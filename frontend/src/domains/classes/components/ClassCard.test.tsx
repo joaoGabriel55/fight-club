@@ -67,8 +67,10 @@ describe("ClassCard", () => {
 
     renderCard();
 
-    // Click "Delete" — should show confirmation, not call service yet
-    fireEvent.click(await screen.findByText("Delete"));
+    // Click the trash icon button — should show confirmation, not call service yet
+    // The trash button is the only <button> before confirmation mode
+    const buttons = await screen.findAllByRole("button");
+    fireEvent.click(buttons[0]);
     expect(await screen.findByText(/Delete class\?/i)).toBeInTheDocument();
     expect(deleteSpy).not.toHaveBeenCalled();
 
