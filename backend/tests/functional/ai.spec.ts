@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
 import { DateTime } from 'luxon'
 import AuditLog from '#models/audit_log'
+import { AiService } from '#services/ai_service'
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -109,23 +110,30 @@ test.group('AI — Improvement Tips', (group) => {
   })
 
   test('happy path: student requests tips → 200 + tips string', async ({ client, assert }) => {
-    const teacher = await registerTeacher(client)
-    const student = await registerStudent(client)
-    const cls = await createClass(client, teacher.token)
-    const enrollment = await enrollStudent(client, teacher.token, student.token, cls.id)
+    const originalGenerateTips = AiService.generateTips
+    AiService.generateTips = async () => '1. Practice your guard passes\n2. Work on hip escapes'
 
-    const feedbackResp = await sendFeedback(client, teacher.token, enrollment.id)
-    const feedbackId = feedbackResp.body().id
+    try {
+      const teacher = await registerTeacher(client)
+      const student = await registerStudent(client)
+      const cls = await createClass(client, teacher.token)
+      const enrollment = await enrollStudent(client, teacher.token, student.token, cls.id)
 
-    const response = await client
-      .post('/api/v1/ai/improvement-tips')
-      .header('Authorization', `Bearer ${student.token}`)
-      .json({ feedback_id: feedbackId, focus_area: 'Ground game' })
+      const feedbackResp = await sendFeedback(client, teacher.token, enrollment.id)
+      const feedbackId = feedbackResp.body().id
 
-    response.assertStatus(200)
-    const body = response.body()
-    assert.isString(body.tips)
-    assert.isAbove(body.tips.length, 0)
+      const response = await client
+        .post('/api/v1/ai/improvement-tips')
+        .header('Authorization', `Bearer ${student.token}`)
+        .json({ feedback_id: feedbackId, focus_area: 'Ground game' })
+
+      response.assertStatus(200)
+      const body = response.body()
+      assert.isString(body.tips)
+      assert.isAbove(body.tips.length, 0)
+    } finally {
+      AiService.generateTips = originalGenerateTips
+    }
   }).timeout(30000)
 
   test('teacher calls endpoint → 403', async ({ client }) => {

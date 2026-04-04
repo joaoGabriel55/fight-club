@@ -1,11 +1,10 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import Anthropic from '@anthropic-ai/sdk'
-import env from '#start/env'
 import Feedback from '#models/feedback'
 import Enrollment from '#models/enrollment'
 import BeltProgress from '#models/belt_progress'
 import StudentProfile from '#models/student_profile'
 import { AuditLogService } from '#services/audit_log_service'
+import { AiService } from '#services/ai_service'
 import { improvementTipsValidator } from '#validators/ai_validator'
 
 const SYSTEM_PROMPT = `You are a martial arts training advisor knowledgeable about: Kickboxing, Muay Thai, Brazilian Jiu-Jitsu (BJJ), Boxing, Wrestling (Olympic, Greco-Roman, Folkstyle), Catch Wrestling, Judo, Brazilian Submission Wrestling (Luta Livre), Karate, Capoeira, Taekwondo, Sanda/Sanshou, and Sambo. Provide specific, actionable improvement tips. Do not ask for personal information. Do not reference the student by name.`
@@ -136,21 +135,10 @@ Focus area: ${focusArea}
 
 Based on ${feedbackContent ? 'this feedback' : 'your expertise in ' + martialArt}, provide 3-5 specific, actionable improvement tips tailored to this student's level and martial art. Format as a numbered list.`
 
-    const apiKey = env.get('ANTHROPIC_API_KEY')
-    if (!apiKey) {
+    const tips = await AiService.generateTips(SYSTEM_PROMPT, userPrompt)
+    if (tips === null) {
       return response.status(503).send({ error: { message: 'AI service not configured' } })
     }
-
-    const client = new Anthropic({ apiKey })
-
-    const aiResponse = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 500,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userPrompt }],
-    })
-
-    const tips = aiResponse.content[0].type === 'text' ? aiResponse.content[0].text : ''
 
     return response.status(200).send({ tips })
   }
