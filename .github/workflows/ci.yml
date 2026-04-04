@@ -68,7 +68,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # npm install instead of npm ci: workaround for npm optional deps bug
+        # (https://github.com/npm/cli/issues/4828) — lockfile generated on
+        # Windows lacks Linux-specific rollup binaries that Nx/Vite need.
+        run: npm install
 
       - name: Audit backend dependencies
         run: npm audit --audit-level=moderate
@@ -101,7 +104,8 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        # See backend job comment — same npm optional deps workaround.
+        run: npm install
 
       - name: Audit frontend dependencies
         run: npm audit --audit-level=moderate
