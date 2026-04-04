@@ -3,8 +3,7 @@ services:
     name: fight-club-api
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
-    preDeployCommand: node ace.js migration:run
-    dockerCommand: node bin/server.js
+    dockerCommand: node docker-entrypoint.js
     plan: free
     buildFilter:
       paths:
@@ -40,6 +39,8 @@ services:
         sync: false
       - key: ANTHROPIC_API_KEY
         sync: false
+      - key: MIGRATE
+        value: "true"
 
   - type: web
     name: fight-club-app
