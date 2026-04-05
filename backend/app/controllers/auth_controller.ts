@@ -85,7 +85,7 @@ export default class AuthController {
     response.cookie('auth_token', tokenValue, {
       httpOnly: true,
       secure: env.get('NODE_ENV') === 'production',
-      sameSite: 'lax',
+      sameSite: env.get('NODE_ENV') === 'production' ? 'none' : 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     })
@@ -132,7 +132,7 @@ export default class AuthController {
     response.cookie('auth_token', tokenValue, {
       httpOnly: true,
       secure: env.get('NODE_ENV') === 'production',
-      sameSite: 'lax',
+      sameSite: env.get('NODE_ENV') === 'production' ? 'none' : 'lax',
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 7 days in seconds
     })
