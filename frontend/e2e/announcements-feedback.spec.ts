@@ -134,13 +134,11 @@ test.describe("Announcements & Feedback", () => {
     await loginUI(page, TEACHER.email, TEACHER.password);
     await page.waitForURL("**/dashboard");
 
-    // Navigate to class → announcements tab
+    // Navigate to class announcements page
     await page.goto(`/classes/${classId}/announcements`);
-    await expect(page.getByRole("link", { name: "Announcements" })).toBeVisible(
-      {
-        timeout: 10000,
-      },
-    );
+    await expect(
+      page.getByRole("heading", { name: "AF E2E Class" }),
+    ).toBeVisible({ timeout: 10000 });
 
     // Empty state
     await expect(page.getByText("No announcements yet.")).toBeVisible();

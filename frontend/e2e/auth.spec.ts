@@ -38,7 +38,9 @@ test.describe("Auth: Full Teacher Flow", () => {
     await page.getByRole("button", { name: /Create account/i }).click();
 
     await page.waitForURL("**/dashboard", { timeout: 15000 });
-    await expect(page.getByText("TeacherAuth")).toBeVisible({ timeout: 10000 });
+    await expect(
+      page.getByRole("heading", { name: "Welcome back, TeacherAuth" }),
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test("Teacher creates a class with 2 schedules", async ({
@@ -85,7 +87,7 @@ test.describe("Auth: Full Teacher Flow", () => {
     await page.waitForURL("**/dashboard");
 
     await page.goto(`/classes/${classId}/invitations`);
-    await expect(page.getByRole("link", { name: "Invite links" })).toBeVisible({
+    await expect(page.getByRole("tab", { name: "Invite links" })).toBeVisible({
       timeout: 10000,
     });
 
