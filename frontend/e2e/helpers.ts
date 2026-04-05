@@ -52,6 +52,7 @@ export async function loginUI(page: Page, email: string, password: string) {
         .waitForURL("**/dashboard", { timeout: 10000 })
         .then(() => "ok" as const),
       page
+        .getByRole("main")
         .getByText("Too many requests")
         .waitFor({ state: "visible", timeout: 10000 })
         .then(() => "rate_limited" as const),
@@ -61,6 +62,8 @@ export async function loginUI(page: Page, email: string, password: string) {
 
     // Rate limited — wait for the 1-minute window to reset
     await page.waitForTimeout(62000);
+    // Reload to get past any rate limit state
+    await page.goto("/login");
   }
 
   // Final attempt — let it fail naturally if still rate-limited

@@ -41,7 +41,7 @@ test.describe("Invitation & Enrollment Workflow", () => {
     await page.waitForURL(/\/classes\/[a-f0-9-]+/, { timeout: 10000 });
 
     // Go to invitations tab
-    await page.getByRole("link", { name: "Invite links" }).click();
+    await page.getByRole("tab", { name: "Invite links" }).click();
     await page.waitForURL(/\/invitations/);
 
     // Generate invite link
@@ -151,7 +151,7 @@ test.describe("Invitation & Enrollment Workflow", () => {
     await page.getByText("E2E Test Class").click();
     await page.waitForURL(/\/classes\/[a-f0-9-]+/);
 
-    await page.getByRole("link", { name: "Invite links" }).click();
+    await page.getByRole("tab", { name: "Invite links" }).click();
     await page.waitForURL(/\/invitations/);
 
     // Generate button should NOT be visible

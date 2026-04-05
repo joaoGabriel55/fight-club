@@ -48,7 +48,7 @@ describe("useCreateClass", () => {
       schedules: [{ day_of_week: 1, start_time: "09:00", end_time: "10:00" }],
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
 
     expect(invalidateSpy).toHaveBeenCalledWith(
       expect.objectContaining({ queryKey: ["classes"] }),
@@ -70,7 +70,7 @@ describe("useCreateClass", () => {
       schedules: [{ day_of_week: 1, start_time: "09:00", end_time: "10:00" }],
     });
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
     expect(result.current.error?.message).toMatch(/validation failed/i);
   });
 });

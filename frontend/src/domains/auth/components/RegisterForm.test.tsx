@@ -257,7 +257,7 @@ describe("RegisterForm — form fields rendered", () => {
   it("has student profile type selected by default", () => {
     renderForm();
     const studentRadio = screen.getByLabelText(/student/i) as HTMLInputElement;
-    expect(studentRadio.checked).toBe(true);
+    expect(studentRadio.checked).toBeTruthy();
   });
 
   it("password field has type password", () => {

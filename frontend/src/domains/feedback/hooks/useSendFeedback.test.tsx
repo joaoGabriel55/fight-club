@@ -29,6 +29,6 @@ describe("useSendFeedback", () => {
 
     result.current.mutate({ content: "Nice work on the techniques!" });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
   });
 });
