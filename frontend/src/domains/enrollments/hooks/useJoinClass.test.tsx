@@ -40,7 +40,7 @@ describe("useJoinClass", () => {
     const { result } = renderHook(() => useJoinClass(), { wrapper });
     result.current.mutate({ token: "abc-token" });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(mockNavigate).toHaveBeenCalledWith({ to: "/dashboard" });
   });
 
@@ -55,7 +55,7 @@ describe("useJoinClass", () => {
     const { result } = renderHook(() => useJoinClass(), { wrapper });
     result.current.mutate({ token: "abc-token" });
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
     expect((result.current.error as ApiError).status).toBe(409);
     expect(mockNavigate).not.toHaveBeenCalled();
   });

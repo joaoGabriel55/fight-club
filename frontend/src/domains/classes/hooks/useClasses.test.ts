@@ -48,7 +48,7 @@ describe("useClasses", () => {
       wrapper: makeWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.data).toHaveLength(2);
   });
 
@@ -61,7 +61,7 @@ describe("useClasses", () => {
       wrapper: makeWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(result.current.data![0].id).toBe("class-1");
     expect(result.current.data![1].id).toBe("class-2");
   });
@@ -75,7 +75,7 @@ describe("useClasses", () => {
       wrapper: makeWrapper(),
     });
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
     expect(result.current.error?.message).toMatch(/network error/i);
   });
 });

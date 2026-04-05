@@ -26,7 +26,7 @@ describe("useNotifications", () => {
         createElement(QueryClientProvider, { client: qc }, children),
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
 
     // Check the query options via the query cache
     const queryCache = qc.getQueryCache();

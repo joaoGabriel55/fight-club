@@ -30,7 +30,7 @@ describe("useLogin", () => {
       password: "password1",
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(setTokenSpy).toHaveBeenCalledWith("tok-abc");
   });
 
@@ -42,7 +42,7 @@ describe("useLogin", () => {
     const { result } = renderHook(() => useLogin(), { wrapper: makeWrapper() });
     result.current.mutate({ email: "alice@example.com", password: "wrong" });
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
     expect(result.current.error?.message).toMatch(/invalid credentials/i);
   });
 });
