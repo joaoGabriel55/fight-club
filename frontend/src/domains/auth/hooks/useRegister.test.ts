@@ -34,13 +34,13 @@ describe("useRegister", () => {
       last_name: "Smith",
       email: "bob@example.com",
       password: "Secure123!",
-      password_confirmation: "Secure123!",
+      birth_date: "2000-01-01",
       profile_type: "student" as const,
     };
 
     result.current.mutate(input);
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(registerSpy).toHaveBeenCalledWith(input);
   });
 
@@ -60,11 +60,11 @@ describe("useRegister", () => {
       last_name: "Smith",
       email: "bob@example.com",
       password: "Secure123!",
-      password_confirmation: "Secure123!",
+      birth_date: "2000-01-01",
       profile_type: "student" as const,
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.isSuccess).toBeTruthy());
     expect(setTokenSpy).toHaveBeenCalledWith("tok-new");
   });
 
@@ -82,11 +82,11 @@ describe("useRegister", () => {
       last_name: "Smith",
       email: "bob@example.com",
       password: "Secure123!",
-      password_confirmation: "Secure123!",
+      birth_date: "2000-01-01",
       profile_type: "student" as const,
     });
 
-    await waitFor(() => expect(result.current.isError).toBe(true));
+    await waitFor(() => expect(result.current.isError).toBeTruthy());
     expect(result.current.error?.message).toMatch(/email already taken/i);
   });
 });

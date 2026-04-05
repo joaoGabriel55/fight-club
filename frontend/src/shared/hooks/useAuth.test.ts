@@ -61,7 +61,7 @@ describe("useAuth", () => {
       wrapper: makeWrapper(),
     });
 
-    expect(result.current.isAuthenticated).toBe(false);
+    expect(result.current.isAuthenticated).toBeFalsy();
   });
 
   it("logout clears token and removes queries", async () => {
