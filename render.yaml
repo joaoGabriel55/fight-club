@@ -57,6 +57,8 @@ services:
         - frontend/**
     envVars:
       - key: VITE_API_URL
+        value: ""
+      - key: API_UPSTREAM
         sync: false
       - key: VITE_APP_NAME
         value: Fight Club
