@@ -25,8 +25,11 @@ import { Route as AuthenticatedClassesNewRouteImport } from './routes/_authentic
 import { Route as AuthenticatedClassesClassIdRouteImport } from './routes/_authenticated/classes/$classId'
 import { Route as AuthenticatedClassesClassIdStudentsRouteImport } from './routes/_authenticated/classes/$classId/students'
 import { Route as AuthenticatedClassesClassIdSchedulesRouteImport } from './routes/_authenticated/classes/$classId/schedules'
+import { Route as AuthenticatedClassesClassIdReviewsRouteImport } from './routes/_authenticated/classes/$classId/reviews'
 import { Route as AuthenticatedClassesClassIdInvitationsRouteImport } from './routes/_authenticated/classes/$classId/invitations'
+import { Route as AuthenticatedClassesClassIdEditRouteImport } from './routes/_authenticated/classes/$classId/edit'
 import { Route as AuthenticatedClassesClassIdAnnouncementsRouteImport } from './routes/_authenticated/classes/$classId/announcements'
+import { Route as AuthenticatedClassesClassIdStudentsStudentIdRouteImport } from './routes/_authenticated/classes/$classId/students/$studentId'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -113,10 +116,22 @@ const AuthenticatedClassesClassIdSchedulesRoute =
     path: '/schedules',
     getParentRoute: () => AuthenticatedClassesClassIdRoute,
   } as any)
+const AuthenticatedClassesClassIdReviewsRoute =
+  AuthenticatedClassesClassIdReviewsRouteImport.update({
+    id: '/reviews',
+    path: '/reviews',
+    getParentRoute: () => AuthenticatedClassesClassIdRoute,
+  } as any)
 const AuthenticatedClassesClassIdInvitationsRoute =
   AuthenticatedClassesClassIdInvitationsRouteImport.update({
     id: '/invitations',
     path: '/invitations',
+    getParentRoute: () => AuthenticatedClassesClassIdRoute,
+  } as any)
+const AuthenticatedClassesClassIdEditRoute =
+  AuthenticatedClassesClassIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
     getParentRoute: () => AuthenticatedClassesClassIdRoute,
   } as any)
 const AuthenticatedClassesClassIdAnnouncementsRoute =
@@ -124,6 +139,12 @@ const AuthenticatedClassesClassIdAnnouncementsRoute =
     id: '/announcements',
     path: '/announcements',
     getParentRoute: () => AuthenticatedClassesClassIdRoute,
+  } as any)
+const AuthenticatedClassesClassIdStudentsStudentIdRoute =
+  AuthenticatedClassesClassIdStudentsStudentIdRouteImport.update({
+    id: '/$studentId',
+    path: '/$studentId',
+    getParentRoute: () => AuthenticatedClassesClassIdStudentsRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -141,9 +162,12 @@ export interface FileRoutesByFullPath {
   '/classes/new': typeof AuthenticatedClassesNewRoute
   '/classes/': typeof AuthenticatedClassesIndexRoute
   '/classes/$classId/announcements': typeof AuthenticatedClassesClassIdAnnouncementsRoute
+  '/classes/$classId/edit': typeof AuthenticatedClassesClassIdEditRoute
   '/classes/$classId/invitations': typeof AuthenticatedClassesClassIdInvitationsRoute
+  '/classes/$classId/reviews': typeof AuthenticatedClassesClassIdReviewsRoute
   '/classes/$classId/schedules': typeof AuthenticatedClassesClassIdSchedulesRoute
-  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRoute
+  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
+  '/classes/$classId/students/$studentId': typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,9 +184,12 @@ export interface FileRoutesByTo {
   '/classes/new': typeof AuthenticatedClassesNewRoute
   '/classes': typeof AuthenticatedClassesIndexRoute
   '/classes/$classId/announcements': typeof AuthenticatedClassesClassIdAnnouncementsRoute
+  '/classes/$classId/edit': typeof AuthenticatedClassesClassIdEditRoute
   '/classes/$classId/invitations': typeof AuthenticatedClassesClassIdInvitationsRoute
+  '/classes/$classId/reviews': typeof AuthenticatedClassesClassIdReviewsRoute
   '/classes/$classId/schedules': typeof AuthenticatedClassesClassIdSchedulesRoute
-  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRoute
+  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
+  '/classes/$classId/students/$studentId': typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,9 +208,12 @@ export interface FileRoutesById {
   '/_authenticated/classes/new': typeof AuthenticatedClassesNewRoute
   '/_authenticated/classes/': typeof AuthenticatedClassesIndexRoute
   '/_authenticated/classes/$classId/announcements': typeof AuthenticatedClassesClassIdAnnouncementsRoute
+  '/_authenticated/classes/$classId/edit': typeof AuthenticatedClassesClassIdEditRoute
   '/_authenticated/classes/$classId/invitations': typeof AuthenticatedClassesClassIdInvitationsRoute
+  '/_authenticated/classes/$classId/reviews': typeof AuthenticatedClassesClassIdReviewsRoute
   '/_authenticated/classes/$classId/schedules': typeof AuthenticatedClassesClassIdSchedulesRoute
-  '/_authenticated/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRoute
+  '/_authenticated/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
+  '/_authenticated/classes/$classId/students/$studentId': typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -202,9 +232,12 @@ export interface FileRouteTypes {
     | '/classes/new'
     | '/classes/'
     | '/classes/$classId/announcements'
+    | '/classes/$classId/edit'
     | '/classes/$classId/invitations'
+    | '/classes/$classId/reviews'
     | '/classes/$classId/schedules'
     | '/classes/$classId/students'
+    | '/classes/$classId/students/$studentId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -221,9 +254,12 @@ export interface FileRouteTypes {
     | '/classes/new'
     | '/classes'
     | '/classes/$classId/announcements'
+    | '/classes/$classId/edit'
     | '/classes/$classId/invitations'
+    | '/classes/$classId/reviews'
     | '/classes/$classId/schedules'
     | '/classes/$classId/students'
+    | '/classes/$classId/students/$studentId'
   id:
     | '__root__'
     | '/'
@@ -241,9 +277,12 @@ export interface FileRouteTypes {
     | '/_authenticated/classes/new'
     | '/_authenticated/classes/'
     | '/_authenticated/classes/$classId/announcements'
+    | '/_authenticated/classes/$classId/edit'
     | '/_authenticated/classes/$classId/invitations'
+    | '/_authenticated/classes/$classId/reviews'
     | '/_authenticated/classes/$classId/schedules'
     | '/_authenticated/classes/$classId/students'
+    | '/_authenticated/classes/$classId/students/$studentId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -368,11 +407,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassesClassIdSchedulesRouteImport
       parentRoute: typeof AuthenticatedClassesClassIdRoute
     }
+    '/_authenticated/classes/$classId/reviews': {
+      id: '/_authenticated/classes/$classId/reviews'
+      path: '/reviews'
+      fullPath: '/classes/$classId/reviews'
+      preLoaderRoute: typeof AuthenticatedClassesClassIdReviewsRouteImport
+      parentRoute: typeof AuthenticatedClassesClassIdRoute
+    }
     '/_authenticated/classes/$classId/invitations': {
       id: '/_authenticated/classes/$classId/invitations'
       path: '/invitations'
       fullPath: '/classes/$classId/invitations'
       preLoaderRoute: typeof AuthenticatedClassesClassIdInvitationsRouteImport
+      parentRoute: typeof AuthenticatedClassesClassIdRoute
+    }
+    '/_authenticated/classes/$classId/edit': {
+      id: '/_authenticated/classes/$classId/edit'
+      path: '/edit'
+      fullPath: '/classes/$classId/edit'
+      preLoaderRoute: typeof AuthenticatedClassesClassIdEditRouteImport
       parentRoute: typeof AuthenticatedClassesClassIdRoute
     }
     '/_authenticated/classes/$classId/announcements': {
@@ -382,26 +435,53 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassesClassIdAnnouncementsRouteImport
       parentRoute: typeof AuthenticatedClassesClassIdRoute
     }
+    '/_authenticated/classes/$classId/students/$studentId': {
+      id: '/_authenticated/classes/$classId/students/$studentId'
+      path: '/$studentId'
+      fullPath: '/classes/$classId/students/$studentId'
+      preLoaderRoute: typeof AuthenticatedClassesClassIdStudentsStudentIdRouteImport
+      parentRoute: typeof AuthenticatedClassesClassIdStudentsRoute
+    }
   }
 }
 
+interface AuthenticatedClassesClassIdStudentsRouteChildren {
+  AuthenticatedClassesClassIdStudentsStudentIdRoute: typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
+}
+
+const AuthenticatedClassesClassIdStudentsRouteChildren: AuthenticatedClassesClassIdStudentsRouteChildren =
+  {
+    AuthenticatedClassesClassIdStudentsStudentIdRoute:
+      AuthenticatedClassesClassIdStudentsStudentIdRoute,
+  }
+
+const AuthenticatedClassesClassIdStudentsRouteWithChildren =
+  AuthenticatedClassesClassIdStudentsRoute._addFileChildren(
+    AuthenticatedClassesClassIdStudentsRouteChildren,
+  )
+
 interface AuthenticatedClassesClassIdRouteChildren {
   AuthenticatedClassesClassIdAnnouncementsRoute: typeof AuthenticatedClassesClassIdAnnouncementsRoute
+  AuthenticatedClassesClassIdEditRoute: typeof AuthenticatedClassesClassIdEditRoute
   AuthenticatedClassesClassIdInvitationsRoute: typeof AuthenticatedClassesClassIdInvitationsRoute
+  AuthenticatedClassesClassIdReviewsRoute: typeof AuthenticatedClassesClassIdReviewsRoute
   AuthenticatedClassesClassIdSchedulesRoute: typeof AuthenticatedClassesClassIdSchedulesRoute
-  AuthenticatedClassesClassIdStudentsRoute: typeof AuthenticatedClassesClassIdStudentsRoute
+  AuthenticatedClassesClassIdStudentsRoute: typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
 }
 
 const AuthenticatedClassesClassIdRouteChildren: AuthenticatedClassesClassIdRouteChildren =
   {
     AuthenticatedClassesClassIdAnnouncementsRoute:
       AuthenticatedClassesClassIdAnnouncementsRoute,
+    AuthenticatedClassesClassIdEditRoute: AuthenticatedClassesClassIdEditRoute,
     AuthenticatedClassesClassIdInvitationsRoute:
       AuthenticatedClassesClassIdInvitationsRoute,
+    AuthenticatedClassesClassIdReviewsRoute:
+      AuthenticatedClassesClassIdReviewsRoute,
     AuthenticatedClassesClassIdSchedulesRoute:
       AuthenticatedClassesClassIdSchedulesRoute,
     AuthenticatedClassesClassIdStudentsRoute:
-      AuthenticatedClassesClassIdStudentsRoute,
+      AuthenticatedClassesClassIdStudentsRouteWithChildren,
   }
 
 const AuthenticatedClassesClassIdRouteWithChildren =

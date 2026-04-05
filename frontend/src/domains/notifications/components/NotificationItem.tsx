@@ -1,5 +1,6 @@
 import type { NotificationItem as NotificationType } from "../types/notification.types";
 import { useMarkRead } from "../hooks/useMarkRead";
+import { useNavigate } from "@tanstack/react-router";
 
 interface NotificationItemProps {
   notification: NotificationType;
@@ -7,11 +8,19 @@ interface NotificationItemProps {
 
 export function NotificationItem({ notification }: NotificationItemProps) {
   const { mutate: markRead } = useMarkRead();
+  const navigate = useNavigate();
   const isUnread = notification.read_at === null;
 
   const handleClick = () => {
     if (isUnread) {
       markRead(notification.id);
+    }
+
+    if (notification.type === "class_session_ended") {
+      navigate({
+        to: "/enrollments",
+        search: { reviewClassId: notification.data?.classId },
+      });
     }
   };
 

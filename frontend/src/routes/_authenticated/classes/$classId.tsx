@@ -9,7 +9,7 @@ import { useClass } from "@/domains/classes/hooks/useClass";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Settings } from "lucide-react";
 import {
   Tabs,
   TabsContent,
@@ -77,14 +77,24 @@ function ClassDetailLayout() {
             </h1>
             <p className="text-muted-foreground">{currentClass.martial_art}</p>
           </div>
-          {currentClass.has_belt_system && (
-            <Badge
-              variant="outline"
-              className="text-yellow-600 border-yellow-600 dark:text-yellow-400 dark:border-yellow-400"
-            >
-              Belt system
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {currentClass.has_belt_system && (
+              <Badge
+                variant="outline"
+                className="text-yellow-600 border-yellow-600 dark:text-yellow-400 dark:border-yellow-400"
+              >
+                Belt system
+              </Badge>
+            )}
+            {isTeacher && (
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/classes/$classId/edit" params={{ classId }}>
+                  <Settings className="h-3 w-3 mr-1" />
+                  Edit
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
         {currentClass.description && (
           <p className="text-sm text-muted-foreground">
@@ -94,7 +104,7 @@ function ClassDetailLayout() {
       </div>
 
       {/* Tab navigation */}
-      <Tabs defaultValue="overview">
+      <Tabs defaultValue="overview" className="overscroll-x-contain">
         <TabsList variant="line">
           {isTeacher && (
             <TabsTrigger
@@ -160,6 +170,23 @@ function ClassDetailLayout() {
               Invite links
             </Link>
           </TabsTrigger>
+          {isTeacher && (
+            <TabsTrigger
+              value="reviews"
+              {...{ "data-active": currentTab === "reviews" }}
+              className="p-4"
+              asChild
+            >
+              <Link
+                to="/classes/$classId/reviews"
+                params={{ classId }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
+                activeOptions={{ exact: true }}
+              >
+                Reviews
+              </Link>
+            </TabsTrigger>
+          )}
         </TabsList>
       </Tabs>
 

@@ -259,8 +259,7 @@ export default class ClassesController {
 
   /**
    * GET /api/v1/classes/:id/students
-   * Returns enrolled students with minimal PII — no email, last_name, birth_date, weight_kg.
-   * Enrollment table is added in a later ticket; returns empty array until then.
+   * Returns enrolled students with weight, height, and belt info.
    */
   async students({ auth, params, response }: HttpContext) {
     const user = auth.getUserOrFail()
@@ -282,7 +281,8 @@ export default class ClassesController {
     const enrollments = await Enrollment.query()
       .where('class_id', cls.id)
       .where('status', 'active')
-      .preload('student')
+      .preload('student', (q) => q.preload('studentProfile'))
+      .preload('beltProgress', (q) => q.orderBy('awarded_at', 'desc').limit(1))
       .orderBy('joined_at', 'asc')
 
     return response.status(200).send(
@@ -291,6 +291,10 @@ export default class ClassesController {
         enrollment_id: enr.id,
         first_name: enr.student.firstName,
         enrolled_at: enr.joinedAt,
+        weight_kg: enr.student.studentProfile?.weightKg ?? null,
+        height_cm: enr.student.studentProfile?.heightCm ?? null,
+        fight_experience: enr.student.studentProfile?.fightExperience ?? null,
+        belt_level: enr.beltProgress[0]?.beltName ?? null,
       }))
     )
   }

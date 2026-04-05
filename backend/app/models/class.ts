@@ -6,6 +6,7 @@ import ClassSchedule from '#models/class_schedule'
 import Invitation from '#models/invitation'
 import Enrollment from '#models/enrollment'
 import Announcement from '#models/announcement'
+import Review from '#models/review'
 
 export default class Class extends BaseModel {
   static table = 'classes'
@@ -51,4 +52,7 @@ export default class Class extends BaseModel {
 
   @hasMany(() => Announcement)
   declare announcements: HasMany<typeof Announcement>
+
+  @hasMany(() => Review)
+  declare reviews: HasMany<typeof Review>
 }

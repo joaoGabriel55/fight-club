@@ -5,6 +5,8 @@ import CleanupExpiredInvitationsJob from '#jobs/cleanup_expired_invitations_job'
 import PurgeExpiredNotificationsJob from '#jobs/purge_expired_notifications_job'
 import PurgeExpiredTokensJob from '#jobs/purge_expired_tokens_job'
 import PaymentReminderJob from '#jobs/payment_reminder_job'
+import NotifyClassStartReminderJob from '#jobs/notify_class_start_reminder_job'
+import NotifySessionReviewJob from '#jobs/notify_session_review_job'
 
 const connection = {
   host: env.get('REDIS_HOST'),
@@ -21,6 +23,8 @@ const jobMap: Record<string, () => Promise<number>> = {
   'purge-expired-notifications': () => new PurgeExpiredNotificationsJob().run(),
   'purge-expired-tokens': () => new PurgeExpiredTokensJob().run(),
   'payment-reminder': () => new PaymentReminderJob().run(),
+  'notify-class-start-reminder': () => new NotifyClassStartReminderJob().run(),
+  'notify-session-review': () => new NotifySessionReviewJob().run(),
 }
 
 const worker = new Worker(
@@ -49,6 +53,8 @@ async function registerRepeatableJobs() {
   await queue.upsertJobScheduler('purge-expired-notifications', { pattern: '30 2 * * *' })
   await queue.upsertJobScheduler('purge-expired-tokens', { pattern: '0 3 * * *' })
   await queue.upsertJobScheduler('payment-reminder', { pattern: '0 9 1 * *' })
+  await queue.upsertJobScheduler('notify-class-start-reminder', { pattern: '0 * * * *' })
+  await queue.upsertJobScheduler('notify-session-review', { pattern: '0 18 * * *' })
 
   logger.info('BullMQ scheduled jobs registered with Valkey')
 }

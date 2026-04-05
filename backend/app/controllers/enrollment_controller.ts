@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import emitter from '@adonisjs/core/services/emitter'
 import { DateTime } from 'luxon'
+import Class from '#models/class'
 import Invitation from '#models/invitation'
 import Enrollment from '#models/enrollment'
 import StudentEnrolled from '#events/student_enrolled'
@@ -199,6 +200,48 @@ export default class EnrollmentController {
       resourceId: params.id,
       ipAddress: request.ip(),
       metadata: { class_id: enrollment.classId },
+    })
+
+    return response.status(204).send(null)
+  }
+
+  /**
+   * DELETE /api/v1/classes/:classId/students/:enrollmentId
+   * Remove a student from a class (teacher only).
+   */
+  async removeStudent({ auth, params, request, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    if (user.profileType !== 'teacher') {
+      return response.status(403).send({ error: { message: 'Forbidden' } })
+    }
+
+    const cls = await Class.query().where('id', params.classId).whereNull('deleted_at').first()
+
+    if (!cls) {
+      return response.status(404).send({ error: { message: 'Class not found' } })
+    }
+
+    if (cls.teacherId !== user.id) {
+      return response.status(403).send({ error: { message: 'Forbidden' } })
+    }
+
+    const enrollment = await Enrollment.query()
+      .where('id', params.enrollmentId)
+      .where('class_id', cls.id)
+      .where('status', 'active')
+      .first()
+
+    if (!enrollment) {
+      return response.status(404).send({ error: { message: 'Enrollment not found' } })
+    }
+
+    await enrollment.delete()
+
+    await AuditLogService.log(user.id, 'student_removed', 'enrollment', {
+      resourceId: params.enrollmentId,
+      ipAddress: request.ip(),
+      metadata: { class_id: cls.id, student_id: enrollment.studentId },
     })
 
     return response.status(204).send(null)

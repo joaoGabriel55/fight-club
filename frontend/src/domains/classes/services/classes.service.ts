@@ -70,4 +70,11 @@ export const classesService = {
       { method: "DELETE" },
     );
   },
+
+  async removeStudent(classId: string, enrollmentId: string): Promise<void> {
+    await apiClient<void>(
+      `/api/v1/classes/${classId}/students/${enrollmentId}`,
+      { method: "DELETE" },
+    );
+  },
 };

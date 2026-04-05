@@ -1,8 +1,9 @@
-import { BaseModel, belongsTo, column } from '@adonisjs/lucid/orm'
-import type { BelongsTo } from '@adonisjs/lucid/types/relations'
+import { BaseModel, belongsTo, column, hasMany } from '@adonisjs/lucid/orm'
+import type { BelongsTo, HasMany } from '@adonisjs/lucid/types/relations'
 import { DateTime } from 'luxon'
 import Class from '#models/class'
 import User from '#models/user'
+import BeltProgress from '#models/belt_progress'
 
 export default class Enrollment extends BaseModel {
   static table = 'enrollments'
@@ -33,4 +34,7 @@ export default class Enrollment extends BaseModel {
 
   @belongsTo(() => User, { foreignKey: 'studentId' })
   declare student: BelongsTo<typeof User>
+
+  @hasMany(() => BeltProgress)
+  declare beltProgress: HasMany<typeof BeltProgress>
 }

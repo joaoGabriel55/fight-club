@@ -22,6 +22,7 @@ const BeltProgressController = () => import('#controllers/belt_progress_controll
 const NotificationsController = () => import('#controllers/notifications_controller')
 const AiController = () => import('#controllers/ai_controller')
 const PrivacyController = () => import('#controllers/privacy_controller')
+const ReviewsController = () => import('#controllers/reviews_controller')
 
 router.get('/health', async ({ response }) => {
   return response.ok({ status: 'ok' })
@@ -53,6 +54,7 @@ router
     router.put('/:id', [ClassesController, 'update'])
     router.delete('/:id', [ClassesController, 'destroy'])
     router.get('/:id/students', [ClassesController, 'students'])
+    router.delete('/:classId/students/:enrollmentId', [EnrollmentController, 'removeStudent'])
 
     router
       .group(() => {
@@ -76,6 +78,16 @@ router
         router.delete('/:id', [AnnouncementsController, 'destroy'])
       })
       .prefix('/:classId/announcements')
+
+    // Reviews for a class (teacher and student)
+    router
+      .group(() => {
+        router.post('/', [ReviewsController, 'store'])
+        router.get('/', [ReviewsController, 'index'])
+        router.get('/summary', [ReviewsController, 'summary'])
+        router.put('/:id', [ReviewsController, 'update'])
+      })
+      .prefix('/:classId/reviews')
   })
   .prefix('/api/v1/classes')
   .use(middleware.auth())
@@ -109,6 +121,9 @@ router
     // Student aggregate views
     router.get('/announcements', [AnnouncementsController, 'myAnnouncements'])
     router.get('/feedback', [FeedbackController, 'myFeedback'])
+
+    // My reviews (student)
+    router.get('/my-reviews/:classId', [ReviewsController, 'myReviews'])
 
     // AI
     router.post('/ai/improvement-tips', [AiController, 'improvementTips']).use(aiRateLimit)
