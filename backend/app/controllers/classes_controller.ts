@@ -291,6 +291,9 @@ export default class ClassesController {
         enrollment_id: enr.id,
         first_name: enr.student.firstName,
         enrolled_at: enr.joinedAt,
+        birth_date: enr.student.birthDate,
+        weight_kg: enr.student.studentProfile?.weightKg ?? null,
+        height_cm: enr.student.studentProfile?.heightCm ?? null,
         fight_experience: enr.student.studentProfile?.fightExperience ?? null,
         belt_level: enr.beltProgress[0]?.beltName ?? null,
       }))

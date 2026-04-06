@@ -31,6 +31,9 @@ export interface ClassStudent {
   enrollment_id: string;
   first_name: string;
   enrolled_at: string;
+  birth_date: string | null;
+  weight_kg: string | null;
+  height_cm: string | null;
   fight_experience: Array<{
     martial_art: string;
     experience_years: number;
