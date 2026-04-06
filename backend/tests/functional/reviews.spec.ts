@@ -613,9 +613,7 @@ test.group('Reviews — Enrollment reviews', (group) => {
   })
 
   test('non-enrolled student → 404', async ({ client }) => {
-    const teacher = await registerTeacher(client)
     const student = await registerStudent(client)
-    const cls = await createClass(client, teacher.token)
 
     const response = await client
       .get(`/api/v1/enrollments/00000000-0000-0000-0000-000000000000/reviews`)
@@ -626,7 +624,6 @@ test.group('Reviews — Enrollment reviews', (group) => {
 
   test('teacher → 403', async ({ client }) => {
     const teacher = await registerTeacher(client)
-    const cls = await createClass(client, teacher.token)
 
     const response = await client
       .get(`/api/v1/enrollments/00000000-0000-0000-0000-000000000000/reviews`)
