@@ -1,5 +1,7 @@
 import type { NotificationItem as NotificationType } from "../types/notification.types";
 import { useMarkRead } from "../hooks/useMarkRead";
+import { useNavigate } from "@tanstack/react-router";
+import { format } from "date-fns";
 
 interface NotificationItemProps {
   notification: NotificationType;
@@ -7,11 +9,19 @@ interface NotificationItemProps {
 
 export function NotificationItem({ notification }: NotificationItemProps) {
   const { mutate: markRead } = useMarkRead();
+  const navigate = useNavigate();
   const isUnread = notification.read_at === null;
 
   const handleClick = () => {
     if (isUnread) {
       markRead(notification.id);
+    }
+
+    if (notification.type === "class_session_ended") {
+      navigate({
+        to: "/enrollments",
+        search: { reviewClassId: notification.data?.classId },
+      });
     }
   };
 
@@ -38,7 +48,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
             </p>
           )}
           <p className="text-xs text-muted-foreground mt-1">
-            {new Date(notification.created_at).toLocaleString()}
+            {format(notification.created_at, "yyyy-MM-dd HH:mm")}
           </p>
         </div>
       </div>

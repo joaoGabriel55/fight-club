@@ -259,8 +259,7 @@ export default class ClassesController {
 
   /**
    * GET /api/v1/classes/:id/students
-   * Returns enrolled students with minimal PII — no email, last_name, birth_date, weight_kg.
-   * Enrollment table is added in a later ticket; returns empty array until then.
+   * Returns enrolled students with weight, height, and belt info.
    */
   async students({ auth, params, response }: HttpContext) {
     const user = auth.getUserOrFail()
@@ -282,7 +281,8 @@ export default class ClassesController {
     const enrollments = await Enrollment.query()
       .where('class_id', cls.id)
       .where('status', 'active')
-      .preload('student')
+      .preload('student', (q) => q.preload('studentProfile'))
+      .preload('beltProgress', (q) => q.orderBy('awarded_at', 'desc').limit(1))
       .orderBy('joined_at', 'asc')
 
     return response.status(200).send(
@@ -291,7 +291,58 @@ export default class ClassesController {
         enrollment_id: enr.id,
         first_name: enr.student.firstName,
         enrolled_at: enr.joinedAt,
+        birth_date: enr.student.birthDate,
+        weight_kg: enr.student.studentProfile?.weightKg ?? null,
+        height_cm: enr.student.studentProfile?.heightCm ?? null,
+        fight_experience: enr.student.studentProfile?.fightExperience ?? null,
+        belt_level: enr.beltProgress[0]?.beltName ?? null,
       }))
     )
+  }
+
+  /**
+   * GET /api/v1/classes/:id/students/:studentId
+   * Returns detailed student profile including weight, height for the teacher view.
+   */
+  async studentDetail({ auth, params, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    if (user.profileType !== 'teacher') {
+      return response.status(403).send({ error: { message: 'Forbidden' } })
+    }
+
+    const cls = await Class.query().where('id', params.id).whereNull('deleted_at').first()
+
+    if (!cls) {
+      return response.status(404).send({ error: { message: 'Not found' } })
+    }
+
+    if (cls.teacherId !== user.id) {
+      return response.status(403).send({ error: { message: 'Forbidden' } })
+    }
+
+    const enrollment = await Enrollment.query()
+      .where('class_id', cls.id)
+      .where('student_id', params.studentId)
+      .where('status', 'active')
+      .preload('student', (q) => q.preload('studentProfile'))
+      .preload('beltProgress', (q) => q.orderBy('awarded_at', 'desc').limit(1))
+      .first()
+
+    if (!enrollment) {
+      return response.status(404).send({ error: { message: 'Student not found in this class' } })
+    }
+
+    return response.status(200).send({
+      id: enrollment.studentId,
+      enrollment_id: enrollment.id,
+      first_name: enrollment.student.firstName,
+      birth_date: enrollment.student.birthDate,
+      enrolled_at: enrollment.joinedAt,
+      weight_kg: enrollment.student.studentProfile?.weightKg ?? null,
+      height_cm: enrollment.student.studentProfile?.heightCm ?? null,
+      fight_experience: enrollment.student.studentProfile?.fightExperience ?? null,
+      belt_level: enrollment.beltProgress[0]?.beltName ?? null,
+    })
   }
 }

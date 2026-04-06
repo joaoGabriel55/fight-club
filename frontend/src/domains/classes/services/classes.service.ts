@@ -4,6 +4,7 @@ import type {
   Class,
   ClassListItem,
   ClassStudent,
+  ClassStudentDetail,
   CreateClassInput,
   UpdateClassInput,
   CreateScheduleInput,
@@ -43,6 +44,10 @@ export const classesService = {
     return apiClient<ClassStudent[]>(`/api/v1/classes/${id}/students`);
   },
 
+  async getStudentDetail(classId: string, studentId: string): Promise<ClassStudentDetail> {
+    return apiClient<ClassStudentDetail>(`/api/v1/classes/${classId}/students/${studentId}`);
+  },
+
   async addSchedule(
     classId: string,
     data: CreateScheduleInput,
@@ -67,6 +72,13 @@ export const classesService = {
   async deleteSchedule(classId: string, scheduleId: string): Promise<void> {
     await apiClient<void>(
       `/api/v1/classes/${classId}/schedules/${scheduleId}`,
+      { method: "DELETE" },
+    );
+  },
+
+  async removeStudent(classId: string, enrollmentId: string): Promise<void> {
+    await apiClient<void>(
+      `/api/v1/classes/${classId}/students/${enrollmentId}`,
       { method: "DELETE" },
     );
   },

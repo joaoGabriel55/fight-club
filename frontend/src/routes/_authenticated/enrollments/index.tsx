@@ -11,9 +11,9 @@ import {
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { BookOpen, Calendar, LogOut as LeaveIcon } from "lucide-react";
+import { BookOpen, Calendar, LogOut as LeaveIcon, Star } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/enrollments")({
+export const Route = createFileRoute("/_authenticated/enrollments/")({
   component: EnrollmentsPage,
 });
 
@@ -112,6 +112,18 @@ function EnrollmentsPage() {
                     ))}
                   </div>
                 )}
+
+                <div className="pt-3 border-t flex items-center justify-between">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link
+                      to="/enrollments/$enrollmentId/reviews"
+                      params={{ enrollmentId: enrollment.id }}
+                    >
+                      <Star className="h-4 w-4" />
+                      View reviews
+                    </Link>
+                  </Button>
+                </div>
               </CardContent>
 
               <CardFooter className="justify-between border-t pt-4">

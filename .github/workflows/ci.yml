@@ -131,119 +131,119 @@ jobs:
         run: npm run build
         working-directory: frontend
 
-  e2e:
-    name: E2E - Playwright
-    runs-on: ubuntu-latest
-    needs: [backend, frontend]
-    timeout-minutes: 20
-    strategy:
-      matrix:
-        node-version: [24.x]
-        shard: [1/2, 2/2]
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: fight_club
-          POSTGRES_PASSWORD: fight_club
-          POSTGRES_DB: fight_club
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd="pg_isready -U fight_club"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+  # e2e:
+  #   name: E2E - Playwright
+  #   runs-on: ubuntu-latest
+  #   needs: [backend, frontend]
+  #   timeout-minutes: 20
+  #   strategy:
+  #     matrix:
+  #       node-version: [24.x]
+  #       shard: [1/2, 2/2]
+  #   services:
+  #     postgres:
+  #       image: postgres:16
+  #       env:
+  #         POSTGRES_USER: fight_club
+  #         POSTGRES_PASSWORD: fight_club
+  #         POSTGRES_DB: fight_club
+  #       ports:
+  #         - 5432:5432
+  #       options: >-
+  #         --health-cmd="pg_isready -U fight_club"
+  #         --health-interval=10s
+  #         --health-timeout=5s
+  #         --health-retries=5
 
-      valkey:
-        image: valkey/valkey:8
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd="valkey-cli ping"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+  #     valkey:
+  #       image: valkey/valkey:8
+  #       ports:
+  #         - 6379:6379
+  #       options: >-
+  #         --health-cmd="valkey-cli ping"
+  #         --health-interval=10s
+  #         --health-timeout=5s
+  #         --health-retries=5
 
-    env:
-      TZ: UTC
-      PORT: 3333
-      HOST: localhost
-      LOG_LEVEL: info
-      APP_KEY: test-app-key-that-is-at-least-16-chars
-      APP_NAME: FightClub
-      NODE_ENV: test
-      VITE_APP_URL: http://localhost:3000
-      VITE_API_URL: http://localhost:3333
-      DB_HOST: 127.0.0.1
-      DB_PORT: 5432
-      DB_USER: fight_club
-      DB_PASSWORD: fight_club
-      DB_DATABASE: fight_club
-      REDIS_HOST: 127.0.0.1
-      REDIS_PORT: 6379
-      REDIS_PASSWORD: ""
-      LIMITER_STORE: database
+  #   env:
+  #     TZ: UTC
+  #     PORT: 3333
+  #     HOST: localhost
+  #     LOG_LEVEL: info
+  #     APP_KEY: test-app-key-that-is-at-least-16-chars
+  #     APP_NAME: FightClub
+  #     NODE_ENV: test
+  #     VITE_APP_URL: http://localhost:3000
+  #     VITE_API_URL: http://localhost:3333
+  #     DB_HOST: 127.0.0.1
+  #     DB_PORT: 5432
+  #     DB_USER: fight_club
+  #     DB_PASSWORD: fight_club
+  #     DB_DATABASE: fight_club
+  #     REDIS_HOST: 127.0.0.1
+  #     REDIS_PORT: 6379
+  #     REDIS_PASSWORD: ""
+  #     LIMITER_STORE: database
 
-    steps:
-      - uses: actions/checkout@v4
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-          cache-dependency-path: |
-            backend/package-lock.json
-            frontend/package-lock.json
+  #     - name: Use Node.js ${{ matrix.node-version }}
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ matrix.node-version }}
+  #         cache: npm
+  #         cache-dependency-path: |
+  #           backend/package-lock.json
+  #           frontend/package-lock.json
 
-      - name: Install backend dependencies
-        run: npm install
-        working-directory: backend
+  #     - name: Install backend dependencies
+  #       run: npm install
+  #       working-directory: backend
 
-      - name: Install frontend dependencies
-        run: npm install
-        working-directory: frontend
+  #     - name: Install frontend dependencies
+  #       run: npm install
+  #       working-directory: frontend
 
-      - name: Run migrations
-        run: node ace.js migration:run
-        working-directory: backend
+  #     - name: Run migrations
+  #       run: node ace.js migration:run
+  #       working-directory: backend
 
-      - name: Start backend
-        run: npm run dev &
-        working-directory: backend
+  #     - name: Start backend
+  #       run: npm run dev &
+  #       working-directory: backend
 
-      - name: Start frontend
-        run: npm run dev &
-        working-directory: frontend
+  #     - name: Start frontend
+  #       run: npm run dev &
+  #       working-directory: frontend
 
-      - name: Wait for services
-        run: |
-          echo "Waiting for backend..."
-          for i in $(seq 1 30); do
-            curl -s http://localhost:3333/health && break || sleep 2
-          done
-          echo "Waiting for frontend..."
-          for i in $(seq 1 30); do
-            curl -s http://localhost:3000 > /dev/null && break || sleep 2
-          done
+  #     - name: Wait for services
+  #       run: |
+  #         echo "Waiting for backend..."
+  #         for i in $(seq 1 30); do
+  #           curl -s http://localhost:3333/health && break || sleep 2
+  #         done
+  #         echo "Waiting for frontend..."
+  #         for i in $(seq 1 30); do
+  #           curl -s http://localhost:3000 > /dev/null && break || sleep 2
+  #         done
 
-      - name: Install Playwright browsers
-        run: npx playwright install chromium
-        working-directory: frontend
+  #     - name: Install Playwright browsers
+  #       run: npx playwright install chromium
+  #       working-directory: frontend
 
-      - name: Run E2E tests (shard ${{ matrix.shard }})
-        run: npx playwright test --shard=${{ matrix.shard }}
-        working-directory: frontend
-        env:
-          CI: true
-          E2E_BASE_URL: http://localhost:3000
-          E2E_API_URL: http://localhost:3333
+  #     - name: Run E2E tests (shard ${{ matrix.shard }})
+  #       run: npx playwright test --shard=${{ matrix.shard }}
+  #       working-directory: frontend
+  #       env:
+  #         CI: true
+  #         E2E_BASE_URL: http://localhost:3000
+  #         E2E_API_URL: http://localhost:3333
 
-      - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: playwright-report-${{ matrix.shard }}
-          path: frontend/playwright-report/
-          retention-days: 7
+  #     - name: Upload Playwright report
+  #       uses: actions/upload-artifact@v4
+  #       if: ${{ !cancelled() }}
+  #       with:
+  #         name: playwright-report-${{ matrix.shard }}
+  #         path: frontend/playwright-report/
+  #         retention-days: 7

@@ -19,7 +19,7 @@ Built as a full-stack **npm workspaces** monorepo with a clear separation betwee
 
 ## Live Demo
 
-> **URL:** _https://fight-club-app.onrender.com_ (update after first deploy)
+> **URL:** _https://fight-club-krr9.onrender.com_ (update after first deploy)
 >
 > | Role    | Email              | Password    |
 > | ------- | ------------------ | ----------- |
@@ -199,10 +199,10 @@ fight-club/
 
 Both services are defined in `render.yaml`, each built via its own Dockerfile:
 
-| Service          | Type           | Dockerfile             | URL                                   |
-| ---------------- | -------------- | ---------------------- | ------------------------------------- |
-| `fight-club-api` | Docker Web Svc | `backend/Dockerfile`   | `https://fight-club-api.onrender.com` |
-| `fight-club-app` | Docker Web Svc | `frontend/Dockerfile`  | `https://fight-club-app.onrender.com` |
+| Service          | Type           | Dockerfile            | URL                                    |
+| ---------------- | -------------- | --------------------- | -------------------------------------- |
+| `fight-club-api` | Docker Web Svc | `backend/Dockerfile`  | `https://fight-club-fmgu.onrender.com` |
+| `fight-club-app` | Docker Web Svc | `frontend/Dockerfile` | `https://fight-club-krr9.onrender.com` |
 
 - **Build filters:** Backend only redeploys when `backend/**` changes; frontend only when `frontend/**` changes.
 - **Secrets:** All sensitive env vars use `sync: false` — set manually in the Render dashboard.

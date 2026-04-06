@@ -6,5 +6,6 @@ export function useBelts(enrollmentId: string) {
   return useQuery<BeltProgress[]>({
     queryKey: ["belts", enrollmentId],
     queryFn: () => beltsService.getBelts(enrollmentId),
+    enabled: !!enrollmentId,
   });
 }

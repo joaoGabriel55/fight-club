@@ -1,21 +1,41 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import {
   createClassSchema,
   type CreateClassInput,
 } from "../schemas/class.schema";
 import { useCreateClass } from "../hooks/useCreateClass";
+import { useUpdateClass } from "../hooks/useUpdateClass";
+import { useClass } from "../hooks/useClass";
 import { ScheduleManager } from "./ScheduleManager";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
 import { Textarea } from "@/shared/components/ui/textarea";
 import { Button } from "@/shared/components/ui/button";
 import { Separator } from "@/shared/components/ui/separator";
+import { useEffect } from "react";
 
-export function ClassForm() {
+interface ClassFormProps {
+  classId?: string;
+}
+
+export function ClassForm({ classId }: ClassFormProps) {
   const navigate = useNavigate();
-  const { mutate: createClass, isPending, error } = useCreateClass();
+  const isEdit = !!classId;
+  const { data: currentClass, isLoading: isLoadingClass } = useClass(
+    classId ?? "",
+  );
+  const {
+    mutate: createClass,
+    isPending: isCreating,
+    error: createError,
+  } = useCreateClass();
+  const {
+    mutate: updateClass,
+    isPending: isUpdating,
+    error: updateError,
+  } = useUpdateClass(classId!);
 
   const methods = useForm<CreateClassInput>({
     resolver: zodResolver(createClassSchema),
@@ -31,16 +51,60 @@ export function ClassForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
+    reset,
   } = methods;
 
+  useEffect(() => {
+    if (isEdit && currentClass) {
+      reset({
+        name: currentClass.name,
+        martial_art: currentClass.martial_art,
+        has_belt_system: currentClass.has_belt_system,
+        description: currentClass.description ?? "",
+        schedules: currentClass.schedules.map((s) => ({
+          day_of_week: s.day_of_week,
+          start_time: s.start_time,
+          end_time: s.end_time,
+        })),
+      });
+    }
+  }, [isEdit, currentClass, reset]);
+
   const onSubmit = (data: CreateClassInput) => {
-    createClass(data, {
-      onSuccess: (cls) => {
-        navigate({ to: "/classes/$classId", params: { classId: cls.id } });
-      },
-    });
+    if (isEdit) {
+      updateClass(
+        {
+          name: data.name,
+          martial_art: data.martial_art,
+          has_belt_system: data.has_belt_system,
+          description: data.description ?? null,
+        },
+        {
+          onSuccess: () => {
+            navigate({ to: "/classes/$classId", params: { classId } });
+          },
+        },
+      );
+    } else {
+      createClass(data, {
+        onSuccess: (cls) => {
+          navigate({ to: "/classes/$classId", params: { classId: cls.id } });
+        },
+      });
+    }
   };
+
+  if (isEdit && isLoadingClass) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  const isPending = isCreating || isUpdating;
+  const error = createError || updateError;
 
   return (
     <FormProvider {...methods}>
@@ -122,8 +186,18 @@ export function ClassForm() {
           </p>
         )}
 
-        <Button type="submit" disabled={isPending} className="w-full">
-          {isPending ? "Creating..." : "Create class"}
+        <Button
+          type="submit"
+          disabled={isPending || (isEdit && !isDirty)}
+          className="w-full"
+        >
+          {isPending
+            ? isEdit
+              ? "Saving..."
+              : "Creating..."
+            : isEdit
+              ? "Save changes"
+              : "Create class"}
         </Button>
       </form>
     </FormProvider>

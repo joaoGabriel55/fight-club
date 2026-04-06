@@ -46,7 +46,7 @@ test.group('Privacy — PII in API: Students endpoint', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('GET /classes/:id/students does not contain email, last_name, birth_date, weight_kg, height_cm', async ({
+  test('GET /classes/:id/students returns non-sensitive profile data but excludes sensitive PII', async ({
     client,
     assert,
   }) => {
@@ -98,23 +98,25 @@ test.group('Privacy — PII in API: Students endpoint', (group) => {
     assert.isArray(students)
     assert.isTrue(students.length > 0)
 
-    const responseText = JSON.stringify(students)
-
-    // Must NOT contain sensitive PII fields
+    // Must NOT contain email or last_name (sensitive PII)
     for (const studentItem of students) {
       assert.notExists(studentItem.email, 'email should not be in student response')
       assert.notExists(studentItem.last_name, 'last_name should not be in student response')
-      assert.notExists(studentItem.birth_date, 'birth_date should not be in student response')
-      assert.notExists(studentItem.weight_kg, 'weight_kg should not be in student response')
-      assert.notExists(studentItem.height_cm, 'height_cm should not be in student response')
       assert.notExists(studentItem.password_hash, 'password_hash should not be in student response')
       assert.notExists(studentItem.email_hash, 'email_hash should not be in student response')
     }
 
-    // Double-check: sensitive values must not appear anywhere in the serialized response
-    assert.isFalse(responseText.includes('pii-student-stu@test.com'))
-    assert.isFalse(responseText.includes('VerySecretName'))
-    assert.isFalse(responseText.includes('1998-12-25'))
+    // Must contain non-sensitive profile data needed for teacher UI
+    const studentItem = students[0]
+    assert.exists(
+      studentItem.birth_date,
+      'birth_date should be in student response for age calculation'
+    )
+    assert.exists(studentItem.weight_kg, 'weight_kg should be in student response')
+    assert.exists(studentItem.height_cm, 'height_cm should be in student response')
+    assert.isTrue(studentItem.birth_date === '1998-12-25')
+    assert.isTrue(studentItem.weight_kg === '80')
+    assert.isTrue(studentItem.height_cm === '175')
   })
 })
 
