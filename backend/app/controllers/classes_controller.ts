@@ -167,6 +167,7 @@ export default class ClassesController {
 
     return response.status(200).send({
       id: cls.id,
+      teacher_id: cls.teacherId,
       name: cls.name,
       martial_art: cls.martialArt,
       has_belt_system: cls.hasBeltSystem,

@@ -7,6 +7,7 @@ export interface ClassSchedule {
 
 export interface Class {
   id: string;
+  teacher_id: string;
   name: string;
   martial_art: string;
   has_belt_system: boolean;

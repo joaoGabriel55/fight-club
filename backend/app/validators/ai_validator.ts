@@ -1,17 +1,5 @@
 import vine from '@vinejs/vine'
-
-const ALLOWED_FOCUS_AREAS = [
-  'Striking technique',
-  'Ground game',
-  'Takedowns',
-  'Defense',
-  'Conditioning',
-  'Flexibility',
-  'Sparring strategy',
-  'Competition preparation',
-  'Forms / Kata',
-  'Footwork',
-] as const
+import { ALLOWED_FOCUS_AREAS } from './constants.js'
 
 const ALLOWED_MARTIAL_ARTS = [
   'Kickboxing',

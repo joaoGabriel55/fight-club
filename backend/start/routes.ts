@@ -131,6 +131,7 @@ router
 
     // AI
     router.post('/ai/improvement-tips', [AiController, 'improvementTips']).use(aiRateLimit)
+    router.post('/ai/class-tips', [AiController, 'classTips']).use(aiRateLimit)
 
     // Privacy
     router.get('/privacy/my-data', [PrivacyController, 'exportData'])

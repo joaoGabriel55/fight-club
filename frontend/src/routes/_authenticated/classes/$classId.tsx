@@ -9,7 +9,7 @@ import { useClass } from "@/domains/classes/hooks/useClass";
 import { useAuth } from "@/shared/hooks/useAuth";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft, Settings, Sparkles } from "lucide-react";
 import {
   Tabs,
   TabsContent,
@@ -17,6 +17,8 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import { useRouter } from "@tanstack/react-router";
+import { useState } from "react";
+import { ClassTipsDialog } from "@/domains/ai/components/ClassTipsDialog";
 
 export const Route = createFileRoute("/_authenticated/classes/$classId")({
   component: ClassDetailLayout,
@@ -27,8 +29,10 @@ function ClassDetailLayout() {
   const { classId } = useParams({ from: "/_authenticated/classes/$classId" });
   const { data: currentClass, isLoading, error } = useClass(classId);
   const { user } = useAuth();
+  const [showClassTips, setShowClassTips] = useState(false);
 
   const isTeacher = user?.profile_type === "teacher";
+  const isOwner = currentClass?.teacher_id === user?.id;
 
   if (isLoading) {
     return (
@@ -87,12 +91,22 @@ function ClassDetailLayout() {
               </Badge>
             )}
             {isTeacher && (
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/classes/$classId/edit" params={{ classId }}>
-                  <Settings className="h-3 w-3 mr-1" />
-                  Edit
-                </Link>
-              </Button>
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowClassTips(true)}
+                >
+                  <Sparkles className="h-3 w-3 mr-1" />
+                  What Teach Today
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/classes/$classId/edit" params={{ classId }}>
+                    <Settings className="h-3 w-3 mr-1" />
+                    Edit
+                  </Link>
+                </Button>
+              </>
             )}
           </div>
         </div>
@@ -193,6 +207,14 @@ function ClassDetailLayout() {
       </Tabs>
 
       <Outlet />
+
+      {showClassTips && currentClass && (
+        <ClassTipsDialog
+          classId={classId}
+          className={currentClass.name}
+          onClose={() => setShowClassTips(false)}
+        />
+      )}
     </div>
   );
 }

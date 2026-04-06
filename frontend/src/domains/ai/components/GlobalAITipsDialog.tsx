@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/shared/components/ui/button";
+import { MarkdownContent } from "@/shared/components/ui/markdown-content";
 import {
   Card,
   CardContent,
@@ -29,7 +30,14 @@ export function GlobalAITipsDialog({ onClose }: GlobalAITipsDialogProps) {
     null,
   );
   const [focusArea, setFocusArea] = useState<FocusArea | undefined>(undefined);
-  const { mutate, data, isPending, error, reset } = useImprovementTips();
+  const { mutate, data, isPending, error, reset, cancel } = useImprovementTips();
+
+  const handleClose = () => {
+    if (isPending) {
+      cancel();
+    }
+    onClose();
+  };
 
   const handleGetTips = () => {
     if (!selectedMartialArt) return;
@@ -53,7 +61,7 @@ export function GlobalAITipsDialog({ onClose }: GlobalAITipsDialogProps) {
               Select a martial art to get personalized improvement tips
             </p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={handleClose}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -139,15 +147,15 @@ export function GlobalAITipsDialog({ onClose }: GlobalAITipsDialogProps) {
                   </span>
                 </div>
               )}
-              <div className="rounded-lg bg-secondary p-4">
-                <p className="text-sm whitespace-pre-wrap">{data.tips}</p>
+              <div className="prose prose-sm dark:prose-invert max-w-none">
+                <MarkdownContent content={data.tips} />
               </div>
             </div>
           )}
         </CardContent>
 
         <CardFooter className="justify-end gap-3 border-t pt-4">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={handleClose}>
             Close
           </Button>
           {!data?.tips && (
