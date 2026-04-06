@@ -139,6 +139,15 @@ function AuthenticatedLayout() {
                 {link.label}
               </Link>
             ))}
+            {isStudent && (
+              <button
+                onClick={() => setShowAITipsDialog(true)}
+                className="px-3 py-2 text-sm font-medium flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors rounded-md uppercase hover:bg-accent"
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Training Tips
+              </button>
+            )}
           </nav>
 
           {/* Right side actions */}
@@ -197,23 +206,8 @@ function AuthenticatedLayout() {
         </div>
       </div>
 
-      {/* Global AI Tips Button - Students only */}
-      {isStudent && (
-        <>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => setShowAITipsDialog(true)}
-            className="fixed bottom-20 md:bottom-6 right-6 z-30 shadow-lg gap-2"
-          >
-            <Sparkles className="h-4 w-4" />
-            Get AI Tips
-          </Button>
-
-          {showAITipsDialog && (
-            <GlobalAITipsDialog onClose={() => setShowAITipsDialog(false)} />
-          )}
-        </>
+      {showAITipsDialog && (
+        <GlobalAITipsDialog onClose={() => setShowAITipsDialog(false)} />
       )}
 
       {/* Mobile bottom tab bar */}
@@ -235,6 +229,15 @@ function AuthenticatedLayout() {
               </Link>
             );
           })}
+          {isStudent && (
+            <button
+              onClick={() => setShowAITipsDialog(true)}
+              className="flex flex-col items-center justify-center gap-0.5 px-2 py-1 text-muted-foreground hover:text-primary transition-colors min-w-0 flex-1"
+            >
+              <Sparkles className="h-5 w-5" />
+              <span className="text-[10px] font-medium truncate">AI Tips</span>
+            </button>
+          )}
         </div>
       </nav>
     </div>

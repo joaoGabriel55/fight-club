@@ -125,6 +125,9 @@ router
     // My reviews (student)
     router.get('/my-reviews/:classId', [ReviewsController, 'myReviews'])
 
+    // Reviews via enrollment (student)
+    router.get('/enrollments/:enrollmentId/reviews', [ReviewsController, 'enrollmentReviews'])
+
     // AI
     router.post('/ai/improvement-tips', [AiController, 'improvementTips']).use(aiRateLimit)
 

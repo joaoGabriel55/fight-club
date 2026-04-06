@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEnrollments } from "@/domains/enrollments/hooks/useEnrollments";
 import { useLeaveClass } from "@/domains/enrollments/hooks/useLeaveClass";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -11,15 +11,9 @@ import {
 } from "@/shared/components/ui/card";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
-import { BookOpen, Calendar, LogOut as LeaveIcon } from "lucide-react";
-import { ReviewSection } from "@/domains/reviews/components/ReviewSection";
+import { BookOpen, Calendar, LogOut as LeaveIcon, Star } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/enrollments")({
-  validateSearch: (search: Record<string, unknown>) => {
-    return {
-      reviewClassId: search.reviewClassId as string | undefined,
-    };
-  },
+export const Route = createFileRoute("/_authenticated/enrollments/")({
   component: EnrollmentsPage,
 });
 
@@ -37,18 +31,6 @@ function EnrollmentsPage() {
   const { data: enrollments, isLoading } = useEnrollments();
   const { mutate: leaveClass, isPending: isLeaving } = useLeaveClass();
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
-  const search = useSearch({ from: "/_authenticated/enrollments" });
-
-  useEffect(() => {
-    if (search.reviewClassId) {
-      const element = document.getElementById(
-        `review-section-${search.reviewClassId}`,
-      );
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }
-  }, [search]);
 
   if (isLoading) {
     return (
@@ -131,12 +113,16 @@ function EnrollmentsPage() {
                   </div>
                 )}
 
-                <div id={`review-section-${enrollment.class.id}`}>
-                  <ReviewSection
-                    classId={enrollment.class.id}
-                    className={enrollment.class.name}
-                    schedules={enrollment.class.schedules}
-                  />
+                <div className="pt-3 border-t flex items-center justify-between">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link
+                      to="/enrollments/$enrollmentId/reviews"
+                      params={{ enrollmentId: enrollment.id }}
+                    >
+                      <Star className="h-4 w-4" />
+                      View reviews
+                    </Link>
+                  </Button>
                 </div>
               </CardContent>
 

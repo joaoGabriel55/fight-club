@@ -18,18 +18,19 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedPrivacyRouteImport } from './routes/_authenticated/privacy'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedFeedbackRouteImport } from './routes/_authenticated/feedback'
-import { Route as AuthenticatedEnrollmentsRouteImport } from './routes/_authenticated/enrollments'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedEnrollmentsIndexRouteImport } from './routes/_authenticated/enrollments/index'
 import { Route as AuthenticatedClassesIndexRouteImport } from './routes/_authenticated/classes/index'
+import { Route as AuthenticatedEnrollmentsEnrollmentIdRouteImport } from './routes/_authenticated/enrollments/$enrollmentId'
 import { Route as AuthenticatedClassesNewRouteImport } from './routes/_authenticated/classes/new'
 import { Route as AuthenticatedClassesClassIdRouteImport } from './routes/_authenticated/classes/$classId'
+import { Route as AuthenticatedEnrollmentsEnrollmentIdReviewsRouteImport } from './routes/_authenticated/enrollments/$enrollmentId/reviews'
 import { Route as AuthenticatedClassesClassIdStudentsRouteImport } from './routes/_authenticated/classes/$classId/students'
 import { Route as AuthenticatedClassesClassIdSchedulesRouteImport } from './routes/_authenticated/classes/$classId/schedules'
 import { Route as AuthenticatedClassesClassIdReviewsRouteImport } from './routes/_authenticated/classes/$classId/reviews'
 import { Route as AuthenticatedClassesClassIdInvitationsRouteImport } from './routes/_authenticated/classes/$classId/invitations'
 import { Route as AuthenticatedClassesClassIdEditRouteImport } from './routes/_authenticated/classes/$classId/edit'
 import { Route as AuthenticatedClassesClassIdAnnouncementsRouteImport } from './routes/_authenticated/classes/$classId/announcements'
-import { Route as AuthenticatedClassesClassIdStudentsStudentIdRouteImport } from './routes/_authenticated/classes/$classId/students/$studentId'
 
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
@@ -76,21 +77,27 @@ const AuthenticatedFeedbackRoute = AuthenticatedFeedbackRouteImport.update({
   path: '/feedback',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
-const AuthenticatedEnrollmentsRoute =
-  AuthenticatedEnrollmentsRouteImport.update({
-    id: '/enrollments',
-    path: '/enrollments',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedEnrollmentsIndexRoute =
+  AuthenticatedEnrollmentsIndexRouteImport.update({
+    id: '/enrollments/',
+    path: '/enrollments/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedClassesIndexRoute =
   AuthenticatedClassesIndexRouteImport.update({
     id: '/classes/',
     path: '/classes/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEnrollmentsEnrollmentIdRoute =
+  AuthenticatedEnrollmentsEnrollmentIdRouteImport.update({
+    id: '/enrollments/$enrollmentId',
+    path: '/enrollments/$enrollmentId',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedClassesNewRoute = AuthenticatedClassesNewRouteImport.update({
@@ -103,6 +110,12 @@ const AuthenticatedClassesClassIdRoute =
     id: '/classes/$classId',
     path: '/classes/$classId',
     getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEnrollmentsEnrollmentIdReviewsRoute =
+  AuthenticatedEnrollmentsEnrollmentIdReviewsRouteImport.update({
+    id: '/reviews',
+    path: '/reviews',
+    getParentRoute: () => AuthenticatedEnrollmentsEnrollmentIdRoute,
   } as any)
 const AuthenticatedClassesClassIdStudentsRoute =
   AuthenticatedClassesClassIdStudentsRouteImport.update({
@@ -140,19 +153,12 @@ const AuthenticatedClassesClassIdAnnouncementsRoute =
     path: '/announcements',
     getParentRoute: () => AuthenticatedClassesClassIdRoute,
   } as any)
-const AuthenticatedClassesClassIdStudentsStudentIdRoute =
-  AuthenticatedClassesClassIdStudentsStudentIdRouteImport.update({
-    id: '/$studentId',
-    path: '/$studentId',
-    getParentRoute: () => AuthenticatedClassesClassIdStudentsRoute,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/enrollments': typeof AuthenticatedEnrollmentsRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
@@ -160,21 +166,22 @@ export interface FileRoutesByFullPath {
   '/join/$token': typeof JoinTokenRoute
   '/classes/$classId': typeof AuthenticatedClassesClassIdRouteWithChildren
   '/classes/new': typeof AuthenticatedClassesNewRoute
+  '/enrollments/$enrollmentId': typeof AuthenticatedEnrollmentsEnrollmentIdRouteWithChildren
   '/classes/': typeof AuthenticatedClassesIndexRoute
+  '/enrollments/': typeof AuthenticatedEnrollmentsIndexRoute
   '/classes/$classId/announcements': typeof AuthenticatedClassesClassIdAnnouncementsRoute
   '/classes/$classId/edit': typeof AuthenticatedClassesClassIdEditRoute
   '/classes/$classId/invitations': typeof AuthenticatedClassesClassIdInvitationsRoute
   '/classes/$classId/reviews': typeof AuthenticatedClassesClassIdReviewsRoute
   '/classes/$classId/schedules': typeof AuthenticatedClassesClassIdSchedulesRoute
-  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
-  '/classes/$classId/students/$studentId': typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
+  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRoute
+  '/enrollments/$enrollmentId/reviews': typeof AuthenticatedEnrollmentsEnrollmentIdReviewsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/enrollments': typeof AuthenticatedEnrollmentsRoute
   '/feedback': typeof AuthenticatedFeedbackRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/privacy': typeof AuthenticatedPrivacyRoute
@@ -182,14 +189,16 @@ export interface FileRoutesByTo {
   '/join/$token': typeof JoinTokenRoute
   '/classes/$classId': typeof AuthenticatedClassesClassIdRouteWithChildren
   '/classes/new': typeof AuthenticatedClassesNewRoute
+  '/enrollments/$enrollmentId': typeof AuthenticatedEnrollmentsEnrollmentIdRouteWithChildren
   '/classes': typeof AuthenticatedClassesIndexRoute
+  '/enrollments': typeof AuthenticatedEnrollmentsIndexRoute
   '/classes/$classId/announcements': typeof AuthenticatedClassesClassIdAnnouncementsRoute
   '/classes/$classId/edit': typeof AuthenticatedClassesClassIdEditRoute
   '/classes/$classId/invitations': typeof AuthenticatedClassesClassIdInvitationsRoute
   '/classes/$classId/reviews': typeof AuthenticatedClassesClassIdReviewsRoute
   '/classes/$classId/schedules': typeof AuthenticatedClassesClassIdSchedulesRoute
-  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
-  '/classes/$classId/students/$studentId': typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
+  '/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRoute
+  '/enrollments/$enrollmentId/reviews': typeof AuthenticatedEnrollmentsEnrollmentIdReviewsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -198,7 +207,6 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/enrollments': typeof AuthenticatedEnrollmentsRoute
   '/_authenticated/feedback': typeof AuthenticatedFeedbackRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/privacy': typeof AuthenticatedPrivacyRoute
@@ -206,14 +214,16 @@ export interface FileRoutesById {
   '/join/$token': typeof JoinTokenRoute
   '/_authenticated/classes/$classId': typeof AuthenticatedClassesClassIdRouteWithChildren
   '/_authenticated/classes/new': typeof AuthenticatedClassesNewRoute
+  '/_authenticated/enrollments/$enrollmentId': typeof AuthenticatedEnrollmentsEnrollmentIdRouteWithChildren
   '/_authenticated/classes/': typeof AuthenticatedClassesIndexRoute
+  '/_authenticated/enrollments/': typeof AuthenticatedEnrollmentsIndexRoute
   '/_authenticated/classes/$classId/announcements': typeof AuthenticatedClassesClassIdAnnouncementsRoute
   '/_authenticated/classes/$classId/edit': typeof AuthenticatedClassesClassIdEditRoute
   '/_authenticated/classes/$classId/invitations': typeof AuthenticatedClassesClassIdInvitationsRoute
   '/_authenticated/classes/$classId/reviews': typeof AuthenticatedClassesClassIdReviewsRoute
   '/_authenticated/classes/$classId/schedules': typeof AuthenticatedClassesClassIdSchedulesRoute
-  '/_authenticated/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
-  '/_authenticated/classes/$classId/students/$studentId': typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
+  '/_authenticated/classes/$classId/students': typeof AuthenticatedClassesClassIdStudentsRoute
+  '/_authenticated/enrollments/$enrollmentId/reviews': typeof AuthenticatedEnrollmentsEnrollmentIdReviewsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -222,7 +232,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
-    | '/enrollments'
     | '/feedback'
     | '/notifications'
     | '/privacy'
@@ -230,21 +239,22 @@ export interface FileRouteTypes {
     | '/join/$token'
     | '/classes/$classId'
     | '/classes/new'
+    | '/enrollments/$enrollmentId'
     | '/classes/'
+    | '/enrollments/'
     | '/classes/$classId/announcements'
     | '/classes/$classId/edit'
     | '/classes/$classId/invitations'
     | '/classes/$classId/reviews'
     | '/classes/$classId/schedules'
     | '/classes/$classId/students'
-    | '/classes/$classId/students/$studentId'
+    | '/enrollments/$enrollmentId/reviews'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/register'
     | '/dashboard'
-    | '/enrollments'
     | '/feedback'
     | '/notifications'
     | '/privacy'
@@ -252,14 +262,16 @@ export interface FileRouteTypes {
     | '/join/$token'
     | '/classes/$classId'
     | '/classes/new'
+    | '/enrollments/$enrollmentId'
     | '/classes'
+    | '/enrollments'
     | '/classes/$classId/announcements'
     | '/classes/$classId/edit'
     | '/classes/$classId/invitations'
     | '/classes/$classId/reviews'
     | '/classes/$classId/schedules'
     | '/classes/$classId/students'
-    | '/classes/$classId/students/$studentId'
+    | '/enrollments/$enrollmentId/reviews'
   id:
     | '__root__'
     | '/'
@@ -267,7 +279,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_authenticated/dashboard'
-    | '/_authenticated/enrollments'
     | '/_authenticated/feedback'
     | '/_authenticated/notifications'
     | '/_authenticated/privacy'
@@ -275,14 +286,16 @@ export interface FileRouteTypes {
     | '/join/$token'
     | '/_authenticated/classes/$classId'
     | '/_authenticated/classes/new'
+    | '/_authenticated/enrollments/$enrollmentId'
     | '/_authenticated/classes/'
+    | '/_authenticated/enrollments/'
     | '/_authenticated/classes/$classId/announcements'
     | '/_authenticated/classes/$classId/edit'
     | '/_authenticated/classes/$classId/invitations'
     | '/_authenticated/classes/$classId/reviews'
     | '/_authenticated/classes/$classId/schedules'
     | '/_authenticated/classes/$classId/students'
-    | '/_authenticated/classes/$classId/students/$studentId'
+    | '/_authenticated/enrollments/$enrollmentId/reviews'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -358,13 +371,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFeedbackRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/enrollments': {
-      id: '/_authenticated/enrollments'
-      path: '/enrollments'
-      fullPath: '/enrollments'
-      preLoaderRoute: typeof AuthenticatedEnrollmentsRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -372,11 +378,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/enrollments/': {
+      id: '/_authenticated/enrollments/'
+      path: '/enrollments'
+      fullPath: '/enrollments/'
+      preLoaderRoute: typeof AuthenticatedEnrollmentsIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/classes/': {
       id: '/_authenticated/classes/'
       path: '/classes'
       fullPath: '/classes/'
       preLoaderRoute: typeof AuthenticatedClassesIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/enrollments/$enrollmentId': {
+      id: '/_authenticated/enrollments/$enrollmentId'
+      path: '/enrollments/$enrollmentId'
+      fullPath: '/enrollments/$enrollmentId'
+      preLoaderRoute: typeof AuthenticatedEnrollmentsEnrollmentIdRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/classes/new': {
@@ -392,6 +412,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/classes/$classId'
       preLoaderRoute: typeof AuthenticatedClassesClassIdRouteImport
       parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/enrollments/$enrollmentId/reviews': {
+      id: '/_authenticated/enrollments/$enrollmentId/reviews'
+      path: '/reviews'
+      fullPath: '/enrollments/$enrollmentId/reviews'
+      preLoaderRoute: typeof AuthenticatedEnrollmentsEnrollmentIdReviewsRouteImport
+      parentRoute: typeof AuthenticatedEnrollmentsEnrollmentIdRoute
     }
     '/_authenticated/classes/$classId/students': {
       id: '/_authenticated/classes/$classId/students'
@@ -435,30 +462,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedClassesClassIdAnnouncementsRouteImport
       parentRoute: typeof AuthenticatedClassesClassIdRoute
     }
-    '/_authenticated/classes/$classId/students/$studentId': {
-      id: '/_authenticated/classes/$classId/students/$studentId'
-      path: '/$studentId'
-      fullPath: '/classes/$classId/students/$studentId'
-      preLoaderRoute: typeof AuthenticatedClassesClassIdStudentsStudentIdRouteImport
-      parentRoute: typeof AuthenticatedClassesClassIdStudentsRoute
-    }
   }
 }
-
-interface AuthenticatedClassesClassIdStudentsRouteChildren {
-  AuthenticatedClassesClassIdStudentsStudentIdRoute: typeof AuthenticatedClassesClassIdStudentsStudentIdRoute
-}
-
-const AuthenticatedClassesClassIdStudentsRouteChildren: AuthenticatedClassesClassIdStudentsRouteChildren =
-  {
-    AuthenticatedClassesClassIdStudentsStudentIdRoute:
-      AuthenticatedClassesClassIdStudentsStudentIdRoute,
-  }
-
-const AuthenticatedClassesClassIdStudentsRouteWithChildren =
-  AuthenticatedClassesClassIdStudentsRoute._addFileChildren(
-    AuthenticatedClassesClassIdStudentsRouteChildren,
-  )
 
 interface AuthenticatedClassesClassIdRouteChildren {
   AuthenticatedClassesClassIdAnnouncementsRoute: typeof AuthenticatedClassesClassIdAnnouncementsRoute
@@ -466,7 +471,7 @@ interface AuthenticatedClassesClassIdRouteChildren {
   AuthenticatedClassesClassIdInvitationsRoute: typeof AuthenticatedClassesClassIdInvitationsRoute
   AuthenticatedClassesClassIdReviewsRoute: typeof AuthenticatedClassesClassIdReviewsRoute
   AuthenticatedClassesClassIdSchedulesRoute: typeof AuthenticatedClassesClassIdSchedulesRoute
-  AuthenticatedClassesClassIdStudentsRoute: typeof AuthenticatedClassesClassIdStudentsRouteWithChildren
+  AuthenticatedClassesClassIdStudentsRoute: typeof AuthenticatedClassesClassIdStudentsRoute
 }
 
 const AuthenticatedClassesClassIdRouteChildren: AuthenticatedClassesClassIdRouteChildren =
@@ -481,7 +486,7 @@ const AuthenticatedClassesClassIdRouteChildren: AuthenticatedClassesClassIdRoute
     AuthenticatedClassesClassIdSchedulesRoute:
       AuthenticatedClassesClassIdSchedulesRoute,
     AuthenticatedClassesClassIdStudentsRoute:
-      AuthenticatedClassesClassIdStudentsRouteWithChildren,
+      AuthenticatedClassesClassIdStudentsRoute,
   }
 
 const AuthenticatedClassesClassIdRouteWithChildren =
@@ -489,21 +494,36 @@ const AuthenticatedClassesClassIdRouteWithChildren =
     AuthenticatedClassesClassIdRouteChildren,
   )
 
+interface AuthenticatedEnrollmentsEnrollmentIdRouteChildren {
+  AuthenticatedEnrollmentsEnrollmentIdReviewsRoute: typeof AuthenticatedEnrollmentsEnrollmentIdReviewsRoute
+}
+
+const AuthenticatedEnrollmentsEnrollmentIdRouteChildren: AuthenticatedEnrollmentsEnrollmentIdRouteChildren =
+  {
+    AuthenticatedEnrollmentsEnrollmentIdReviewsRoute:
+      AuthenticatedEnrollmentsEnrollmentIdReviewsRoute,
+  }
+
+const AuthenticatedEnrollmentsEnrollmentIdRouteWithChildren =
+  AuthenticatedEnrollmentsEnrollmentIdRoute._addFileChildren(
+    AuthenticatedEnrollmentsEnrollmentIdRouteChildren,
+  )
+
 interface AuthenticatedRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedEnrollmentsRoute: typeof AuthenticatedEnrollmentsRoute
   AuthenticatedFeedbackRoute: typeof AuthenticatedFeedbackRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPrivacyRoute: typeof AuthenticatedPrivacyRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedClassesClassIdRoute: typeof AuthenticatedClassesClassIdRouteWithChildren
   AuthenticatedClassesNewRoute: typeof AuthenticatedClassesNewRoute
+  AuthenticatedEnrollmentsEnrollmentIdRoute: typeof AuthenticatedEnrollmentsEnrollmentIdRouteWithChildren
   AuthenticatedClassesIndexRoute: typeof AuthenticatedClassesIndexRoute
+  AuthenticatedEnrollmentsIndexRoute: typeof AuthenticatedEnrollmentsIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedEnrollmentsRoute: AuthenticatedEnrollmentsRoute,
   AuthenticatedFeedbackRoute: AuthenticatedFeedbackRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPrivacyRoute: AuthenticatedPrivacyRoute,
@@ -511,7 +531,10 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedClassesClassIdRoute:
     AuthenticatedClassesClassIdRouteWithChildren,
   AuthenticatedClassesNewRoute: AuthenticatedClassesNewRoute,
+  AuthenticatedEnrollmentsEnrollmentIdRoute:
+    AuthenticatedEnrollmentsEnrollmentIdRouteWithChildren,
   AuthenticatedClassesIndexRoute: AuthenticatedClassesIndexRoute,
+  AuthenticatedEnrollmentsIndexRoute: AuthenticatedEnrollmentsIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(

@@ -2,6 +2,7 @@ import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import { createHash, randomUUID } from 'node:crypto'
 import { faker } from '@faker-js/faker'
 import { DateTime } from 'luxon'
+import hash from '@adonisjs/core/services/hash'
 import User from '#models/user'
 import StudentProfile from '#models/student_profile'
 import TeacherProfile from '#models/teacher_profile'
@@ -16,6 +17,10 @@ import Notification from '#models/notification'
 
 function hashEmail(email: string): string {
   return createHash('sha256').update(email.toLowerCase().trim()).digest('hex')
+}
+
+async function hashPassword(password: string): Promise<string> {
+  return hash.use('scrypt').make(password)
 }
 
 const MARTIAL_ARTS = [
@@ -58,7 +63,7 @@ export default class MainSeeder extends BaseSeeder {
       lastName: 'Demo',
       email: 'teacher@demo.com',
       emailHash: hashEmail('teacher@demo.com'),
-      passwordHash: DEFAULT_PASSWORD,
+      passwordHash: await hashPassword(DEFAULT_PASSWORD),
       birthDate: '1985-03-15',
       profileType: 'teacher',
     })
@@ -82,7 +87,7 @@ export default class MainSeeder extends BaseSeeder {
         lastName: faker.person.lastName(),
         email,
         emailHash: hashEmail(email),
-        passwordHash: DEFAULT_PASSWORD,
+        passwordHash: await hashPassword(DEFAULT_PASSWORD),
         birthDate: faker.date
           .birthdate({ min: 25, max: 55, mode: 'age' })
           .toISOString()
@@ -120,7 +125,7 @@ export default class MainSeeder extends BaseSeeder {
       lastName: 'Demo',
       email: 'student@demo.com',
       emailHash: hashEmail('student@demo.com'),
-      passwordHash: DEFAULT_PASSWORD,
+      passwordHash: await hashPassword(DEFAULT_PASSWORD),
       birthDate: '2000-06-20',
       profileType: 'student',
     })
@@ -139,7 +144,7 @@ export default class MainSeeder extends BaseSeeder {
         lastName: faker.person.lastName(),
         email,
         emailHash: hashEmail(email),
-        passwordHash: DEFAULT_PASSWORD,
+        passwordHash: await hashPassword(DEFAULT_PASSWORD),
         birthDate: faker.date
           .birthdate({ min: 16, max: 40, mode: 'age' })
           .toISOString()

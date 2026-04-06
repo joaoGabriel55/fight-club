@@ -118,7 +118,7 @@ export function ReviewSection({
         )}
       </div>
 
-      {showForm && (
+      {showForm && editingReview && (
         <ReviewForm
           classId={classId}
           existingReview={editingReview}

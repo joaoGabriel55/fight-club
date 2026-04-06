@@ -290,6 +290,7 @@ export default class ClassesController {
         id: enr.studentId,
         enrollment_id: enr.id,
         first_name: enr.student.firstName,
+        birth_date: enr.student.birthDate,
         enrolled_at: enr.joinedAt,
         weight_kg: enr.student.studentProfile?.weightKg ?? null,
         height_cm: enr.student.studentProfile?.heightCm ?? null,

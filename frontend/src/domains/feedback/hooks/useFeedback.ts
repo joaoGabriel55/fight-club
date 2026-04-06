@@ -6,5 +6,6 @@ export function useFeedback(enrollmentId: string) {
   return useQuery<FeedbackItem[]>({
     queryKey: ["feedback", enrollmentId],
     queryFn: () => feedbackService.getEnrollmentFeedback(enrollmentId),
+    enabled: !!enrollmentId,
   });
 }

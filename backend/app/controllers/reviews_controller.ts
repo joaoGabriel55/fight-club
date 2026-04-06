@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import Class from '#models/class'
 import Review from '#models/review'
+import Enrollment from '#models/enrollment'
 import ReviewPolicy from '#policies/review_policy'
 import { AuditLogService } from '#services/audit_log_service'
 import { createReviewValidator, updateReviewValidator } from '#validators/review_validator'
@@ -216,5 +217,57 @@ export default class ReviewsController {
         created_at: r.createdAt,
       }))
     )
+  }
+
+  /**
+   * GET /api/v1/enrollments/:enrollmentId/reviews
+   * Get class info + all own reviews for that enrollment (student only).
+   */
+  async enrollmentReviews({ auth, params, response }: HttpContext) {
+    const user = auth.getUserOrFail()
+
+    if (user.profileType !== 'student') {
+      return response.status(403).send({ error: { message: 'Forbidden' } })
+    }
+
+    const enrollment = await Enrollment.query()
+      .where('id', params.enrollmentId)
+      .where('student_id', user.id)
+      .where('status', 'active')
+      .preload('class', (q) => q.preload('teacher').preload('schedules'))
+      .first()
+
+    if (!enrollment) {
+      return response.status(404).send({ error: { message: 'Enrollment not found' } })
+    }
+
+    const reviews = await Review.query()
+      .where('class_id', enrollment.classId)
+      .where('student_id', user.id)
+      .orderBy('session_date', 'desc')
+
+    return response.status(200).send({
+      enrollment_id: enrollment.id,
+      class: {
+        id: enrollment.class.id,
+        name: enrollment.class.name,
+        martial_art: enrollment.class.martialArt,
+        teacher_first_name: enrollment.class.teacher.firstName,
+        has_belt_system: enrollment.class.hasBeltSystem,
+        schedules: enrollment.class.schedules.map((s) => ({
+          id: s.id,
+          day_of_week: s.dayOfWeek,
+          start_time: s.startTime,
+          end_time: s.endTime,
+        })),
+      },
+      reviews: reviews.map((r) => ({
+        id: r.id,
+        rating: r.rating,
+        comment: r.comment,
+        session_date: r.sessionDate.toISODate(),
+        created_at: r.createdAt,
+      })),
+    })
   }
 }

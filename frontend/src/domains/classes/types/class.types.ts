@@ -30,7 +30,7 @@ export interface ClassStudent {
   id: string;
   enrollment_id: string;
   first_name: string;
-  belt_level: string | null;
+  birth_date: string | null;
   enrolled_at: string;
   weight_kg: string | null;
   height_cm: string | null;
@@ -40,6 +40,7 @@ export interface ClassStudent {
     belt_level?: string | null;
     competition_level?: string | null;
   }> | null;
+  belt_level: string | null;
 }
 
 export interface CreateClassInput {

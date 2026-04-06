@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useClasses } from "@/domains/classes/hooks/useClasses";
 import { useMe } from "@/domains/auth/hooks/useMe";
-import { ClassCard } from "@/domains/classes/components/ClassCard";
+import { ClassListItem } from "@/domains/classes/components/ClassListItem";
 import { GraduationCap, Plus } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Spinner } from "@/shared/components/ui/spinner";
@@ -42,13 +42,13 @@ function ClassesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="max-w-4xl mx-auto space-y-6 px-4 sm:px-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <GraduationCap className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold tracking-tight">My Classes</h1>
         </div>
-        <Button asChild>
+        <Button asChild className="w-full sm:w-auto">
           <Link to="/classes/new">
             <Plus className="h-4 w-4 mr-1" />
             Create class
@@ -71,9 +71,9 @@ function ClassesPage() {
           }
         />
       ) : (
-        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-2">
           {classes.map((cls) => (
-            <ClassCard key={cls.id} cls={cls} />
+            <ClassListItem key={cls.id} cls={cls} />
           ))}
         </div>
       )}

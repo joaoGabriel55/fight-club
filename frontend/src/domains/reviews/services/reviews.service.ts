@@ -6,6 +6,24 @@ import type {
   UpdateReviewInput,
 } from "../types/review.types";
 
+export interface EnrollmentReviewsResponse {
+  enrollment_id: string;
+  class: {
+    id: string;
+    name: string;
+    martial_art: string;
+    teacher_first_name: string;
+    has_belt_system: boolean;
+    schedules: Array<{
+      id: string;
+      day_of_week: number;
+      start_time: string;
+      end_time: string;
+    }>;
+  };
+  reviews: Review[];
+}
+
 export const reviewsService = {
   async createReview(
     classId: string,
@@ -48,5 +66,13 @@ export const reviewsService = {
 
   async getMyReviews(classId: string): Promise<Review[]> {
     return apiClient<Review[]>(`/api/v1/my-reviews/${classId}`);
+  },
+
+  async getEnrollmentReviews(
+    enrollmentId: string,
+  ): Promise<EnrollmentReviewsResponse> {
+    return apiClient<EnrollmentReviewsResponse>(
+      `/api/v1/enrollments/${enrollmentId}/reviews`,
+    );
   },
 };

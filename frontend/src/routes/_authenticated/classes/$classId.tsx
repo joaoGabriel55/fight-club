@@ -155,21 +155,23 @@ function ClassDetailLayout() {
               Announcements
             </Link>
           </TabsTrigger>
-          <TabsTrigger
-            value="invitations"
-            {...{ "data-active": currentTab === "invitations" }}
-            className="p-4"
-            asChild
-          >
-            <Link
-              to="/classes/$classId/invitations"
-              params={{ classId }}
-              className="text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
-              activeOptions={{ exact: true }}
+          {isTeacher && (
+            <TabsTrigger
+              value="invitations"
+              {...{ "data-active": currentTab === "invitations" }}
+              className="p-4"
+              asChild
             >
-              Invite links
-            </Link>
-          </TabsTrigger>
+              <Link
+                to="/classes/$classId/invitations"
+                params={{ classId }}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground border-b-2 border-transparent [&.active]:border-primary [&.active]:text-foreground transition-colors no-underline"
+                activeOptions={{ exact: true }}
+              >
+                Invite links
+              </Link>
+            </TabsTrigger>
+          )}
           {isTeacher && (
             <TabsTrigger
               value="reviews"
