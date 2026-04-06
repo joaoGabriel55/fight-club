@@ -104,7 +104,7 @@ function ClassDetailLayout() {
       </div>
 
       {/* Tab navigation */}
-      <Tabs defaultValue="overview" className="overscroll-x-contain">
+      <Tabs defaultValue={isTeacher ? "schedules" : "announcements"}>
         <TabsList variant="line">
           {isTeacher && (
             <TabsTrigger
