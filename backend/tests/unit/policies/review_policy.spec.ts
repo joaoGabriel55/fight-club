@@ -1,6 +1,11 @@
 import { test } from '@japa/runner'
 import db from '@adonisjs/lucid/services/db'
-import { UserFactory, ClassFactory, EnrollmentFactory, ReviewFactory } from '#database/factories/index'
+import {
+  UserFactory,
+  ClassFactory,
+  EnrollmentFactory,
+  ReviewFactory,
+} from '#database/factories/index'
 import ReviewPolicy from '#policies/review_policy'
 
 test.group('ReviewPolicy', (group) => {

@@ -583,7 +583,10 @@ test.group('Reviews — Enrollment reviews', (group) => {
     return () => db.rollbackGlobalTransaction()
   })
 
-  test('happy path: enrolled student gets reviews with class info → 200', async ({ client, assert }) => {
+  test('happy path: enrolled student gets reviews with class info → 200', async ({
+    client,
+    assert,
+  }) => {
     const teacher = await registerTeacher(client)
     const student = await registerStudent(client)
     const cls = await createClass(client, teacher.token, { name: 'MMA Basics' })
