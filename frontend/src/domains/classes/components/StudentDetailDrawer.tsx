@@ -15,8 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { MessageSquare, Award, Calendar, Ruler, Scale, X } from "lucide-react";
+import { MessageSquare, Award, Calendar, Ruler, Scale } from "lucide-react";
 
 interface StudentDetailDrawerProps {
   classId: string;
