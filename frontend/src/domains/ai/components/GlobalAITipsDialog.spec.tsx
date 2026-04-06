@@ -29,10 +29,22 @@ describe("GlobalAITipsDialog", () => {
     vi.restoreAllMocks();
     vi.mocked(useImprovementTips.useImprovementTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: undefined,
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+      isIdle: true,
+      status: "idle",
+      variables: undefined,
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
   });
 
@@ -80,10 +92,22 @@ describe("GlobalAITipsDialog", () => {
   it("shows loading spinner when isPending is true", () => {
     vi.mocked(useImprovementTips.useImprovementTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: undefined,
-      isPending: true,
       error: null,
       reset: vi.fn(),
+      isPending: true,
+      isError: false,
+      isSuccess: false,
+      isIdle: false,
+      status: "pending",
+      variables: { martial_art: "boxing", focus_area: "Striking technique" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(<GlobalAITipsDialog onClose={() => {}} />);
@@ -94,10 +118,22 @@ describe("GlobalAITipsDialog", () => {
   it("shows error message when there is an error", () => {
     vi.mocked(useImprovementTips.useImprovementTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: undefined,
-      isPending: false,
       error: new Error("API Error"),
       reset: vi.fn(),
+      isPending: false,
+      isError: true,
+      isSuccess: false,
+      isIdle: false,
+      status: "error",
+      variables: { martial_art: "boxing", focus_area: "Striking technique" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(<GlobalAITipsDialog onClose={() => {}} />);
@@ -108,10 +144,22 @@ describe("GlobalAITipsDialog", () => {
   it("shows tips when data is returned", () => {
     vi.mocked(useImprovementTips.useImprovementTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: { tips: "**Focus on your footwork**\n- Keep your guard up" },
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      isIdle: false,
+      status: "success",
+      variables: { martial_art: "boxing", focus_area: "Striking technique" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(<GlobalAITipsDialog onClose={() => {}} />);
@@ -122,10 +170,22 @@ describe("GlobalAITipsDialog", () => {
   it("shows Try Another button after receiving tips", async () => {
     vi.mocked(useImprovementTips.useImprovementTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: { tips: "Some tips" },
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      isIdle: false,
+      status: "success",
+      variables: { martial_art: "boxing", focus_area: "Striking technique" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(<GlobalAITipsDialog onClose={() => {}} />);
@@ -137,10 +197,22 @@ describe("GlobalAITipsDialog", () => {
   it("does not show selects when tips are displayed", () => {
     vi.mocked(useImprovementTips.useImprovementTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: { tips: "Some tips" },
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      isIdle: false,
+      status: "success",
+      variables: { martial_art: "boxing", focus_area: "Striking technique" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(<GlobalAITipsDialog onClose={() => {}} />);
@@ -152,10 +224,22 @@ describe("GlobalAITipsDialog", () => {
   it("shows error message with custom error message", () => {
     vi.mocked(useImprovementTips.useImprovementTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: undefined,
-      isPending: false,
       error: new Error("Rate limit exceeded"),
       reset: vi.fn(),
+      isPending: false,
+      isError: true,
+      isSuccess: false,
+      isIdle: false,
+      status: "error",
+      variables: { martial_art: "boxing", focus_area: "Striking technique" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(<GlobalAITipsDialog onClose={() => {}} />);

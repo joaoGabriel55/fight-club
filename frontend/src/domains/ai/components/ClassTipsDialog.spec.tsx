@@ -29,10 +29,22 @@ describe("ClassTipsDialog", () => {
     vi.restoreAllMocks();
     vi.mocked(useClassTips.useClassTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: undefined,
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: false,
+      isIdle: true,
+      status: "idle",
+      variables: undefined,
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
   });
 
@@ -87,10 +99,22 @@ describe("ClassTipsDialog", () => {
   it("shows loading spinner when isPending is true", () => {
     vi.mocked(useClassTips.useClassTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: undefined,
-      isPending: true,
       error: null,
       reset: vi.fn(),
+      isPending: true,
+      isError: false,
+      isSuccess: false,
+      isIdle: false,
+      status: "pending",
+      variables: { class_id: "1", focus_area: "Ground game" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(
@@ -103,10 +127,22 @@ describe("ClassTipsDialog", () => {
   it("shows error message when there is an error", () => {
     vi.mocked(useClassTips.useClassTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: undefined,
-      isPending: false,
       error: new Error("API Error"),
       reset: vi.fn(),
+      isPending: false,
+      isError: true,
+      isSuccess: false,
+      isIdle: false,
+      status: "error",
+      variables: { class_id: "1", focus_area: "Ground game" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(
@@ -119,10 +155,22 @@ describe("ClassTipsDialog", () => {
   it("shows tips when data is returned", () => {
     vi.mocked(useClassTips.useClassTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: { tips: "**Practice your stance**\n- Keep knees bent" },
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      isIdle: false,
+      status: "success",
+      variables: { class_id: "1", focus_area: "Ground game" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(
@@ -135,10 +183,22 @@ describe("ClassTipsDialog", () => {
   it("shows Try Another button after receiving tips", async () => {
     vi.mocked(useClassTips.useClassTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: { tips: "Some tips" },
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      isIdle: false,
+      status: "success",
+      variables: { class_id: "1", focus_area: "Ground game" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(
@@ -152,10 +212,22 @@ describe("ClassTipsDialog", () => {
   it("does not show focus area select when tips are displayed", () => {
     vi.mocked(useClassTips.useClassTips).mockReturnValue({
       mutate: vi.fn(),
+      mutateAsync: vi.fn(),
       data: { tips: "Some tips" },
-      isPending: false,
       error: null,
       reset: vi.fn(),
+      isPending: false,
+      isError: false,
+      isSuccess: true,
+      isIdle: false,
+      status: "success",
+      variables: { class_id: "1", focus_area: "Ground game" },
+      cancel: vi.fn(),
+      context: undefined,
+      failureCount: 0,
+      failureReason: null,
+      isPaused: false,
+      submittedAt: 0,
     });
 
     renderWithQuery(

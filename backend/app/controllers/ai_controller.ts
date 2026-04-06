@@ -221,6 +221,12 @@ Provide 3-5 specific training exercises or drills suitable for this class compos
       return response.status(503).send({ error: { message: 'AI service not configured' } })
     }
 
+    await AuditLogService.log(user.id, 'ai_class_tips_requested', 'ai', {
+      resourceId: cls.id,
+      ipAddress: request.ip(),
+      metadata: { focus_area: data.focus_area, class_id: data.class_id },
+    })
+
     return response.status(200).send({ tips })
   }
 }
