@@ -572,3 +572,101 @@ test.group('Reviews — My reviews', (group) => {
     assert.lengthOf(body, 2)
   })
 })
+
+// ---------------------------------------------------------------------------
+// Enrollment reviews (student view with class info)
+// ---------------------------------------------------------------------------
+
+test.group('Reviews — Enrollment reviews', (group) => {
+  group.each.setup(async () => {
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
+  })
+
+  test('happy path: enrolled student gets reviews with class info → 200', async ({ client, assert }) => {
+    const teacher = await registerTeacher(client)
+    const student = await registerStudent(client)
+    const cls = await createClass(client, teacher.token, { name: 'MMA Basics' })
+    const joinResp = await createInvitationAndJoin(client, teacher.token, student.token, cls.id)
+    const enrollmentId = joinResp.id
+
+    const today = DateTime.now().toISODate()
+    await createReview(client, student.token, cls.id, { session_date: today })
+
+    const response = await client
+      .get(`/api/v1/enrollments/${enrollmentId}/reviews`)
+      .header('Authorization', `Bearer ${student.token}`)
+
+    response.assertStatus(200)
+    const body = response.body()
+    assert.equal(body.enrollment_id, enrollmentId)
+    assert.equal(body.class.id, cls.id)
+    assert.equal(body.class.name, 'MMA Basics')
+    assert.equal(body.class.teacher_first_name, 'Alice')
+    assert.equal(body.class.has_belt_system, true)
+    assert.isArray(body.class.schedules)
+    assert.isArray(body.reviews)
+    assert.lengthOf(body.reviews, 1)
+  })
+
+  test('non-enrolled student → 404', async ({ client }) => {
+    const teacher = await registerTeacher(client)
+    const student = await registerStudent(client)
+    const cls = await createClass(client, teacher.token)
+
+    const response = await client
+      .get(`/api/v1/enrollments/00000000-0000-0000-0000-000000000000/reviews`)
+      .header('Authorization', `Bearer ${student.token}`)
+
+    response.assertStatus(404)
+  })
+
+  test('teacher → 403', async ({ client }) => {
+    const teacher = await registerTeacher(client)
+    const cls = await createClass(client, teacher.token)
+
+    const response = await client
+      .get(`/api/v1/enrollments/00000000-0000-0000-0000-000000000000/reviews`)
+      .header('Authorization', `Bearer ${teacher.token}`)
+
+    response.assertStatus(403)
+  })
+
+  test('includes schedules in class info', async ({ client, assert }) => {
+    const teacher = await registerTeacher(client)
+    const student = await registerStudent(client)
+    const cls = await createClass(client, teacher.token, {
+      schedules: [
+        { day_of_week: 1, start_time: '09:00', end_time: '10:00' },
+        { day_of_week: 3, start_time: '18:00', end_time: '19:30' },
+      ],
+    })
+    const joinResp = await createInvitationAndJoin(client, teacher.token, student.token, cls.id)
+    const enrollmentId = joinResp.id
+
+    const response = await client
+      .get(`/api/v1/enrollments/${enrollmentId}/reviews`)
+      .header('Authorization', `Bearer ${student.token}`)
+
+    const body = response.body()
+    assert.lengthOf(body.class.schedules, 2)
+    assert.equal(body.class.schedules[0].day_of_week, 1)
+    assert.equal(body.class.schedules[1].day_of_week, 3)
+  })
+
+  test('returns empty reviews array when no reviews', async ({ client, assert }) => {
+    const teacher = await registerTeacher(client)
+    const student = await registerStudent(client)
+    const cls = await createClass(client, teacher.token)
+    const joinResp = await createInvitationAndJoin(client, teacher.token, student.token, cls.id)
+    const enrollmentId = joinResp.id
+
+    const response = await client
+      .get(`/api/v1/enrollments/${enrollmentId}/reviews`)
+      .header('Authorization', `Bearer ${student.token}`)
+
+    const body = response.body()
+    assert.isArray(body.reviews)
+    assert.lengthOf(body.reviews, 0)
+  })
+})
