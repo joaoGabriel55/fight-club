@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { classesService } from "../services/classes.service";
+import type { ClassStudentDetail } from "../types/class.types";
 
 export function useClassStudents(classId: string) {
   return useQuery({
@@ -10,12 +11,9 @@ export function useClassStudents(classId: string) {
 }
 
 export function useStudentProfile(classId: string, studentId: string) {
-  return useQuery({
+  return useQuery<ClassStudentDetail>({
     queryKey: ["classes", classId, "students", studentId],
-    queryFn: async () => {
-      const students = await classesService.getClassStudents(classId);
-      return students.find((s) => s.id === studentId);
-    },
+    queryFn: () => classesService.getStudentDetail(classId, studentId),
     enabled: !!classId && !!studentId,
   });
 }

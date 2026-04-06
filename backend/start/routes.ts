@@ -54,6 +54,7 @@ router
     router.put('/:id', [ClassesController, 'update'])
     router.delete('/:id', [ClassesController, 'destroy'])
     router.get('/:id/students', [ClassesController, 'students'])
+    router.get('/:id/students/:studentId', [ClassesController, 'studentDetail'])
     router.delete('/:classId/students/:enrollmentId', [EnrollmentController, 'removeStudent'])
 
     router
