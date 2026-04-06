@@ -1,20 +1,22 @@
-import { useForm, FormProvider } from "react-hook-form";
+import { MARTIAL_ARTS } from "@/domains/auth/types/auth.types";
+import { Button } from "@/shared/components/ui/button";
+import { Input } from "@/shared/components/ui/input";
+import { Label } from "@/shared/components/ui/label";
+import { NativeSelect } from "@/shared/components/ui/select";
+import { Separator } from "@/shared/components/ui/separator";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useClass } from "../hooks/useClass";
+import { useCreateClass } from "../hooks/useCreateClass";
+import { useUpdateClass } from "../hooks/useUpdateClass";
 import {
   createClassSchema,
   type CreateClassInput,
 } from "../schemas/class.schema";
-import { useCreateClass } from "../hooks/useCreateClass";
-import { useUpdateClass } from "../hooks/useUpdateClass";
-import { useClass } from "../hooks/useClass";
 import { ScheduleManager } from "./ScheduleManager";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { Button } from "@/shared/components/ui/button";
-import { Separator } from "@/shared/components/ui/separator";
-import { useEffect } from "react";
 
 interface ClassFormProps {
   classId?: string;
@@ -128,12 +130,14 @@ export function ClassForm({ classId }: ClassFormProps) {
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="martial_art">Martial art</Label>
-          <Input
-            id="martial_art"
-            type="text"
-            placeholder="e.g. BJJ, Muay Thai, Boxing"
-            {...register("martial_art")}
-          />
+          <NativeSelect id="martial_art" {...register("martial_art")}>
+            <option value="">Select a martial art</option>
+            {MARTIAL_ARTS.map((art) => (
+              <option key={art} value={art}>
+                {art}
+              </option>
+            ))}
+          </NativeSelect>
           {errors.martial_art && (
             <p className="text-sm text-destructive">
               {errors.martial_art.message}

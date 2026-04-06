@@ -59,6 +59,8 @@ export interface ApiRequestOptions extends RequestInit {
   unauthenticated?: boolean;
   /** If true, do not redirect to /login on 401 (useful for auth probes) */
   suppressRedirect?: boolean;
+  /** Signal to abort the request */
+  signal?: AbortSignal;
 }
 
 export async function apiClient<T = unknown>(
@@ -91,8 +93,20 @@ export async function apiClient<T = unknown>(
       headers,
       credentials: "include", // send httpOnly auth cookie on every request
     });
-  } catch {
-    import("@/shared/components/ui/toast")
+  } catch (error) {
+    const toast = import("@/shared/components/ui/toast");
+
+    if ((error as ApiError).name === "AbortError") {
+      toast
+        .then(({ showToast }) => {
+          showToast("Request cancelled.", "error");
+        })
+        .catch(() => {});
+
+      throw new ApiError(0, "Network error");
+    }
+
+    toast
       .then(({ showToast }) => {
         showToast("Connection error. Please check your internet.", "error");
       })

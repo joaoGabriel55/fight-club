@@ -216,3 +216,132 @@ test.group('AI — Improvement Tips', (group) => {
     assert.exists(log)
   }).timeout(30000)
 })
+
+// ---------------------------------------------------------------------------
+// AI Class Tips ("What Teach Today")
+// ---------------------------------------------------------------------------
+
+test.group('AI — Class Tips', (group) => {
+  group.each.setup(async () => {
+    await db.beginGlobalTransaction()
+    return () => db.rollbackGlobalTransaction()
+  })
+
+  test('happy path: teacher requests class tips → 200 + tips string', async ({
+    client,
+    assert,
+  }) => {
+    const originalGenerateTips = AiService.generateTips
+    AiService.generateTips = async () => '## Drill 1\n- Shadow boxing\n\n## Drill 2\n- Pad work'
+
+    try {
+      const teacher = await registerTeacher(client)
+      const student = await registerStudent(client)
+      const cls = await createClass(client, teacher.token, {
+        martial_art: 'Muay Thai',
+        name: 'Muay Thai Basics',
+      })
+      await enrollStudent(client, teacher.token, student.token, cls.id)
+
+      const response = await client
+        .post('/api/v1/ai/class-tips')
+        .header('Authorization', `Bearer ${teacher.token}`)
+        .json({ class_id: cls.id, focus_area: 'Striking technique' })
+
+      response.assertStatus(200)
+      const body = response.body()
+      assert.isString(body.tips)
+      assert.isAbove(body.tips.length, 0)
+    } finally {
+      AiService.generateTips = originalGenerateTips
+    }
+  }).timeout(30000)
+
+  test('student calls endpoint → 403', async ({ client }) => {
+    const teacher = await registerTeacher(client)
+    const student = await registerStudent(client)
+    const cls = await createClass(client, teacher.token)
+
+    const response = await client
+      .post('/api/v1/ai/class-tips')
+      .header('Authorization', `Bearer ${student.token}`)
+      .json({ class_id: cls.id })
+
+    response.assertStatus(403)
+  })
+
+  test('teacher requests tips for class they do not own → 404', async ({ client }) => {
+    const teacher1 = await registerTeacher(client, { email: 'teacher1@example.com' })
+    const teacher2 = await registerTeacher(client, { email: 'teacher2@example.com' })
+    const cls = await createClass(client, teacher1.token)
+
+    const response = await client
+      .post('/api/v1/ai/class-tips')
+      .header('Authorization', `Bearer ${teacher2.token}`)
+      .json({ class_id: cls.id })
+
+    response.assertStatus(404)
+  })
+
+  test('class with no students → 422', async ({ client }) => {
+    const teacher = await registerTeacher(client)
+    const cls = await createClass(client, teacher.token)
+
+    const response = await client
+      .post('/api/v1/ai/class-tips')
+      .header('Authorization', `Bearer ${teacher.token}`)
+      .json({ class_id: cls.id })
+
+    response.assertStatus(422)
+  })
+
+  test('invalid class_id (random UUID) → 404', async ({ client }) => {
+    const teacher = await registerTeacher(client)
+
+    const response = await client
+      .post('/api/v1/ai/class-tips')
+      .header('Authorization', `Bearer ${teacher.token}`)
+      .json({ class_id: '00000000-0000-0000-0000-000000000000' })
+
+    response.assertStatus(404)
+  })
+
+  test('invalid focus_area → 422', async ({ client }) => {
+    const teacher = await registerTeacher(client)
+    const student = await registerStudent(client)
+    const cls = await createClass(client, teacher.token)
+    await enrollStudent(client, teacher.token, student.token, cls.id)
+
+    const response = await client
+      .post('/api/v1/ai/class-tips')
+      .header('Authorization', `Bearer ${teacher.token}`)
+      .json({ class_id: cls.id, focus_area: 'Invalid Area' })
+
+    response.assertStatus(422)
+  })
+
+  test('audit log written on ai_class_tips_requested', async ({ client, assert }) => {
+    const originalGenerateTips = AiService.generateTips
+    AiService.generateTips = async () => 'Test tips'
+
+    try {
+      const teacher = await registerTeacher(client)
+      const student = await registerStudent(client)
+      const cls = await createClass(client, teacher.token)
+      await enrollStudent(client, teacher.token, student.token, cls.id)
+
+      await client
+        .post('/api/v1/ai/class-tips')
+        .header('Authorization', `Bearer ${teacher.token}`)
+        .json({ class_id: cls.id })
+
+      const log = await AuditLog.query()
+        .where('user_id', teacher.user.id)
+        .where('action', 'ai_class_tips_requested')
+        .first()
+      assert.exists(log)
+    } finally {
+      AiService.generateTips = originalGenerateTips
+    }
+  }).timeout(30000)
+})

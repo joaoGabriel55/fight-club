@@ -134,6 +134,7 @@ export default class MainSeeder extends BaseSeeder {
       weightKg: '75.0',
       heightCm: '178.0',
       dataConsentAt: DateTime.now(),
+      isCompetitionMode: true,
     })
     students.push(fixedStudent)
 
@@ -156,6 +157,7 @@ export default class MainSeeder extends BaseSeeder {
         weightKg: String(faker.number.float({ min: 50, max: 120, fractionDigits: 1 })),
         heightCm: String(faker.number.float({ min: 150, max: 200, fractionDigits: 1 })),
         dataConsentAt: DateTime.now(),
+        isCompetitionMode: faker.datatype.boolean({ probability: 0.3 }),
       })
       students.push(student)
     }

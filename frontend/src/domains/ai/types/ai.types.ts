@@ -22,3 +22,12 @@ export interface ImprovementTipsRequest {
 export interface ImprovementTipsResponse {
   tips: string;
 }
+
+export interface ClassTipsRequest {
+  class_id: string;
+  focus_area?: FocusArea;
+}
+
+export interface ClassTipsResponse {
+  tips: string;
+}

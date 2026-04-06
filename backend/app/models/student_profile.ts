@@ -38,6 +38,9 @@ export default class StudentProfile extends BaseModel {
   @column.dateTime()
   declare dataConsentAt: DateTime | null
 
+  @column()
+  declare isCompetitionMode: boolean
+
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
 }
