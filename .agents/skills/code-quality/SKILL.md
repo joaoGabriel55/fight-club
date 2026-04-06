@@ -66,6 +66,11 @@ npm run lint     # tsc --noEmit
 npm test         # Vitest
 ```
 
+**Privacy and Secret Checks:**
+- Run `gitleaks detect --source .` to check for leaked secrets
+- Verify no `.env`, credentials, or sensitive files are committed
+- Check that privacy-related tests exist for sensitive endpoints
+
 ### Step 5: Report Results
 
 Output results in format:
